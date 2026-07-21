@@ -24,24 +24,23 @@ interface Props {
 export default function Welcome({ auth, menu = [] }: Props) {
     return (
         <>
-            <Head title="Bienvenidos | Empanadas" />
+            <Head title="Bienvenidos | Empandas" />
 
             <div className="relative min-h-screen bg-[#09090b] text-[#f8fafc] font-sans overflow-x-hidden selection:bg-amber-500 selection:text-white">
                 
-                {/* Glow de fondo */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-amber-950/20 via-slate-900/10 to-transparent rounded-full blur-[120px] pointer-events-none" />
 
-                {/* --- NAVBAR --- */}
                 <header className="relative z-10 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-white/5">
                     <div className="flex items-center gap-2">
                         <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                            Empanadas.
+                            Empandas
                         </span>
                     </div>
 
                     <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
                         <a href="#menu" className="hover:text-white transition-colors">Carta</a>
                         <a href="#nosotros" className="hover:text-white transition-colors">Nosotros</a>
+                        <a href="#redes" className="hover:text-white transition-colors">Redes</a>
                     </nav>
 
                     <div className="flex items-center gap-4">
@@ -71,11 +70,10 @@ export default function Welcome({ auth, menu = [] }: Props) {
                     </div>
                 </header>
 
-                {/* --- HERO SECTION --- */}
                 <section className="relative z-10 max-w-4xl mx-auto px-6 pt-20 pb-16 text-center flex flex-col items-center justify-center">
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-amber-400 tracking-wide mb-8 backdrop-blur-md">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                        HORNO DE BARRO AL INSTANTE
+                        ¡LAS MAS RICAS!
                     </div>
 
                     <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.1] text-white mb-6">
@@ -97,7 +95,6 @@ export default function Welcome({ auth, menu = [] }: Props) {
                     </a>
                 </section>
 
-                {/* --- CARTA DE PRODUCTOS --- */}
                 <section id="menu" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
                     <h2 className="text-3xl font-serif text-white mb-10 text-center md:text-left">Nuestra Carta</h2>
 
