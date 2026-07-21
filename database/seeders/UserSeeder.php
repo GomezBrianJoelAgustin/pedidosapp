@@ -15,6 +15,14 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        
+        $user = User::updateOrCreate(
+            ['email' => 'admin@empandas.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('password123'),
+            ] 
+        );
+
+        $user->assignRole('super-admin');
     }
 }

@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Fortify\Contracts\LoginResponse;
+use Laravel\Fortify\Contracts\RegisterResponse;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +25,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->configureDefaults();
+        $this->app->instance(LoginResponse::class, new class implements LoginResponse {
+            public function toResponse($request)
+            {
+                $user = $request->user();
+
+                if ($user->hasAnyRole(['super-admin', 'admin', 'cashier', 'chef'])) {
+                    return redirect()->intended(route('dashboard'));
+                }
+
+                return redirect()->intended(route('dashboard'));
+            }
+        });
     }
 
     /**
