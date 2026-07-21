@@ -24,7 +24,8 @@ class UpdateCategoryRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255|unique:categories,name,' . $this->category->id,
-            'active' => 'required|boolean',
+            'description' => 'nullable|string|max:255',
+            'active' => 'nullable|boolean',
         ];
     }
 }
