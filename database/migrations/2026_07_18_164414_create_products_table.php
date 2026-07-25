@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('name');
-            $table->string('description');
-            $table->string('image');
+            $table->string('description')->nullable();
+            $table->string('image')->nullable();
             $table->boolean('active')->default(true);
             $table->decimal('price', 10, 2);
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');

@@ -16,7 +16,7 @@ class ProductController extends Controller
         $products = Product::with('category')->latest()->get();
         $categories = Category::where('active', true)->get();
 
-        return Inertia::render('Admin/Products/Index', [
+        return Inertia::render('Products/Index', [
             'products' => $products,
             'categories' => $categories,
         ]);
@@ -26,15 +26,20 @@ class ProductController extends Controller
     {
         Product::create($request->validated());
 
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Producto creado con éxito.');
+        return redirect()->route('admin.products')->with('success', 'Producto creado con éxito.');
     }
 
     public function update(UpdateProductRequest $request, Product $product)
     {
         $product->update($request->validated());
 
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Producto actualizado.');
+        return redirect()->route('admin.products')->with('success', 'Producto actualizado.');
+    }
+
+    public function destroy(Product $product)
+    {
+        $product->delete();
+
+        return redirect()->route('admin.products')->with('success', 'Producto eliminado.');
     }
 }
