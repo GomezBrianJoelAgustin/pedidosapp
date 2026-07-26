@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Layers, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Layers, Tag, Eye, PackageX, ImageIcon, Package } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface Category {
@@ -7,16 +7,30 @@ interface Category {
     name: string;
     description: string | null;
     active: boolean;
+    products?: Product[];
+}
+
+interface Product {
+    id: number;
+    name: string;
+    description: string | null;
+    price: number;
+    image?: string | null;
+    active: boolean;
+    category_id: number;
+    category?: Category;
 }
 
 interface Props {
     categories: Category[];
+    products: Product[];
 }
 
-export default function Index({ categories }: Props) {
+export default function Index({ categories = [], products = [] }: Props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [search, setSearch] = useState('');
+    const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         name: '',
@@ -42,16 +56,24 @@ export default function Index({ categories }: Props) {
         setIsModalOpen(true);
     };
 
-    const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
-
-    const categoryProducts = products.filter(
-        (p) => p.category_id == viewingCategory?.id
-    );
-
     const closeModal = () => {
         setIsModalOpen(false);
         setEditingCategory(null);
         reset();
+    };
+
+    const closeShowModal = () => {
+        setViewingCategory(null);
+    };
+
+    const categoryProducts = viewingCategory?.products && viewingCategory.products.length > 0
+        ? viewingCategory.products
+        : products.filter(
+            (product) => String(product.category_id) === String(viewingCategory?.id)
+        );
+
+    const handleOpenShowModal = (category: Category) => {
+        setViewingCategory(category);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -123,7 +145,6 @@ export default function Index({ categories }: Props) {
                                     className="group relative bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm hover:shadow-xl dark:hover:shadow-slate-900/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between backdrop-blur-sm"
                                 >
                                     <div className="space-y-3">
-                                        {/* HEADER CARD: ICONO Y ESTADO */}
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                                                 <Tag className="w-4 h-4" />
@@ -140,7 +161,6 @@ export default function Index({ categories }: Props) {
                                             )}
                                         </div>
 
-                                        {/* NOMBRE Y DESCRIPCIÓN */}
                                         <div>
                                             <h3 className="font-semibold text-lg text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                                                 {cat.name}
@@ -151,7 +171,6 @@ export default function Index({ categories }: Props) {
                                         </div>
                                     </div>
 
-                                    {/* FOOTER CARD: ACCIONES */}
                                     <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-end gap-1">
                                         <button
                                             onClick={() => openEditModal(cat)}
@@ -166,6 +185,13 @@ export default function Index({ categories }: Props) {
                                             title="Eliminar categoría"
                                         >
                                             <Trash2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleOpenShowModal(cat)}
+                                            className="p-2 text-slate-400 hover:text-sky-500 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                            title="Ver productos de esta categoría"
+                                        >
+                                            <Eye className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </div>
@@ -253,6 +279,129 @@ export default function Index({ categories }: Props) {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {viewingCategory && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl relative transition-all max-h-[90vh] flex flex-col">
+                        
+                        <button
+                            onClick={closeShowModal}
+                            className="absolute top-4 right-4 z-10 p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full transition-colors"
+                        >
+                            <XCircle className="w-5 h-5" />
+                            <span className="sr-only">Cerrar</span>
+                        </button>
+
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800/80 pr-14">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                    <Tag className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                            {viewingCategory.name}
+                                        </h2>
+                                        {viewingCategory.active ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                                <CheckCircle2 className="w-3 h-3" /> Activo
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                                                <XCircle className="w-3 h-3" /> Inactivo
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-slate-400 mt-1">ID de Categoría: #{viewingCategory.id}</p>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                                <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 block mb-1">
+                                    Descripción
+                                </span>
+                                <p className="text-sm text-slate-700 dark:text-slate-300">
+                                    {viewingCategory.description || 'Esta categoría no cuenta con una descripción asignada.'}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto space-y-4 flex-1">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                                    <Package className="w-4 h-4 text-amber-500" />
+                                    Productos vinculados ({categoryProducts.length})
+                                </h3>
+                            </div>
+
+                            {categoryProducts.length > 0 ? (
+                                <div className="space-y-2.5">
+                                    {categoryProducts.map((product) => (
+                                        <div
+                                            key={product.id}
+                                            className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/60 hover:border-slate-200 dark:hover:border-slate-700 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {product.image ? (
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-800"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-lg bg-slate-200/60 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                                        <ImageIcon className="w-5 h-5" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                                        {product.name}
+                                                    </h4>
+                                                    <p className="text-xs text-slate-400 line-clamp-1">
+                                                        {product.description || 'Sin descripción'}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="text-right flex items-center gap-3">
+                                                <span className="text-sm font-bold text-amber-600 dark:text-amber-400">
+                                                    ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                                </span>
+                                                {product.active ? (
+                                                    <span className="w-2 h-2 rounded-full bg-emerald-500" title="Producto activo" />
+                                                ) : (
+                                                    <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-600" title="Producto inactivo" />
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="py-8 text-center bg-slate-50/50 dark:bg-slate-950/20 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                                    <PackageX className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                        No hay productos vinculados a esta categoría.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    const cat = viewingCategory;
+                                    closeShowModal();
+                                    openEditModal(cat);
+                                }}
+                                className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-200 font-semibold px-4 py-2 rounded-xl transition-all text-xs"
+                            >
+                                <Edit2 className="w-3.5 h-3.5" />
+                                Editar Categoría
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
