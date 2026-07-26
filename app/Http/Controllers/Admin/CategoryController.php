@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Product;
 use Inertia\Inertia;
 use App\Http\Requests\Admin\StoreCategoryRequest;
 use App\Http\Requests\Admin\UpdateCategoryRequest;
@@ -13,8 +14,8 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::latest()->get();
-
+        $categories = Category::with('products')->latest()->get();
+        
         return Inertia::render('Categories/Index', [
             'categories' => $categories
         ]);

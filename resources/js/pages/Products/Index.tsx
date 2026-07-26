@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Package, DollarSign, Image as ImageIcon, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Package, Image as ImageIcon, Eye } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface Category {
