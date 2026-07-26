@@ -42,6 +42,12 @@ export default function Index({ categories }: Props) {
         setIsModalOpen(true);
     };
 
+    const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
+
+    const categoryProducts = products.filter(
+        (p) => p.category_id == viewingCategory?.id
+    );
+
     const closeModal = () => {
         setIsModalOpen(false);
         setEditingCategory(null);
