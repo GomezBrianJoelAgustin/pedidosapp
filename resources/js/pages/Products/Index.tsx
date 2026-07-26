@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Package, DollarSign, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Package, DollarSign, Image as ImageIcon, Eye } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface Category {
@@ -68,6 +68,11 @@ export default function Index({ products = [], categories = [] }: Props) {
         reset();
     };
 
+    const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+    const closeShowModal = () => {
+        setViewingProduct(null);
+    }
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (editingProduct) {
@@ -103,7 +108,6 @@ export default function Index({ products = [], categories = [] }: Props) {
             <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 p-6 sm:p-10 transition-colors duration-200">
                 <div className="max-w-7xl mx-auto space-y-8">
                     
-                    {/* ENCABEZADO */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
                         <div>
                             <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
@@ -226,10 +230,18 @@ export default function Index({ products = [], categories = [] }: Props) {
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
+                                        <button
+                                        onClick={() => setViewingProduct(product)}
+                                        className="p-2 text-slate-400 hover:text-sky-500 hover:bg-slate-200/60 dark:hover-slate-800 rounded-lg transition-colors"
+                                        title="Ver detalle del producto"
+                                        >
+                                            <Eye className="w-4 h-4"/>
+                                        </button>
                                     </div>
                                 </div>
                             ))}
                         </div>
+                        
                     ) : (
                         <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center shadow-sm">
                             <Package className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
@@ -250,7 +262,6 @@ export default function Index({ products = [], categories = [] }: Props) {
                         </h2>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Nombre */}
                             <div>
                                 <label className="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1.5">
                                     Nombre del Producto
@@ -359,6 +370,92 @@ export default function Index({ products = [], categories = [] }: Props) {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            
+            {viewingProduct && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl relative transition-all max-h-[90vh] flex flex-col">
+                        
+                        <button
+                            onClick={closeShowModal}
+                            className="absolute top-3 right-3 z-10 p-2 bg-slate-950/50 hover:bg-slate-950/80 text-white rounded-full backdrop-blur-md transition-colors"
+                        >
+                            <XCircle className="w-5 h-5" />
+                        </button>
+
+                        <div className="relative h-64 w-full bg-slate-100 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
+                            {viewingProduct.image ? (
+                                <img
+                                    src={viewingProduct.image}
+                                    alt={viewingProduct.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center gap-2 text-slate-400">
+                                    <ImageIcon className="w-12 h-12" />
+                                    <span className="text-xs">Sin imagen disponible</span>
+                                </div>
+                            )}
+
+                            {viewingProduct.category && (
+                                <span className="absolute bottom-4 left-4 px-3 py-1 rounded-xl text-xs font-semibold bg-slate-950/80 text-amber-400 border border-amber-500/30 backdrop-blur-md">
+                                    {viewingProduct.category.name}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="p-6 space-y-5 overflow-y-auto">
+                            
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                                        {viewingProduct.name}
+                                    </h2>
+                                    <p className="text-xs text-slate-400 mt-1">ID del Producto: #{viewingProduct.id}</p>
+                                </div>
+
+                                {viewingProduct.active ? (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                        <CheckCircle2 className="w-3.5 h-3.5" /> Activo
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                                        <XCircle className="w-3.5 h-3.5" /> Pausado
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-slate-950/60 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/80 flex justify-between items-center">
+                                <span className="text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">Precio de Venta</span>
+                                <span className="text-2xl font-black text-amber-500">
+                                    ${Number(viewingProduct.price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                </span>
+                            </div>
+
+                            <div>
+                                <h3 className="text-xs font-semibold uppercase text-slate-400 mb-2">Descripción</h3>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-950/30 p-4 rounded-xl border border-slate-100 dark:border-slate-800/40">
+                                    {viewingProduct.description || 'Este producto no cuenta con una descripción detallada cargada.'}
+                                </p>
+                            </div>
+
+                            <div className="pt-2 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+                                <button
+                                    onClick={() => {
+                                        const prod = viewingProduct;
+                                        closeShowModal();
+                                        openEditModal(prod);
+                                    }}
+                                    className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-200 font-semibold px-4 py-2.5 rounded-xl transition-all text-xs"
+                                >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                    Editar Producto
+                                </button>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             )}
