@@ -2,27 +2,25 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $user = User::updateOrCreate(
             ['email' => 'admin@empandas.com'],
             [
                 'name' => 'Super Admin',
-                'password' => Hash::make('password123'),
-            ] 
+                'password' => Hash::make(env('ADMIN_DEFAULT_PASSWORD', 'password123')),
+                'email_verified_at' => now(),
+            ]
         );
 
-        $user->assignRole('super-admin');
+        if (! $user->hasRole('super-admin')) {
+            $user->assignRole('super-admin');
+        }
     }
 }
