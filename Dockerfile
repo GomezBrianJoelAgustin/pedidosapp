@@ -1,11 +1,20 @@
+FROM node:20-alpine AS frontend
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
 FROM richarvey/nginx-php-fpm:3.1.6
 
 COPY . .
 
-RUN chmod +x deploy.sh
+COPY --from=frontend /app/public/build ./public/build
 
-RUN apk add --no-cache nodejs npm
-RUN npm install && npm run build
+RUN chmod +x deploy.sh
 
 ENV WEBROOT /var/www/html/public
 ENV PHP_ERRORS_STDERR 1
