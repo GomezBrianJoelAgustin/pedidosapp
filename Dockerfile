@@ -4,6 +4,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN apk add --no-cache php84-pgsql php84-pdo_pgsql
 
+RUN apk add --no-cache libcap \
+    && setcap -r "$(which php)" \
+    && apk del libcap
+
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction
