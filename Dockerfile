@@ -10,10 +10,15 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 RUN npm install && npm run build
 
-RUN chmod +x deploy.sh
+RUN mkdir -p storage/framework/{cache,sessions,views} \
+    storage/framework/cache/data \
+    storage/logs \
+    bootstrap/cache
 
 RUN chown -R nobody:nobody storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+
+RUN chmod +x deploy.sh docker-start.sh
 
 ENV WEBROOT /var/www/html/public
 ENV PHP_ERRORS_STDERR 1
@@ -24,4 +29,4 @@ ENV APP_ENV production
 ENV APP_DEBUG false
 ENV LOG_CHANNEL stderr
 
-CMD ["/start.sh"]
+CMD ["/docker-start.sh"]
