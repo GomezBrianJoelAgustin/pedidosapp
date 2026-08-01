@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, ChartColumnStacked, Barcode } from 'lucide-react';
+import { LayoutGrid, ChartColumnStacked, Barcode, BadgeDollarSign  } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -31,6 +31,11 @@ const mainNavItems: NavItem[] = [
         title: 'Products',
         href: '/admin/products',
         icon: Barcode,
+    },
+    {
+        title: 'Orders',
+        href: '/admin/orders',
+        icon: BadgeDollarSign,
     },
 ];
 
