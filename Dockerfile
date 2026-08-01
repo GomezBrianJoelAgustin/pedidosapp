@@ -10,8 +10,9 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 RUN npm install && npm run build
 
-RUN mkdir -p storage/framework/{cache,sessions,views} \
-    storage/framework/cache/data \
+RUN mkdir -p storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/views \
     storage/logs \
     bootstrap/cache
 
@@ -29,4 +30,4 @@ ENV APP_ENV production
 ENV APP_DEBUG false
 ENV LOG_CHANNEL stderr
 
-CMD ["/docker-start.sh"]
+CMD ["/var/www/html/docker-start.sh"]
