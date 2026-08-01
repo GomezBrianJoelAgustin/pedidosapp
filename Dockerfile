@@ -20,8 +20,7 @@ RUN mkdir -p storage/framework/cache/data \
     storage/logs \
     bootstrap/cache
 
-RUN chown -R nobody:nobody storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+RUN chmod -R 777 storage bootstrap/cache
 
 RUN chmod +x deploy.sh docker-start.sh
 
