@@ -12,6 +12,9 @@ RUN npm install && npm run build
 
 RUN chmod +x deploy.sh
 
+RUN chown -R nobody:nobody storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
 ENV WEBROOT /var/www/html/public
 ENV PHP_ERRORS_STDERR 1
 ENV RUN_SCRIPTS 1
@@ -22,4 +25,3 @@ ENV APP_DEBUG false
 ENV LOG_CHANNEL stderr
 
 CMD ["/start.sh"]
-RUN php -m | grep -i pgsql
