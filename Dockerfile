@@ -24,6 +24,10 @@ RUN chmod -R 777 storage bootstrap/cache
 
 RUN chmod +x deploy.sh docker-start.sh
 
+RUN mkdir -p /etc/nginx/conf.d \
+    && echo "fastcgi_buffers 16 16k;" > /etc/nginx/conf.d/fastcgi_buffers.conf \
+    && echo "fastcgi_buffer_size 32k;" >> /etc/nginx/conf.d/fastcgi_buffers.conf
+
 ENV WEBROOT /var/www/html/public
 ENV PHP_ERRORS_STDERR 1
 ENV RUN_SCRIPTS 1
