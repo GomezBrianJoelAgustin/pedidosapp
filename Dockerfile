@@ -12,6 +12,12 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+ARG APP_URL=https://pedidosapp-gno1.onrender.com
+ENV APP_URL=${APP_URL}
+ENV APP_ENV=production
+
+RUN php artisan ziggy:generate || true
+
 RUN npm install && npm run build
 
 RUN mkdir -p storage/framework/cache/data \
