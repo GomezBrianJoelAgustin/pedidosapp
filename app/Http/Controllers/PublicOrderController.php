@@ -39,6 +39,6 @@ class PublicOrderController extends Controller
             return $order;
         });
 
-        return redirect()->route('welcome')->with('success', "¡Gracias {$validated['guest_name']}! Tu pedido #{$order->id} fue recibido.");
+        return redirect()->route('home')->with('success', "¡Gracias {$validated['guest_name']}! Tu pedido #{$order->id} fue recibido.");
     }
 }
