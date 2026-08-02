@@ -1,6 +1,8 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage  } from '@inertiajs/react';
 import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Layers, Tag, Eye, PackageX, ImageIcon, Package } from 'lucide-react';
 import React, { useState } from 'react';
+import FlashAlert from '@/components/flash-alert';
+
 
 interface Category {
     id: number;
@@ -27,6 +29,7 @@ interface Props {
 }
 
 export default function Index({ categories = [], products = [] }: Props) {
+    const { flash } = usePage().props as any;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [search, setSearch] = useState('');
@@ -105,6 +108,8 @@ export default function Index({ categories = [], products = [] }: Props) {
 
             <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 p-6 sm:p-10 transition-colors duration-200">
                 <div className="max-w-7xl mx-auto space-y-8">
+
+                    <FlashAlert />
                     
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
                         <div>

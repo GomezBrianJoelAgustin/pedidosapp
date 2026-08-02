@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { Link, usePage, useForm, router } from '@inertiajs/react';
+import { Link, useForm, router } from '@inertiajs/react';
 import { 
-    PlusCircle, CheckCircle, Calendar, CreditCard, 
+    PlusCircle, Calendar, CreditCard, 
     Eye, Edit3, Trash2, X, MapPin, User, ShieldAlert, Package, ShoppingBag,
     Search, Filter 
 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import FlashAlert from '@/components/flash-alert';
+
 
 interface Product {
     id: number;
@@ -47,7 +49,6 @@ interface PageProps {
 }
 
 export default function OrdersIndex({ orders }: PageProps) {
-    const { flash } = usePage().props as any;
     const orderList = Array.isArray(orders) ? orders : orders?.data || [];
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -125,17 +126,10 @@ export default function OrdersIndex({ orders }: PageProps) {
     };
 
     return (
-        <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-6 font-sans transition-colors duration-200">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-6 font-sans transition-colors duration-200">
             <div className="max-w-7xl mx-auto space-y-6">
                 
-                {flash?.success && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-2xl shadow-lg backdrop-blur-md flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <CheckCircle className="w-6 h-6 text-emerald-500" />
-                            <span className="font-semibold">{flash.success}</span>
-                        </div>
-                    </div>
-                )}
+                <FlashAlert />
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-800/60 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700/50 backdrop-blur-xl shadow-sm dark:shadow-xl">
                     <div>

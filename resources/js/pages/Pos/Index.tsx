@@ -113,8 +113,8 @@ export default function PosIndex({ categories = [], products = [] }: { categorie
     };
 
     return (
-        <div className="flex flex-col lg:flex-row h-screen bg-slate-100 font-sans text-slate-800 overflow-hidden">
-            
+        <div className="flex flex-col lg:flex-row h-screen bg-slate-50 font-sans text-slate-800 overflow-hidden">
+
             <div className="flex-1 flex flex-col p-6 overflow-y-auto space-y-6">
                 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
