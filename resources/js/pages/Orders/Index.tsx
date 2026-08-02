@@ -126,41 +126,41 @@ export default function OrdersIndex({ orders }: PageProps) {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-6 font-sans transition-colors duration-200">
+        <div className="min-h-screen bg-[#09090b] text-white p-6 font-sans transition-colors duration-200">
             <div className="max-w-7xl mx-auto space-y-6">
                 
                 <FlashAlert />
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-800/60 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700/50 backdrop-blur-xl shadow-sm dark:shadow-xl">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.03] p-6 rounded-3xl border border-white/10 backdrop-blur-xl">
                     <div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-                            <ShoppingBag className="w-8 h-8 text-amber-500 dark:text-amber-400" /> Gestión de Órdenes
+                        <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
+                            <ShoppingBag className="w-8 h-8 text-amber-400" /> Gestión de Órdenes
                         </h1>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Control rápido de transacciones, estados y envíos</p>
+                        <p className="text-sm text-slate-400 mt-1">Control rápido de transacciones, estados y envíos</p>
                     </div>
 
                     <Link
                         href={route('admin.pos')}
-                        className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-2xl shadow-lg shadow-amber-500/25 flex items-center gap-2 transition-all active:scale-95 hover:shadow-amber-500/40"
+                        className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold rounded-2xl shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all active:scale-95 hover:shadow-amber-500/30"
                     >
                         <PlusCircle className="w-5 h-5" /> Nueva Venta
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white/60 dark:bg-slate-800/40 p-4 rounded-3xl border border-slate-200/80 dark:border-slate-800 backdrop-blur-md">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white/[0.02] p-4 rounded-3xl border border-white/10 backdrop-blur-md">
                     <div className="md:col-span-2 relative flex items-center">
-                        <Search className="w-5 h-5 absolute left-4 text-slate-400 pointer-events-none" />
+                        <Search className="w-5 h-5 absolute left-4 text-slate-500 pointer-events-none" />
                         <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Buscar por ID (#123), cliente, dirección..."
-                            className="w-full pl-11 pr-10 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:border-amber-500 focus:ring-amber-500 transition-all shadow-sm"
+                            className="w-full pl-11 pr-10 py-3 bg-white/5 border border-white/10 rounded-2xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:ring-amber-500/30 transition-all"
                         />
                         {searchTerm && (
                             <button 
                                 onClick={() => setSearchTerm('')} 
-                                className="absolute right-3 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg"
+                                className="absolute right-3 p-1 text-slate-500 hover:text-white rounded-lg"
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -168,23 +168,23 @@ export default function OrdersIndex({ orders }: PageProps) {
                     </div>
 
                     <div className="relative flex items-center">
-                        <Filter className="w-4 h-4 absolute left-4 text-slate-400 pointer-events-none" />
+                        <Filter className="w-4 h-4 absolute left-4 text-slate-500 pointer-events-none" />
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full pl-10 pr-8 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-800 dark:text-slate-100 focus:border-amber-500 focus:ring-amber-500 transition-all shadow-sm font-medium"
+                            className="w-full pl-10 pr-8 py-3 bg-white/5 border border-white/10 rounded-2xl text-sm text-white focus:border-amber-500 focus:ring-amber-500/30 transition-all font-medium"
                         >
-                            <option value="all">Todos los Estados</option>
-                            <option value="pending">Pendiente</option>
-                            <option value="processing">En Proceso</option>
-                            <option value="completed">Completado</option>
-                            <option value="cancelled">Cancelado</option>
+                            <option value="all" className="bg-[#0f0f11]">Todos los Estados</option>
+                            <option value="pending" className="bg-[#0f0f11]">Pendiente</option>
+                            <option value="processing" className="bg-[#0f0f11]">En Proceso</option>
+                            <option value="completed" className="bg-[#0f0f11]">Completado</option>
+                            <option value="cancelled" className="bg-[#0f0f11]">Cancelado</option>
                         </select>
                     </div>
                 </div>
 
                 {filteredOrders.length === 0 ? (
-                    <div className="bg-white/60 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-16 text-center text-slate-400 dark:text-slate-500 space-y-2">
+                    <div className="bg-white/[0.02] border border-white/10 rounded-3xl p-16 text-center text-slate-500 space-y-2">
                         <p className="font-semibold text-lg">No se encontraron órdenes</p>
                         <p className="text-xs">Intenta ajustar la búsqueda o los filtros aplicados.</p>
                     </div>
@@ -193,65 +193,65 @@ export default function OrdersIndex({ orders }: PageProps) {
                         {filteredOrders.map((order) => (
                             <div 
                                 key={order.id} 
-                                className="bg-white dark:bg-slate-800/70 hover:dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 hover:border-slate-300 dark:hover:border-slate-600 rounded-3xl p-6 shadow-sm dark:shadow-xl transition-all hover:-translate-y-1 hover:shadow-md dark:hover:shadow-2xl flex flex-col justify-between group"
+                                className="bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 hover:border-white/20 rounded-3xl p-6 transition-all hover:-translate-y-1 flex flex-col justify-between group"
                             >
                                 <div>
-                                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/50 pb-4 mb-4">
+                                    <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
                                         <div>
-                                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Orden</span>
-                                            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">#{order.id}</h3>
+                                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Orden</span>
+                                            <h3 className="text-xl font-extrabold text-white">#{order.id}</h3>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total</span>
-                                            <span className="text-lg font-black text-amber-600 dark:text-amber-400">{formatMoney(order.total_price)}</span>
+                                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Total</span>
+                                            <span className="text-lg font-black text-amber-400">{formatMoney(order.total_price)}</span>
                                         </div>
                                     </div>
 
                                     <div className="flex flex-wrap gap-2 mb-4">
                                         <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${
-                                            order.status === 'completed' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' :
-                                            order.status === 'pending' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' : 
-                                            'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30'
+                                            order.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                            order.status === 'pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 
+                                            'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                                         }`}>
                                             {order.status}
                                         </span>
 
-                                        <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 flex items-center gap-1">
+                                        <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 flex items-center gap-1">
                                             <CreditCard className="w-3.5 h-3.5" />
                                             {order.payment_method} ({order.payment_status})
                                         </span>
                                     </div>
 
-                                    <div className="text-xs text-slate-500 dark:text-slate-400 space-y-2 mb-6">
+                                    <div className="text-xs text-slate-400 space-y-2 mb-6">
                                         <p className="flex items-center gap-2">
-                                            <Calendar className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                            <Calendar className="w-4 h-4 text-slate-500" />
                                             {new Date(order.created_at).toLocaleString('es-AR')}
                                         </p>
                                         <p className="flex items-center gap-2 truncate">
-                                            <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                            <MapPin className="w-4 h-4 text-slate-500" />
                                             {order.delivery_address || 'Retiro en Local'}
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 dark:border-slate-700/40">
+                                <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/10">
                                     <button
                                         onClick={() => handleOpenShow(order)}
-                                        className="py-2.5 px-3 bg-blue-50 dark:bg-blue-600/20 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/30 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm hover:shadow-blue-500/30"
+                                        className="py-2.5 px-3 bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white border border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                     >
                                         <Eye className="w-4 h-4" /> Detalle
                                     </button>
 
                                     <button
                                         onClick={() => handleOpenEdit(order)}
-                                        className="py-2.5 px-3 bg-amber-50 dark:bg-amber-600/20 hover:bg-amber-500 text-amber-600 dark:text-amber-400 hover:text-white border border-amber-200 dark:border-amber-500/30 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm hover:shadow-amber-500/30"
+                                        className="py-2.5 px-3 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-black border border-amber-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                     >
                                         <Edit3 className="w-4 h-4" /> Editar
                                     </button>
 
                                     <button
                                         onClick={() => handleOpenDelete(order)}
-                                        className="py-2.5 px-3 bg-rose-50 dark:bg-rose-600/20 hover:bg-rose-600 text-rose-600 dark:text-rose-400 hover:text-white border border-rose-200 dark:border-rose-500/30 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm hover:shadow-rose-500/30"
+                                        className="py-2.5 px-3 bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                     >
                                         <Trash2 className="w-4 h-4" /> Borrar
                                     </button>
@@ -263,51 +263,51 @@ export default function OrdersIndex({ orders }: PageProps) {
             </div>
 
             {modalShow && selectedOrder && (
-                <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden">
-                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/40">
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="bg-[#0f0f11] border border-white/10 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden">
+                        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
                             <div>
-                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Detalle de la Órden #{selectedOrder.id}</h2>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(selectedOrder.created_at).toLocaleString('es-AR')}</p>
+                                <h2 className="text-xl font-bold text-white">Detalle de la Órden #{selectedOrder.id}</h2>
+                                <p className="text-xs text-slate-500">{new Date(selectedOrder.created_at).toLocaleString('es-AR')}</p>
                             </div>
-                            <button onClick={() => setModalShow(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-2 rounded-xl bg-slate-100 dark:bg-slate-800">
+                            <button onClick={() => setModalShow(false)} className="text-slate-400 hover:text-white p-2 rounded-xl bg-white/5">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
-                            <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/50">
+                            <div className="grid grid-cols-2 gap-4 text-sm bg-white/5 p-4 rounded-2xl border border-white/10">
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-400 uppercase">Cliente</p>
-                                    <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-1">
-                                        <User className="w-4 h-4 text-slate-400" /> {selectedOrder.user?.name || `ID: ${selectedOrder.user_id}`}
+                                    <p className="text-xs font-semibold text-slate-500 uppercase">Cliente</p>
+                                    <p className="font-medium text-slate-200 flex items-center gap-1.5 mt-1">
+                                        <User className="w-4 h-4 text-slate-500" /> {selectedOrder.user?.name || `ID: ${selectedOrder.user_id}`}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-400 uppercase">Repartidor</p>
-                                    <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-1">
-                                        <User className="w-4 h-4 text-slate-400" /> {selectedOrder.delivery?.name || `ID: ${selectedOrder.delivery_id}`}
+                                    <p className="text-xs font-semibold text-slate-500 uppercase">Repartidor</p>
+                                    <p className="font-medium text-slate-200 flex items-center gap-1.5 mt-1">
+                                        <User className="w-4 h-4 text-slate-500" /> {selectedOrder.delivery?.name || `ID: ${selectedOrder.delivery_id}`}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-400 uppercase">Tipo Entrega</p>
-                                    <p className="font-medium text-slate-800 dark:text-slate-200 capitalize mt-1">{selectedOrder.delivery_type}</p>
+                                    <p className="text-xs font-semibold text-slate-500 uppercase">Tipo Entrega</p>
+                                    <p className="font-medium text-slate-200 capitalize mt-1">{selectedOrder.delivery_type}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-400 uppercase">Dirección</p>
-                                    <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-1">
-                                        <MapPin className="w-4 h-4 text-slate-400" /> {selectedOrder.delivery_address || 'Retiro en Local'}
+                                    <p className="text-xs font-semibold text-slate-500 uppercase">Dirección</p>
+                                    <p className="font-medium text-slate-200 flex items-center gap-1.5 mt-1">
+                                        <MapPin className="w-4 h-4 text-slate-500" /> {selectedOrder.delivery_address || 'Retiro en Local'}
                                     </p>
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                                    <Package className="w-4 h-4 text-amber-500 dark:text-amber-400" /> Ítems del Pedido
+                                <h3 className="font-bold text-white mb-3 flex items-center gap-2">
+                                    <Package className="w-4 h-4 text-amber-400" /> Ítems del Pedido
                                 </h3>
-                                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+                                <div className="border border-white/10 rounded-2xl overflow-hidden">
                                     <table className="w-full text-left text-sm">
-                                        <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-800">
+                                        <thead className="bg-white/5 text-xs font-semibold text-slate-400 uppercase border-b border-white/10">
                                             <tr>
                                                 <th className="py-3 px-4">Producto</th>
                                                 <th className="py-3 px-4 text-center">Cant.</th>
@@ -315,15 +315,15 @@ export default function OrdersIndex({ orders }: PageProps) {
                                                 <th className="py-3 px-4 text-right">Subtotal</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                                        <tbody className="divide-y divide-white/10">
                                             {selectedOrder.items?.map((item) => (
-                                                <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                                                    <td className="py-3 px-4 font-medium text-slate-800 dark:text-slate-200">
+                                                <tr key={item.id} className="hover:bg-white/5">
+                                                    <td className="py-3 px-4 font-medium text-slate-200">
                                                         {item.product?.name || `Producto #${item.product_id}`}
                                                     </td>
-                                                    <td className="py-3 px-4 text-center text-slate-500 dark:text-slate-400">{item.quantity}</td>
-                                                    <td className="py-3 px-4 text-right text-slate-500 dark:text-slate-400">{formatMoney(item.price)}</td>
-                                                    <td className="py-3 px-4 text-right font-bold text-amber-600 dark:text-amber-400">
+                                                    <td className="py-3 px-4 text-center text-slate-400">{item.quantity}</td>
+                                                    <td className="py-3 px-4 text-right text-slate-400">{formatMoney(item.price)}</td>
+                                                    <td className="py-3 px-4 text-right font-bold text-amber-400">
                                                         {formatMoney(item.price * item.quantity)}
                                                     </td>
                                                 </tr>
@@ -333,9 +333,9 @@ export default function OrdersIndex({ orders }: PageProps) {
                                 </div>
                             </div>
 
-                            <div className="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800">
-                                <span className="font-bold text-slate-500 dark:text-slate-400">Total a Pagar:</span>
-                                <span className="text-2xl font-black text-slate-900 dark:text-amber-400">{formatMoney(selectedOrder.total_price)}</span>
+                            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                                <span className="font-bold text-slate-400">Total a Pagar:</span>
+                                <span className="text-2xl font-black text-amber-400">{formatMoney(selectedOrder.total_price)}</span>
                             </div>
                         </div>
                     </div>
@@ -343,80 +343,80 @@ export default function OrdersIndex({ orders }: PageProps) {
             )}
 
             {modalEdit && selectedOrder && (
-                <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Editar Órden #{selectedOrder.id}</h2>
-                            <button onClick={() => setModalEdit(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-2 rounded-xl bg-slate-100 dark:bg-slate-800">
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="bg-[#0f0f11] border border-white/10 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+                        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                            <h2 className="text-lg font-bold text-white">Editar Órden #{selectedOrder.id}</h2>
+                            <button onClick={() => setModalEdit(false)} className="text-slate-400 hover:text-white p-2 rounded-xl bg-white/5">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         <form onSubmit={handleUpdate} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Estado del Pedido</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Estado del Pedido</label>
                                 <select
                                     value={data.status}
                                     onChange={(e) => setData('status', e.target.value)}
-                                    className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:border-amber-500 focus:ring-amber-500"
+                                    className="w-full rounded-2xl bg-white/5 border-white/10 text-white text-sm focus:border-amber-500 focus:ring-amber-500/30"
                                 >
-                                    <option value="pending">Pendiente</option>
-                                    <option value="processing">En Proceso</option>
-                                    <option value="completed">Completado</option>
-                                    <option value="cancelled">Cancelado</option>
+                                    <option value="pending" className="bg-[#0f0f11]">Pendiente</option>
+                                    <option value="processing" className="bg-[#0f0f11]">En Proceso</option>
+                                    <option value="completed" className="bg-[#0f0f11]">Completado</option>
+                                    <option value="cancelled" className="bg-[#0f0f11]">Cancelado</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Estado del Pago</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Estado del Pago</label>
                                 <select
                                     value={data.payment_status}
                                     onChange={(e) => setData('payment_status', e.target.value)}
-                                    className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:border-amber-500 focus:ring-amber-500"
+                                    className="w-full rounded-2xl bg-white/5 border-white/10 text-white text-sm focus:border-amber-500 focus:ring-amber-500/30"
                                 >
-                                    <option value="pending">Pendiente</option>
-                                    <option value="paid">Pagado</option>
-                                    <option value="failed">Fallido</option>
+                                    <option value="pending" className="bg-[#0f0f11]">Pendiente</option>
+                                    <option value="paid" className="bg-[#0f0f11]">Pagado</option>
+                                    <option value="failed" className="bg-[#0f0f11]">Fallido</option>
                                 </select>
                             </div>
 
                             <div>
-    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tipo de Entrega</label>
-    <select
-        value={data.delivery_type}
-        onChange={(e) => setData('delivery_type', e.target.value)}
-        className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:border-amber-500 focus:ring-amber-500"
-    >
-        <option value="takeaway">Retiro en Local</option>
-        <option value="delivery">Envío a Domicilio</option>
-    </select>
-</div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Tipo de Entrega</label>
+                                <select
+                                    value={data.delivery_type}
+                                    onChange={(e) => setData('delivery_type', e.target.value)}
+                                    className="w-full rounded-2xl bg-white/5 border-white/10 text-white text-sm focus:border-amber-500 focus:ring-amber-500/30"
+                                >
+                                    <option value="takeaway" className="bg-[#0f0f11]">Retiro en Local</option>
+                                    <option value="delivery" className="bg-[#0f0f11]">Envío a Domicilio</option>
+                                </select>
+                            </div>
 
-{data.delivery_type === 'delivery' && (
-    <div>
-        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Dirección de Entrega</label>
-        <input
-            type="text"
-            value={data.delivery_address}
-            onChange={(e) => setData('delivery_address', e.target.value)}
-            className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:border-amber-500 focus:ring-amber-500"
-            placeholder="Calle 123..."
-        />
-    </div>
-)}
+                            {data.delivery_type === 'delivery' && (
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Dirección de Entrega</label>
+                                    <input
+                                        type="text"
+                                        value={data.delivery_address}
+                                        onChange={(e) => setData('delivery_address', e.target.value)}
+                                        className="w-full rounded-2xl bg-white/5 border-white/10 text-white text-sm focus:border-amber-500 focus:ring-amber-500/30"
+                                        placeholder="Calle 123..."
+                                    />
+                                </div>
+                            )}
 
                             <div className="pt-4 flex items-center justify-end gap-3">
                                 <button
                                     type="button"
                                     onClick={() => setModalEdit(false)}
-                                    className="px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+                                    className="px-4 py-2.5 text-sm font-semibold text-slate-400 hover:bg-white/5 rounded-xl"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="px-5 py-2.5 text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-lg shadow-amber-500/25 transition-all active:scale-95"
+                                    className="px-5 py-2.5 text-sm font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-xl shadow-lg shadow-amber-500/20 transition-all active:scale-95"
                                 >
                                     Guardar Cambios
                                 </button>
@@ -427,25 +427,25 @@ export default function OrdersIndex({ orders }: PageProps) {
             )}
 
             {modalDelete && selectedOrder && (
-                <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-sm p-6 space-y-4">
-                        <div className="flex items-center gap-3 text-rose-600 dark:text-rose-500">
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="bg-[#0f0f11] border border-white/10 rounded-3xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+                        <div className="flex items-center gap-3 text-rose-400">
                             <ShieldAlert className="w-7 h-7" />
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">¿Eliminar Órden?</h3>
+                            <h3 className="text-lg font-bold text-white">¿Eliminar Órden?</h3>
                         </div>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                            ¿Estás seguro de eliminar la órden <strong className="text-slate-800 dark:text-slate-200">#{selectedOrder.id}</strong>? Esta acción no se puede deshacer.
+                        <p className="text-sm text-slate-400">
+                            ¿Estás seguro de eliminar la órden <strong className="text-slate-200">#{selectedOrder.id}</strong>? Esta acción no se puede deshacer.
                         </p>
                         <div className="flex items-center justify-end gap-3 pt-2">
                             <button
                                 onClick={() => setModalDelete(false)}
-                                className="px-4 py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+                                className="px-4 py-2 text-sm font-semibold text-slate-400 hover:bg-white/5 rounded-xl"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handleDelete}
-                                className="px-4 py-2 text-sm font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-lg shadow-rose-600/25 transition-all active:scale-95"
+                                className="px-4 py-2 text-sm font-bold bg-rose-600 hover:bg-rose-500 text-white rounded-xl shadow-lg shadow-rose-600/20 transition-all active:scale-95"
                             >
                                 Sí, Eliminar
                             </button>
