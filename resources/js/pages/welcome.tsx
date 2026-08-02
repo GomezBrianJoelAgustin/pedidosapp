@@ -102,7 +102,7 @@ export default function Welcome({ auth, menu = [] }: Props) {
 
     return (
         <>
-            <Head title="Bienvenidos | Empandas" />
+            <Head title="Bienvenidos" />
 
             <div className="relative min-h-screen bg-[#09090b] text-[#f8fafc] font-sans overflow-x-hidden selection:bg-amber-500 selection:text-white">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-amber-950/20 via-slate-900/10 to-transparent rounded-full blur-[120px] pointer-events-none" />
