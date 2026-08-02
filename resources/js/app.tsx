@@ -21,20 +21,22 @@ createInertiaApp({
     resolve: (name) => 
         resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')) as any,
 
-    layout: (name) => {
-        const pageName = name.toLowerCase(); 
-        
-        switch (true) {
-            case pageName === 'welcome':
-                return null;
-            case pageName.startsWith('auth/'):
-                return AuthLayout;
-            case pageName.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
-            default:
-                return AppLayout;
-        }
-    },
+layout: (name) => {
+    const pageName = name.toLowerCase(); 
+    
+    switch (true) {
+        case pageName === 'welcome':
+            return null;
+        case pageName === 'auth/login':
+            return null;
+        case pageName.startsWith('auth/'):
+            return AuthLayout;
+        case pageName.startsWith('settings/'):
+            return [AppLayout, SettingsLayout];
+        default:
+            return AppLayout;
+    }
+},
     strictMode: true,
     withApp(app) {
         return (
