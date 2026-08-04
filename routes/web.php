@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\PublicOrderController;
+use App\Http\Controllers\MercadoPagoController;
 
 Route::get('/', [MenuController::class, 'index'])->name('home');
 
@@ -35,5 +36,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 Route::post('/pedido', [PublicOrderController::class, 'store'])->name('public.orders.store');
+Route::post('/pagos/mercadopago', [MercadoPagoController::class, 'processPayment'])->name('mercadopago.process');
 
 require __DIR__.'/settings.php';

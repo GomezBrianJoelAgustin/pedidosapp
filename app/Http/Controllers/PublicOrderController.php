@@ -13,17 +13,29 @@ class PublicOrderController extends Controller
     {
         $validated = $request->validated();
 
-        $order = DB::transaction(function () use ($validated) {
+        $paymentStatus = 'pending';
+
+        if ($validated['payment_method'] === 'card') {
+            $paymentStatus = match ($validated['payment_gateway_status'] ?? null) {
+                'approved' => 'paid',
+                'in_process' => 'pending',
+                default => 'failed',
+            };
+        }
+
+        $order = DB::transaction(function () use ($validated, $paymentStatus) {
             $order = Order::create([
                 'user_id' => null,
                 'delivery_id' => null,
                 'guest_name' => $validated['guest_name'],
                 'guest_phone' => $validated['guest_phone'],
+                'guest_email' => $validated['guest_email'] ?? null,
                 'status' => 'pending',
                 'delivery_type' => $validated['delivery_type'],
                 'delivery_address' => $validated['delivery_address'] ?? null,
                 'payment_method' => $validated['payment_method'],
-                'payment_status' => 'pending',
+                'payment_status' => $paymentStatus,
+                'payment_gateway_id' => $validated['payment_gateway_id'] ?? null,
                 'total_price' => $validated['total_price'],
             ]);
 
@@ -39,6 +51,10 @@ class PublicOrderController extends Controller
             return $order;
         });
 
-        return redirect()->route('home')->with('success', "¡Gracias {$validated['guest_name']}! Tu pedido #{$order->id} fue recibido.");
+        $message = $paymentStatus === 'failed'
+            ? 'El pago fue rechazado. Por favor intentá con otro medio de pago.'
+            : "¡Gracias {$validated['guest_name']}! Tu pedido #{$order->id} fue recibido.";
+
+        return redirect()->route('home')->with($paymentStatus === 'failed' ? 'error' : 'success', $message);
     }
 }

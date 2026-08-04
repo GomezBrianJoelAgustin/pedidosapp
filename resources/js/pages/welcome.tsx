@@ -1,7 +1,9 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage, router  } from '@inertiajs/react';
 import { ShoppingBag, Plus, Minus, X, CheckCircle } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import FlashAlert from '@/components/flash-alert';  
+import { loadMercadoPagoSdk } from '@/lib/load-mercadopago';
+
 
 
 interface Product {
@@ -28,9 +30,15 @@ interface CartItem {
 interface Props {
     auth?: { user?: any };
     menu?: Category[];
+    mercadopagoPublicKey?: string;
 }
 
-export default function Welcome({ auth, menu = [] }: Props) {
+export default function Welcome({ auth, menu = [] , mercadopagoPublicKey  }: Props) {
+    const [guestEmail, setGuestEmail] = useState('');
+    const [paymentProcessing, setPaymentProcessing] = useState(false);
+    const [paymentError, setPaymentError] = useState<string | null>(null);
+    const brickContainerRef = useRef<HTMLDivElement>(null);
+    const brickControllerRef = useRef<any>(null);
     const { flash } = usePage().props as any;
     const [cartOpen, setCartOpen] = useState(false);
 
@@ -99,6 +107,127 @@ export default function Welcome({ auth, menu = [] }: Props) {
             },
         });
     };
+
+    useEffect(() => {
+        if (data.payment_method !== 'card' || !mercadopagoPublicKey || !guestEmail || data.total_price <= 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        loadMercadoPagoSdk().then(() => {
+            if (cancelled || !brickContainerRef.current) return;
+
+            const mp = new (window as any).MercadoPago(mercadopagoPublicKey, { locale: 'es-AR' });
+            const bricksBuilder = mp.bricks();
+
+            if (brickControllerRef.current) {
+                brickControllerRef.current.unmount();
+            }
+
+            bricksBuilder.create('payment', 'payment-brick-container', {
+                initialization: {
+                    amount: data.total_price,
+                    payer: { 
+                        email: guestEmail, 
+                        entityType: 'individual',
+                    },
+                },
+                customization: {
+                    paymentMethods: {
+                        creditCard: 'all',
+                        debitCard: 'all',
+                        prepaid_card: 'all',
+                    },
+                    visual: {
+                        style: {
+                            theme: 'dark',
+                        },
+                    },
+                },
+                callbacks: {
+                    onReady: () => {},
+                    onError: (error: any) => {
+                        console.error(error);
+                        setPaymentError('Ocurrió un error al cargar el formulario de pago.');
+                    },
+                    onSubmit: ({ formData }: any) => {
+    setPaymentProcessing(true);
+    setPaymentError(null);
+
+    let paymentUrl: string;
+    try {
+        paymentUrl = route('mercadopago.process');
+    } catch (err) {
+        console.error('Error resolviendo la ruta de Mercado Pago:', err);
+        setPaymentError('Error de configuración. Contactá al administrador.');
+        setPaymentProcessing(false);
+        return Promise.reject(err);
+    }
+
+    return fetch(paymentUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '',
+        },
+        body: JSON.stringify(formData),
+    })
+        .then(async (res) => {
+            if (!res.ok) {
+                const text = await res.text();
+                console.error('Respuesta no OK de mercadopago.process:', res.status, text);
+                throw new Error(`Error del servidor (${res.status})`);
+            }
+            return res.json();
+        })
+    .then((result) => {
+        console.log('Resultado de Mercado Pago:', result);
+        if (result.status === 'rejected') {
+            setPaymentError(`El pago fue rechazado (${result.status_detail}). Probá con otra tarjeta.`);
+            setPaymentProcessing(false);
+            return;
+        }
+
+        router.post(route('public.orders.store'), {
+            guest_name: data.guest_name,
+            guest_phone: data.guest_phone,
+            guest_email: guestEmail,
+            payment_method: data.payment_method,
+            delivery_type: data.delivery_type,
+            delivery_address: data.delivery_address,
+            items: data.items,
+            total_price: data.total_price,
+            payment_gateway_id: String(result.id),
+            payment_gateway_status: result.status,
+        }, {
+            onSuccess: () => {
+                reset();
+                setCartOpen(false);
+            },
+            onError: (errors) => {
+                console.error('Error al crear la orden:', errors);
+                setPaymentError('El pago se acreditó pero hubo un error al registrar el pedido. Contactanos con tu comprobante.');
+            },
+            onFinish: () => setPaymentProcessing(false),
+        });
+    })
+        .catch((err) => {
+            console.error(err);
+            setPaymentError('No se pudo procesar el pago. Intentá de nuevo.');
+            setPaymentProcessing(false);
+        });
+},
+                },
+            });
+
+            brickControllerRef.current = bricksBuilder;
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [data.payment_method, guestEmail, data.total_price, mercadopagoPublicKey]);
 
     return (
         <>
@@ -232,132 +361,166 @@ export default function Welcome({ auth, menu = [] }: Props) {
             )}
 
             {cartOpen && (
-                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
-                    <div className="w-full sm:w-96 h-full bg-[#0f0f11] border-l border-white/10 flex flex-col">
-                        <div className="p-5 border-b border-white/10 flex items-center justify-between">
-                            <h2 className="text-lg font-bold text-white">Tu Pedido</h2>
-                            <button onClick={() => setCartOpen(false)} className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-white/5">
-                                <X className="w-5 h-5" />
-                            </button>
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
+        <div className="w-full sm:w-96 h-full bg-[#0f0f11] border-l border-white/10 flex flex-col">
+            <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0">
+                <h2 className="text-lg font-bold text-white">Tu Pedido</h2>
+                <button onClick={() => setCartOpen(false)} className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-white/5">
+                    <X className="w-5 h-5" />
+                </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+                {flash?.success && (
+                    <div className="m-4 p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl flex items-center gap-2 text-sm">
+                        <CheckCircle className="w-4 h-4" /> {flash.success}
+                    </div>
+                )}
+
+                <div className="p-4 space-y-3">
+                    {data.items.length === 0 ? (
+                        <p className="text-slate-500 text-sm text-center py-12">El carrito está vacío</p>
+                    ) : (
+                        data.items.map((item) => (
+                            <div key={item.product_id} className="bg-white/[0.03] border border-white/10 rounded-xl p-3 flex flex-col gap-2">
+                                <div className="flex justify-between items-start gap-2">
+                                    <span className="text-sm font-medium text-white">{item.name}</span>
+                                    <button onClick={() => removeFromCart(item.product_id)} className="text-slate-500 hover:text-red-400">
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-amber-400 font-bold text-sm">
+                                        {formatMoney(item.price * item.quantity)}
+                                    </span>
+                                    <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
+                                        <button onClick={() => updateQuantity(item.product_id, -1)} className="p-1 hover:bg-white/10 rounded text-slate-300">
+                                            <Minus className="w-3 h-3" />
+                                        </button>
+                                        <span className="text-xs font-bold w-5 text-center text-white">{item.quantity}</span>
+                                        <button onClick={() => updateQuantity(item.product_id, 1)} className="p-1 hover:bg-white/10 rounded text-slate-300">
+                                            <Plus className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {data.items.length > 0 && (
+                    <form onSubmit={handleCheckout} className="p-5 border-t border-white/10 space-y-3">
+                        <input
+                            type="text"
+                            placeholder="Tu nombre"
+                            value={data.guest_name}
+                            onChange={(e) => setData('guest_name', e.target.value)}
+                            className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                        />
+                        {errors.guest_name && <p className="text-red-400 text-xs">{errors.guest_name}</p>}
+
+                        <input
+                            type="text"
+                            placeholder="Teléfono de contacto"
+                            value={data.guest_phone}
+                            onChange={(e) => setData('guest_phone', e.target.value)}
+                            className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                        />
+                        {errors.guest_phone && <p className="text-red-400 text-xs">{errors.guest_phone}</p>}
+
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { id: 'takeaway', label: 'Retiro' },
+                                { id: 'delivery', label: 'Cadete' },
+                            ].map((type) => (
+                                <button
+                                    type="button"
+                                    key={type.id}
+                                    onClick={() => setData('delivery_type', type.id)}
+                                    className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
+                                        data.delivery_type === type.id
+                                            ? 'bg-amber-500 text-black'
+                                            : 'bg-white/5 text-slate-300 border border-white/10'
+                                    }`}
+                                >
+                                    {type.label}
+                                </button>
+                            ))}
                         </div>
 
-                        {flash?.success && (
-                            <div className="m-4 p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl flex items-center gap-2 text-sm">
-                                <CheckCircle className="w-4 h-4" /> {flash.success}
+                        {data.delivery_type === 'delivery' && (
+                            <>
+                                <input
+                                    type="text"
+                                    placeholder="Dirección de entrega"
+                                    value={data.delivery_address}
+                                    onChange={(e) => setData('delivery_address', e.target.value)}
+                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                                />
+                                {errors.delivery_address && <p className="text-red-400 text-xs">{errors.delivery_address}</p>}
+                            </>
+                        )}
+
+                        <div className="grid grid-cols-3 gap-2">
+                            {[
+                                { id: 'effective', label: 'Efectivo' },
+                                { id: 'transfer', label: 'Transferencia' },
+                                { id: 'card', label: 'Tarjeta' },
+                            ].map((method) => (
+                                <button
+                                    type="button"
+                                    key={method.id}
+                                    onClick={() => setData('payment_method', method.id)}
+                                    className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
+                                        data.payment_method === method.id
+                                            ? 'bg-amber-500 text-black'
+                                            : 'bg-white/5 text-slate-300 border border-white/10'
+                                    }`}
+                                >
+                                    {method.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {data.payment_method === 'card' && (
+                            <div className="space-y-3">
+                                <input
+                                    type="email"
+                                    placeholder="Tu email (para el comprobante de pago)"
+                                    value={guestEmail}
+                                    onChange={(e) => setGuestEmail(e.target.value)}
+                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                                />
+                                <div ref={brickContainerRef} id="payment-brick-container" />
+                                {paymentError && (
+                                    <p className="text-rose-400 text-xs">{paymentError}</p>
+                                )}
+                                {paymentProcessing && (
+                                    <p className="text-amber-400 text-xs text-center">Procesando pago...</p>
+                                )}
                             </div>
                         )}
 
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                            {data.items.length === 0 ? (
-                                <p className="text-slate-500 text-sm text-center py-12">El carrito está vacío</p>
-                            ) : (
-                                data.items.map((item) => (
-                                    <div key={item.product_id} className="bg-white/[0.03] border border-white/10 rounded-xl p-3 flex flex-col gap-2">
-                                        <div className="flex justify-between items-start gap-2">
-                                            <span className="text-sm font-medium text-white">{item.name}</span>
-                                            <button onClick={() => removeFromCart(item.product_id)} className="text-slate-500 hover:text-red-400">
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-amber-400 font-bold text-sm">
-                                                {formatMoney(item.price * item.quantity)}
-                                            </span>
-                                            <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
-                                                <button onClick={() => updateQuantity(item.product_id, -1)} className="p-1 hover:bg-white/10 rounded text-slate-300">
-                                                    <Minus className="w-3 h-3" />
-                                                </button>
-                                                <span className="text-xs font-bold w-5 text-center text-white">{item.quantity}</span>
-                                                <button onClick={() => updateQuantity(item.product_id, 1)} className="p-1 hover:bg-white/10 rounded text-slate-300">
-                                                    <Plus className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
+                        <div className="flex items-center justify-between pt-2">
+                            <span className="text-sm text-slate-400">Total</span>
+                            <span className="text-xl font-black text-white">{formatMoney(data.total_price)}</span>
                         </div>
 
-                        {data.items.length > 0 && (
-                            <form onSubmit={handleCheckout} className="p-5 border-t border-white/10 space-y-3">
-                                <input
-                                    type="text"
-                                    placeholder="Tu nombre"
-                                    value={data.guest_name}
-                                    onChange={(e) => setData('guest_name', e.target.value)}
-                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
-                                />
-                                {errors.guest_name && <p className="text-red-400 text-xs">{errors.guest_name}</p>}
-
-                                <input
-                                    type="text"
-                                    placeholder="Teléfono de contacto"
-                                    value={data.guest_phone}
-                                    onChange={(e) => setData('guest_phone', e.target.value)}
-                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
-                                />
-                                {errors.guest_phone && <p className="text-red-400 text-xs">{errors.guest_phone}</p>}
-
-                                <div className="grid grid-cols-2 gap-2">
-                                    {[
-                                        { id: 'takeaway', label: 'Retiro' },
-                                        { id: 'delivery', label: 'Cadete' },
-                                    ].map((type) => (
-                                        <button
-                                            type="button"
-                                            key={type.id}
-                                            onClick={() => setData('delivery_type', type.id)}
-                                            className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
-                                                data.delivery_type === type.id
-                                                    ? 'bg-amber-500 text-black'
-                                                    : 'bg-white/5 text-slate-300 border border-white/10'
-                                            }`}
-                                        >
-                                            {type.label}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {data.delivery_type === 'delivery' && (
-                                    <>
-                                        <input
-                                            type="text"
-                                            placeholder="Dirección de entrega"
-                                            value={data.delivery_address}
-                                            onChange={(e) => setData('delivery_address', e.target.value)}
-                                            className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
-                                        />
-                                        {errors.delivery_address && <p className="text-red-400 text-xs">{errors.delivery_address}</p>}
-                                    </>
-                                )}
-
-                                <select
-                                    value={data.payment_method}
-                                    onChange={(e) => setData('payment_method', e.target.value)}
-                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:border-amber-500 focus:outline-none"
-                                >
-                                    <option value="effective" className="bg-[#0f0f11]">Efectivo</option>
-                                    <option value="card" className="bg-[#0f0f11]">Tarjeta</option>
-                                    <option value="transfer" className="bg-[#0f0f11]">Transferencia</option>
-                                </select>
-
-                                <div className="flex items-center justify-between pt-2">
-                                    <span className="text-sm text-slate-400">Total</span>
-                                    <span className="text-xl font-black text-white">{formatMoney(data.total_price)}</span>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="w-full py-3.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-bold rounded-xl transition-all active:scale-[0.98]"
-                                >
-                                    Confirmar Pedido
-                                </button>
-                            </form>
+                        {data.payment_method !== 'card' && (
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="w-full py-3.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-bold rounded-xl transition-all active:scale-[0.98]"
+                            >
+                                Confirmar Pedido
+                            </button>
                         )}
-                    </div>
-                </div>
-            )}
+                    </form>
+                )}
+            </div>
+        </div>
+    </div>
+)}
         </>
     );
 }
