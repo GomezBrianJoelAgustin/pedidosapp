@@ -46,9 +46,11 @@ export default function Index({ products = [], categories = [] }: Props) {
         setEditingProduct(null);
         reset();
         clearErrors();
+
         if (categories.length > 0) {
             setData('category_id', String(categories[0].id));
         }
+
         setIsModalOpen(true);
     };
 
@@ -78,6 +80,7 @@ export default function Index({ products = [], categories = [] }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (editingProduct) {
             put(route('admin.products.update', editingProduct.id), {
                 onSuccess: () => closeModal(),
@@ -90,7 +93,10 @@ export default function Index({ products = [], categories = [] }: Props) {
     };
 
     const handleDelete = () => {
-        if (!deletingProduct) return;
+        if (!deletingProduct) {
+return;
+}
+
         destroy(route('admin.products.destroy', deletingProduct.id), {
             onSuccess: () => setDeletingProduct(null),
         });

@@ -59,7 +59,7 @@ export default function OrdersIndex({ orders }: PageProps) {
     const [modalEdit, setModalEdit] = useState(false);
     const [modalDelete, setModalDelete] = useState(false);
 
-    const { data, setData, put, processing, delete: destroy, processing: deleting } = useForm({
+    const { data, setData, put, processing } = useForm({
         status: '',
         payment_status: '',
         delivery_type: '',
@@ -71,9 +71,10 @@ export default function OrdersIndex({ orders }: PageProps) {
     };
 
     const filteredOrders = useMemo(() => {
+        const orderList = Array.isArray(orders) ? orders : orders?.data || [];
+
         return orderList.filter((order) => {
             const matchesStatus = statusFilter === 'all' || order.status.toLowerCase() === statusFilter.toLowerCase();
-
             const term = searchTerm.toLowerCase().trim();
             const matchesSearch = 
                 term === '' ||
@@ -84,7 +85,7 @@ export default function OrdersIndex({ orders }: PageProps) {
 
             return matchesStatus && matchesSearch;
         });
-    }, [orderList, searchTerm, statusFilter]);
+    }, [orders, searchTerm, statusFilter]);
 
 
     const handleOpenShow = (order: Order) => {
@@ -105,7 +106,10 @@ export default function OrdersIndex({ orders }: PageProps) {
 
     const handleUpdate = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedOrder) return;
+
+        if (!selectedOrder) {
+return;
+}
 
         put(route('admin.orders.update', selectedOrder.id), {
             onSuccess: () => setModalEdit(false),
@@ -118,7 +122,9 @@ export default function OrdersIndex({ orders }: PageProps) {
     };
 
     const handleDelete = () => {
-        if (!selectedOrder) return;
+        if (!selectedOrder) {
+return;
+}
 
         router.delete(route('admin.orders.destroy', selectedOrder.id), {
             onSuccess: () => setModalDelete(false),

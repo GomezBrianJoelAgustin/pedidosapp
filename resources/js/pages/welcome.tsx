@@ -74,6 +74,7 @@ export default function Welcome({ auth, menu = [] , mercadopagoPublicKey  }: Pro
                 quantity: 1,
             });
         }
+
         updateCart(updated);
         setCartOpen(true);
     };
@@ -83,8 +84,10 @@ export default function Welcome({ auth, menu = [] , mercadopagoPublicKey  }: Pro
             .map(item => {
                 if (item.product_id === productId) {
                     const newQty = item.quantity + delta;
+
                     return newQty > 0 ? { ...item, quantity: newQty } : null;
                 }
+
                 return item;
             })
             .filter(Boolean) as CartItem[];
@@ -99,7 +102,11 @@ export default function Welcome({ auth, menu = [] , mercadopagoPublicKey  }: Pro
 
     const handleCheckout = (e: React.FormEvent) => {
         e.preventDefault();
-        if (data.items.length === 0) return;
+
+        if (data.items.length === 0) {
+return;
+}
+
         post(route('public.orders.store'), {
             onSuccess: () => {
                 reset();
@@ -116,7 +123,9 @@ export default function Welcome({ auth, menu = [] , mercadopagoPublicKey  }: Pro
         let cancelled = false;
 
         loadMercadoPagoSdk().then(() => {
-            if (cancelled || !brickContainerRef.current) return;
+            if (cancelled || !brickContainerRef.current) {
+return;
+}, [data.payment_method, guestEmail, data.total_price, mercadopagoPublicKey]);
 
             const mp = new (window as any).MercadoPago(mercadopagoPublicKey, { locale: 'es-AR' });
             const bricksBuilder = mp.bricks();
@@ -156,12 +165,14 @@ export default function Welcome({ auth, menu = [] , mercadopagoPublicKey  }: Pro
     setPaymentError(null);
 
     let paymentUrl: string;
+
     try {
         paymentUrl = route('mercadopago.process');
     } catch (err) {
         console.error('Error resolviendo la ruta de Mercado Pago:', err);
         setPaymentError('Error de configuración. Contactá al administrador.');
         setPaymentProcessing(false);
+
         return Promise.reject(err);
     }
 
@@ -177,15 +188,19 @@ export default function Welcome({ auth, menu = [] , mercadopagoPublicKey  }: Pro
             if (!res.ok) {
                 const text = await res.text();
                 console.error('Respuesta no OK de mercadopago.process:', res.status, text);
+
                 throw new Error(`Error del servidor (${res.status})`);
             }
+
             return res.json();
         })
     .then((result) => {
         console.log('Resultado de Mercado Pago:', result);
+
         if (result.status === 'rejected') {
             setPaymentError(`El pago fue rechazado (${result.status_detail}). Probá con otra tarjeta.`);
             setPaymentProcessing(false);
+
             return;
         }
 

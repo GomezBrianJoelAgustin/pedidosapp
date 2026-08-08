@@ -49,12 +49,13 @@ export default function PosIndex({ categories = [], products = [] }: { categorie
     const filteredProducts = products.filter((product) => {
         const matchesCategory = selectedCategory === null || product.category_id === selectedCategory;
         const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+
         return matchesCategory && matchesSearch;
     });
 
     const addToCart = (product: Product) => {
         const existingIndex = data.items.findIndex(item => item.product_id === product.id);
-        let updatedItems = [...data.items];
+        const updatedItems = [...data.items];
 
         if (existingIndex > -1) {
             updatedItems[existingIndex].quantity += 1;
@@ -75,8 +76,10 @@ export default function PosIndex({ categories = [], products = [] }: { categorie
             .map(item => {
                 if (item.product_id === productId) {
                     const newQty = item.quantity + delta;
+
                     return newQty > 0 ? { ...item, quantity: newQty } : null;
                 }
+
                 return item;
             })
             .filter(Boolean) as CartItem[];
@@ -104,7 +107,11 @@ export default function PosIndex({ categories = [], products = [] }: { categorie
 
     const handleCheckout = (e: React.FormEvent) => {
         e.preventDefault();
-        if (data.items.length === 0) return;
+
+        if (data.items.length === 0) {
+return;
+}
+
         post(route('admin.pos.store'));
     };
 
@@ -284,6 +291,7 @@ export default function PosIndex({ categories = [], products = [] }: { categorie
                                 { id: 'delivery', label: 'Con Cadete' },
                             ].map((type) => {
                                 const isSelected = data.delivery_type === type.id;
+
                                 return (
                                     <button
                                         type="button"
@@ -324,6 +332,7 @@ export default function PosIndex({ categories = [], products = [] }: { categorie
                             ].map((method) => {
                                 const Icon = method.icon;
                                 const isSelected = data.payment_method === method.id;
+
                                 return (
                                     <button
                                         type="button"

@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, CheckCircle2 , Croissant} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
-import { Eye, EyeOff, Mail, Lock, ArrowRight, CheckCircle2 , Croissant} from 'lucide-react';
 
 interface LoginProps {
     status?: string;
