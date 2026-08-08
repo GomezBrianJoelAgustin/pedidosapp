@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage, router  } from '@inertiajs/react';
-import { ShoppingBag, Plus, Minus, X, CheckCircle } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, X, CheckCircle, Instagram, Facebook, MessageCircle, Music2, MapPin, Clock, Phone, Sparkles, ChefHat, Leaf, Flame, Star, ArrowRight } from 'lucide-react';
 import React, { useState, useRef, useEffect } from 'react';
 import FlashAlert from '@/components/flash-alert';  
 import { loadMercadoPagoSdk } from '@/lib/load-mercadopago';
@@ -345,8 +345,158 @@ export default function Welcome({ auth, menu = [] , mercadopagoPublicKey  }: Pro
                     )}
                 </section>
 
+                {/* Sección visual de comida */}
+                <section className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                            { emoji: '🥟', label: 'Masa casera', desc: 'Amasada a mano cada día' },
+                            { emoji: '🔥', label: 'Horno a leña', desc: 'Cocción tradicional' },
+                            { emoji: '🥩', label: 'Cortes premium', desc: 'Carne seleccionada' },
+                            { emoji: '🧀', label: 'Quesos artesanales', desc: 'Rellenos generosos' },
+                        ].map((item) => (
+                            <div key={item.label} className="group bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-amber-500/30 transition-all duration-300 rounded-2xl p-6 text-center">
+                                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{item.emoji}</div>
+                                <h3 className="font-semibold text-white text-sm mb-1">{item.label}</h3>
+                                <p className="text-xs text-slate-500">{item.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Sección Nosotros */}
+                <section id="nosotros" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-amber-400 tracking-wide mb-6 backdrop-blur-md">
+                                <ChefHat className="w-3.5 h-3.5" />
+                                NUESTRA HISTORIA
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 leading-tight">
+                                Pasión por la cocina, <br />
+                                <span className="text-amber-400">tradición en cada bocado.</span>
+                            </h2>
+                            <p className="text-slate-400 font-light leading-relaxed mb-6">
+                                En Empandas, cada empanada es el resultado de años de dedicación y amor por la cocina argentina.
+                                Seleccionamos los mejores ingredientes, amasamos la masa a mano y horneamos al momento para que
+                                llegue a tu mesa con el sabor de lo auténtico.
+                            </p>
+                            <p className="text-slate-400 font-light leading-relaxed mb-8">
+                                Desde nuestros inicios, nuestro objetivo fue simple: ofrecer empanadas artesanales de calidad
+                                superior, con recetas familiares que se transmiten de generación en generación.
+                            </p>
+
+                            <div className="grid grid-cols-3 gap-4 mb-8">
+                                {[
+                                    { value: '10+', label: 'Años de tradición' },
+                                    { value: '15+', label: 'Variedades' },
+                                    { value: '1000+', label: 'Clientes felices' },
+                                ].map((stat) => (
+                                    <div key={stat.label} className="bg-white/[0.03] border border-white/10 rounded-xl p-4 text-center">
+                                        <div className="text-2xl font-bold text-amber-400">{stat.value}</div>
+                                        <div className="text-xs text-slate-500 mt-1">{stat.label}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex flex-wrap gap-3">
+                                {[
+                                    { icon: Leaf, label: 'Ingredientes frescos' },
+                                    { icon: Flame, label: 'Horneadas al momento' },
+                                    { icon: Sparkles, label: 'Receta artesanal' },
+                                ].map(({ icon: Icon, label }) => (
+                                    <span key={label} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
+                                        <Icon className="w-3.5 h-3.5 text-amber-400" />
+                                        {label}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="relative">
+                            <div className="absolute -inset-4 bg-gradient-to-br from-amber-500/20 to-transparent rounded-3xl blur-2xl pointer-events-none" />
+                            <div className="relative bg-white/[0.03] border border-white/10 rounded-3xl overflow-hidden">
+                                <div className="aspect-[4/3] bg-gradient-to-br from-amber-900/40 via-slate-900 to-slate-950 flex items-center justify-center">
+                                    <div className="text-center p-8">
+                                        <div className="text-7xl mb-4">🥟</div>
+                                        <p className="text-slate-300 font-serif text-xl italic">"El sabor de lo hecho con amor"</p>
+                                        <div className="flex items-center justify-center gap-1 mt-4 text-amber-400">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} className="w-4 h-4 fill-current" />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Sección Redes */}
+                <section id="redes" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
+                    <div className="text-center mb-12">
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-amber-400 tracking-wide mb-6 backdrop-blur-md">
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            SEGUINOS
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-serif text-white mb-4">Conectate con nosotros</h2>
+                        <p className="text-slate-400 font-light max-w-xl mx-auto">
+                            Seguí nuestras novedades, promociones y el detrás de escena de nuestras empanadas.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[
+                            { icon: Instagram, label: 'Instagram', handle: '@empandas', color: 'hover:border-pink-500/40 hover:bg-pink-500/5', iconColor: 'text-pink-400' },
+                            { icon: Facebook, label: 'Facebook', handle: '/empandas', color: 'hover:border-blue-500/40 hover:bg-blue-500/5', iconColor: 'text-blue-400' },
+                            { icon: MessageCircle, label: 'WhatsApp', handle: '+54 11 1234-5678', color: 'hover:border-emerald-500/40 hover:bg-emerald-500/5', iconColor: 'text-emerald-400' },
+                            { icon: Music2, label: 'TikTok', handle: '@empandas', color: 'hover:border-cyan-500/40 hover:bg-cyan-500/5', iconColor: 'text-cyan-400' },
+                        ].map(({ icon: Icon, label, handle, color, iconColor }) => (
+                            <a
+                                key={label}
+                                href="#"
+                                className={`group bg-white/[0.03] border border-white/10 rounded-2xl p-6 transition-all duration-300 ${color}`}
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <Icon className={`w-6 h-6 ${iconColor}`} />
+                                    <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                                </div>
+                                <h3 className="font-semibold text-white mb-1">{label}</h3>
+                                <p className="text-sm text-slate-500">{handle}</p>
+                            </a>
+                        ))}
+                    </div>
+
+                    <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {[
+                            { icon: MapPin, title: 'Ubicación', desc: 'Av. Siempre Viva 123, Buenos Aires' },
+                            { icon: Clock, title: 'Horarios', desc: 'Lun a Dom · 11:00 a 23:00 hs' },
+                            { icon: Phone, title: 'Pedidos', desc: '+54 11 1234-5678' },
+                        ].map(({ icon: Icon, title, desc }) => (
+                            <div key={title} className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 flex items-start gap-4">
+                                <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl shrink-0">
+                                    <Icon className="w-5 h-5 text-amber-400" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-white text-sm mb-1">{title}</h4>
+                                    <p className="text-sm text-slate-500">{desc}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
                 <footer className="relative z-10 border-t border-white/5 bg-black/40 py-8 text-center text-xs text-slate-600">
-                    © {new Date().getFullYear()} Empanadas. Todos los derechos reservados.
+                    <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <span className="text-sm font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                            Empandas
+                        </span>
+                        <p>© {new Date().getFullYear()} Empandas. Todos los derechos reservados.</p>
+                        <div className="flex items-center gap-4">
+                            <a href="#nosotros" className="hover:text-white transition-colors">Nosotros</a>
+                            <a href="#redes" className="hover:text-white transition-colors">Redes</a>
+                            <a href="#menu" className="hover:text-white transition-colors">Carta</a>
+                        </div>
+                    </div>
                 </footer>
             </div>
 
