@@ -1,0 +1,13 @@
+# Reglas de desarrollo - Empanadas App
+
+## Stack Tecnológico
+- Backend: Laravel 11, PHP 8.3+, Eloquent ORM, Spatie Permissions
+- Frontend: React, Inertia.js, Tailwind CSS, Lucide Icons
+- Entorno local: Laravel Herd en Windows
+
+## Buenas Prácticas y Estilo
+1. Usar siempre sintaxis corta de PHP y tipos estrictos donde sea posible.
+2. En React, preferir componentes funcionales con TypeScript e Inertia hooks (`useForm`, `usePage`, `router`).
+3. Estilizado exclusivamente con Tailwind CSS (mantener la estética dark modo / neón con bordes sutiles `border-white/10` y acentos `amber-500`).
+4. Al modificar un archivo, muestra solo los cambios necesarios o aplica el edit directamente sin borrar comentarios ni código no relacionado.
+5. NO ejecutar comandos destructivos de base de datos (`migrate:fresh`) sin confirmar explícitamente.
