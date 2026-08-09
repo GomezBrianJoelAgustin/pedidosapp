@@ -104,8 +104,8 @@ export default function Welcome({ auth, menu = [] , mercadopagoPublicKey  }: Pro
         e.preventDefault();
 
         if (data.items.length === 0) {
-return;
-}
+            return;
+        }
 
         post(route('public.orders.store'), {
             onSuccess: () => {
@@ -124,8 +124,8 @@ return;
 
         loadMercadoPagoSdk().then(() => {
             if (cancelled || !brickContainerRef.current) {
-return;
-}, [data.payment_method, guestEmail, data.total_price, mercadopagoPublicKey]);
+                return;
+            }
 
             const mp = new (window as any).MercadoPago(mercadopagoPublicKey, { locale: 'es-AR' });
             const bricksBuilder = mp.bricks();
@@ -242,6 +242,7 @@ return;
         return () => {
             cancelled = true;
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data.payment_method, guestEmail, data.total_price, mercadopagoPublicKey]);
 
     return (

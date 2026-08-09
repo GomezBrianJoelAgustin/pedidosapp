@@ -49,7 +49,6 @@ interface PageProps {
 }
 
 export default function OrdersIndex({ orders }: PageProps) {
-    const orderList = Array.isArray(orders) ? orders : orders?.data || [];
 
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
