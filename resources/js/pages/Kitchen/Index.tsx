@@ -97,6 +97,8 @@ export default function KitchenIndex({ orders }: PageProps) {
 
     const updateStatus = (orderId: number, status: 'preparing' | 'ready') => {
         router.put(route('kitchen.orders.update', orderId), { status }, {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 if (selectedOrder?.id === orderId) {
                     setSelectedOrder({ ...selectedOrder, status });
@@ -212,7 +214,7 @@ export default function KitchenIndex({ orders }: PageProps) {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {filteredOrders.map((order) => {
-                            const badge = statusBadge[order.status] || statusBadge['pending'];
+                            const badge = statusBadge[order.status] || statusBadge['awaiting_approval'];
                             return (
                                 <div key={order.id} className="bg-white dark:bg-white/[0.03] hover:dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-3xl p-5 sm:p-6 shadow-sm dark:shadow-none transition-all hover:-translate-y-1 hover:shadow-md flex flex-col justify-between group">
                                     <div>

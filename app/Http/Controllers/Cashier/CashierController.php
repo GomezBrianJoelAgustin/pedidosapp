@@ -42,6 +42,12 @@ class CashierController extends Controller
             ->get()
             ->makeHidden(['pin']);
 
+        $rejectedOrders = Order::with(['items.product', 'user', 'delivery'])
+            ->where('status', 'rejected')
+            ->latest()
+            ->get()
+            ->makeHidden(['pin']);
+
         $deliveryUsers = User::role('delivery')->get(['id', 'name', 'email']);
 
         return Inertia::render('Cashier/Index', [
@@ -49,6 +55,7 @@ class CashierController extends Controller
             'pendingAssignment' => $pendingAssignment,
             'pendingCashPayment' => $pendingCashPayment,
             'recentOrders' => $recentOrders,
+            'rejectedOrders' => $rejectedOrders,
             'deliveryUsers' => $deliveryUsers,
         ]);
     }

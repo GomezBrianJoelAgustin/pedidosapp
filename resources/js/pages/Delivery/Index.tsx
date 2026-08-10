@@ -107,6 +107,8 @@ export default function DeliveryIndex({ orders }: PageProps) {
         if (!selectedOrder) return;
 
         postPin(route('delivery.orders.validate-pin', selectedOrder.id), {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 setModalPin(false);
                 resetPin();

@@ -56,10 +56,11 @@ interface PageProps {
     pendingAssignment: Order[];
     pendingCashPayment: Order[];
     recentOrders: Order[];
+    rejectedOrders: Order[];
     deliveryUsers: DeliveryUser[];
 }
 
-export default function CashierIndex({ awaitingApproval, pendingAssignment, pendingCashPayment, recentOrders, deliveryUsers }: PageProps) {
+export default function CashierIndex({ awaitingApproval, pendingAssignment, pendingCashPayment, recentOrders, rejectedOrders, deliveryUsers }: PageProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [modalDetail, setModalDetail] = useState(false);
@@ -78,8 +79,18 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
         },
     });
 
+    const { data: assignData, setData: setAssignData, post: postAssign, processing: assignProcessing, reset: resetAssign } = useForm({
+        delivery_id: '',
+    });
+
+    const { data: cashData, setData: setCashData, post: postCash, processing: cashProcessing, reset: resetCash } = useForm({
+        payment_status: 'paid',
+    });
+
     const handleApprove = (order: Order) => {
         router.post(route('cashier.orders.approve', order.id), {}, {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 setSelectedOrder(null);
             },
@@ -93,6 +104,8 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
         router.post(route('cashier.orders.reject', selectedOrder.id), {
             rejection_reason: rejectReason,
         }, {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 setModalReject(false);
                 setRejectReason('');
@@ -122,6 +135,8 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
         if (!selectedOrder) return;
 
         postAssign(route('cashier.orders.assign-delivery', selectedOrder.id), {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 setModalAssign(false);
                 resetAssign();
@@ -134,6 +149,8 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
         if (!selectedOrder) return;
 
         postCash(route('cashier.orders.mark-cash-paid', selectedOrder.id), {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 setModalCash(false);
                 resetCash();
@@ -254,7 +271,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                         </div>
 
                                         <div className="flex flex-wrap gap-2 mb-4">
-                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['pending'].className}`}>
+                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
                                                 {statusBadge[order.status]?.label || order.status}
                                             </span>
                                             <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
@@ -349,7 +366,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                         </div>
 
                                         <div className="flex flex-wrap gap-2 mb-4">
-                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['pending'].className}`}>
+                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
                                                 {statusBadge[order.status]?.label || order.status}
                                             </span>
                                             <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
@@ -373,15 +390,15 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                     <div className="flex items-center gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
                                         <button
                                             onClick={() => { setSelectedOrder(order); setModalDetail(true); }}
-                                            className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            className="flex-1 py-2.5 px-3 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                         >
                                             <Eye className="w-4 h-4" /> Detalle
                                         </button>
                                         <button
                                             onClick={() => handleOpenAssign(order)}
-                                            className="flex-1 py-2.5 px-3 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                         >
-                                            <Truck className="w-4 h-4" /> Asignar Cadete
+                                            <Truck className="w-4 h-4" /> Asignar
                                         </button>
                                     </div>
                                 </div>
@@ -438,7 +455,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                         </div>
 
                                         <div className="flex flex-wrap gap-2 mb-4">
-                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['pending'].className}`}>
+                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
                                                 {statusBadge[order.status]?.label || order.status}
                                             </span>
                                             <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
@@ -462,7 +479,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                     <div className="flex items-center gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
                                         <button
                                             onClick={() => { setSelectedOrder(order); setModalDetail(true); }}
-                                            className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            className="flex-1 py-2.5 px-3 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                         >
                                             <Eye className="w-4 h-4" /> Detalle
                                         </button>
@@ -492,7 +509,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {filteredRecentOrders.map((order) => {
-                                const badge = statusBadge[order.status] || statusBadge['pending'];
+                                const badge = statusBadge[order.status] || statusBadge['awaiting_approval'];
                                 const isPendingAssignment = order.delivery_type === 'delivery' && !order.delivery_id;
                                 const isPendingCash = order.payment_method === 'effective' && order.payment_status === 'pending';
 
@@ -571,7 +588,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                             >
                                                 <Eye className="w-4 h-4" /> Detalle
                                             </button>
-                                            {isPendingAssignment && (
+                                            {isPendingAssignment && order.status !== 'rejected' && (
                                                 <button
                                                     onClick={() => handleOpenAssign(order)}
                                                     className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
@@ -579,7 +596,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                                     <Truck className="w-4 h-4" /> Asignar
                                                 </button>
                                             )}
-                                            {isPendingCash && (
+                                            {isPendingCash && order.status !== 'rejected' && (
                                                 <button
                                                     onClick={() => handleOpenCash(order)}
                                                     className="flex-1 py-2.5 px-3 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-600 text-amber-600 dark:text-amber-400 hover:text-white border border-amber-200 dark:border-amber-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
@@ -594,6 +611,85 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                         </div>
                     )}
                 </div>
+
+                {rejectedOrders.length > 0 && (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <X className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Pedidos Rechazados</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            {rejectedOrders.map((order) => (
+                                <div key={`rejected-${order.id}`} className="bg-rose-50/50 dark:bg-rose-500/5 border border-rose-200/60 dark:border-rose-500/10 hover:border-rose-300 dark:hover:border-rose-500/20 rounded-3xl p-5 sm:p-6 shadow-sm dark:shadow-none transition-all flex flex-col justify-between">
+                                    <div>
+                                        <div className="flex items-center justify-between border-b border-rose-100 dark:border-white/10 pb-4 mb-4">
+                                            <div>
+                                                <span className="text-xs font-semibold text-rose-500 dark:text-rose-400 uppercase tracking-wider">Pedido</span>
+                                                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">#{order.id}</h3>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total</span>
+                                                <span className="text-lg font-black text-rose-600 dark:text-rose-400">{formatMoney(order.total_price)}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-4 bg-white/60 dark:bg-white/5 p-3 rounded-2xl border border-rose-200/40 dark:border-rose-500/10">
+                                            {order.user ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="p-1 bg-amber-500/10 text-amber-500 rounded-lg shrink-0">
+                                                        <UserCheck className="w-4 h-4" />
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{order.user.name}</p>
+                                                        <span className="text-[10px] uppercase tracking-wider font-bold text-amber-500">Cliente Registrado</span>
+                                                    </div>
+                                                </div>
+                                            ) : order.guest_name ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="p-1 bg-purple-500/10 text-purple-400 rounded-lg shrink-0">
+                                                        <UserCheck className="w-4 h-4" />
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{order.guest_name}</p>
+                                                        <span className="text-[10px] uppercase tracking-wider font-bold text-purple-400">Invitado</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-slate-400 text-sm">Sin datos de cliente</span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
+                                                {statusBadge[order.status]?.label || order.status}
+                                            </span>
+                                        </div>
+
+                                        <div className="text-xs text-slate-500 dark:text-slate-400 space-y-2 mb-6">
+                                            <p className="flex items-center gap-2">
+                                                <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                                {order.delivery_address || 'Retiro en Local'}
+                                            </p>
+                                            <p className="flex items-center gap-2">
+                                                <Package className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                                {order.items?.length || 0} ítem(s)
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-4 border-t border-rose-100 dark:border-white/10">
+                                        <button
+                                            onClick={() => { setSelectedOrder(order); setModalDetail(true); }}
+                                            className="w-full py-2.5 px-3 bg-white dark:bg-white/5 hover:bg-rose-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-rose-200 dark:border-white/10 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                        >
+                                            <Eye className="w-4 h-4" /> Ver Detalle
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {modalDetail && selectedOrder && (
