@@ -31,6 +31,7 @@ class PublicOrderController extends Controller
                 'guest_phone' => $validated['guest_phone'],
                 'guest_email' => $validated['guest_email'] ?? null,
                 'status' => 'pending',
+                'pin' => str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT),
                 'delivery_type' => $validated['delivery_type'],
                 'delivery_address' => $validated['delivery_address'] ?? null,
                 'payment_method' => $validated['payment_method'],
