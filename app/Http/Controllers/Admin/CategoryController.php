@@ -12,6 +12,16 @@ use App\Http\Requests\Admin\UpdateCategoryRequest;
 
 class CategoryController extends Controller
 {
+
+    public static function getActiveWithActiveProducts()
+    {
+        return static::where('active', true)
+            ->with(['products' => function ($query) {
+                $query->where('active', true);
+            }])
+            ->get();
+    }
+
     public function index()
     {
         $categories = Category::with('products')->latest()->get();
