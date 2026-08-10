@@ -19,6 +19,7 @@ interface Order {
     status: string;
     payment_status: string;
     total_price: number;
+    pin: string;
     created_at: string;
     items: OrderItem[];
 }
@@ -43,9 +44,9 @@ export default function ClientDashboard() {
     const getStatusBadge = (status: string) => {
         const statusMap: Record<string, { label: string; class: string }> = {
             pending: { label: 'Pendiente', class: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-            in_progress: { label: 'En Preparación', class: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-            completed: { label: 'Completado', class: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-            cancelled: { label: 'Cancelado', class: 'bg-rose-500/10 text-rose-500 border-rose-500/20' },
+            preparing: { label: 'En Preparación', class: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
+            ready: { label: 'Listo', class: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+            delivered: { label: 'Entregado', class: 'bg-slate-500/10 text-slate-500 border-slate-500/20' },
         };
 
         const config = statusMap[status] || {
@@ -168,6 +169,20 @@ export default function ClientDashboard() {
                                             </div>
                                         ))}
                                     </div>
+
+                                    {order.pin && (
+                                        <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl">
+                                            <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">
+                                                PIN de entrega
+                                            </p>
+                                            <p className="text-2xl font-black text-amber-700 dark:text-amber-300 tracking-[0.2em] text-center">
+                                                {order.pin}
+                                            </p>
+                                            <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 text-center">
+                                                Dictá este código al cadete al momento de la entrega.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="pt-4 border-t border-slate-100 dark:border-white/10 flex justify-between items-center">
