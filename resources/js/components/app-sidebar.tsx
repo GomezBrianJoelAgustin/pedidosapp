@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, ChartColumnStacked, Barcode, BadgeDollarSign, UtensilsCrossed } from 'lucide-react';
+import { LayoutGrid, ChartColumnStacked, Barcode, BadgeDollarSign, UtensilsCrossed, ChefHat, Truck, Wallet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -38,6 +38,30 @@ const adminNavItems: NavItem[] = [
     },
 ];
 
+const kitchenNavItems: NavItem[] = [
+    {
+        title: 'Cocina',
+        href: '/cocina',
+        icon: ChefHat,
+    },
+];
+
+const deliveryNavItems: NavItem[] = [
+    {
+        title: 'Cadetes',
+        href: '/cadetes',
+        icon: Truck,
+    },
+];
+
+const cashierNavItems: NavItem[] = [
+    {
+        title: 'Caja',
+        href: '/caja',
+        icon: Wallet,
+    },
+];
+
 const clientNavItems: NavItem[] = [
     {
         title: 'Mis Pedidos',
@@ -57,8 +81,26 @@ export function AppSidebar() {
     const { auth } = usePage<{ auth: Auth }>().props;
 
     const isClient = auth.user?.roles?.some((r: any) => r.name === 'client');
-    const mainNavItems = isClient ? clientNavItems : adminNavItems;
-    const logoHref = isClient ? '/mi-cuenta/dashboard' : '/admin/orders';
+    const isChef = auth.user?.roles?.some((r: any) => r.name === 'chef');
+    const isDelivery = auth.user?.roles?.some((r: any) => r.name === 'delivery');
+    const isCashier = auth.user?.roles?.some((r: any) => r.name === 'cashier');
+
+    let mainNavItems: NavItem[] = adminNavItems;
+    let logoHref = '/admin/orders';
+
+    if (isClient) {
+        mainNavItems = clientNavItems;
+        logoHref = '/mi-cuenta/dashboard';
+    } else if (isChef) {
+        mainNavItems = kitchenNavItems;
+        logoHref = '/cocina';
+    } else if (isDelivery) {
+        mainNavItems = deliveryNavItems;
+        logoHref = '/cadetes';
+    } else if (isCashier) {
+        mainNavItems = cashierNavItems;
+        logoHref = '/caja';
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">

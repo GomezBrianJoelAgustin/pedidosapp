@@ -54,6 +54,7 @@ class MenuController extends Controller
             $order = Order::create([
                 'user_id' => $user->id,
                 'status' => 'pending',
+                'pin' => str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT),
                 'payment_status' => ($validated['payment_gateway_status'] ?? 'pending') === 'approved' ? 'paid' : 'pending',
                 'payment_method' => $validated['payment_method'],
                 'delivery_type' => $validated['delivery_type'],

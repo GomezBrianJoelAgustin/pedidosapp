@@ -11,12 +11,24 @@ use App\Http\Controllers\MercadoPagoController;
 use App\Http\Controllers\MenuController as PublicMenuController;
 use App\Http\Controllers\Client\MenuController as ClientMenuController;
 use App\Http\Controllers\Client\DashboardController as ClientDashboardController;
+use App\Http\Controllers\Kitchen\KitchenController;
+use App\Http\Controllers\Delivery\DeliveryController;
+use App\Http\Controllers\Cashier\CashierController;
 
 Route::get('/', [PublicMenuController::class, 'index'])->name('home');
 
 Route::get('/dashboard', function () {
     if (auth()->user()?->hasRole('client')) {
         return redirect()->route('client.dashboard');
+    }
+    if (auth()->user()?->hasRole('chef')) {
+        return redirect()->route('kitchen.dashboard');
+    }
+    if (auth()->user()?->hasRole('delivery')) {
+        return redirect()->route('delivery.dashboard');
+    }
+    if (auth()->user()?->hasRole('cashier')) {
+        return redirect()->route('cashier.dashboard');
     }
     return redirect()->route('admin.orders');
 })->middleware(['auth'])->name('dashboard');
@@ -45,6 +57,22 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders');
     Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+});
+
+Route::middleware(['auth', 'role:chef'])->prefix('cocina')->name('kitchen.')->group(function () {
+    Route::get('/', [KitchenController::class, 'index'])->name('dashboard');
+    Route::put('/orders/{order}', [KitchenController::class, 'update'])->name('orders.update');
+});
+
+Route::middleware(['auth', 'role:delivery'])->prefix('cadetes')->name('delivery.')->group(function () {
+    Route::get('/', [DeliveryController::class, 'index'])->name('dashboard');
+    Route::post('/orders/{order}/validate-pin', [DeliveryController::class, 'validatePin'])->name('orders.validate-pin');
+});
+
+Route::middleware(['auth', 'role:cashier'])->prefix('caja')->name('cashier.')->group(function () {
+    Route::get('/', [CashierController::class, 'index'])->name('dashboard');
+    Route::post('/orders/{order}/assign-delivery', [CashierController::class, 'assignDelivery'])->name('orders.assign-delivery');
+    Route::post('/orders/{order}/mark-cash-paid', [CashierController::class, 'markCashPaid'])->name('orders.mark-cash-paid');
 });
 
 Route::post('/pedido', [PublicOrderController::class, 'store'])->name('public.orders.store');

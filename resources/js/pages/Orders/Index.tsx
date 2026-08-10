@@ -214,9 +214,9 @@ export default function OrdersIndex({ orders }: PageProps) {
                         >
                             <option value="all" className="dark:bg-[#0f0f11]">Todos los Estados</option>
                             <option value="pending" className="dark:bg-[#0f0f11]">Pendiente</option>
-                            <option value="processing" className="dark:bg-[#0f0f11]">En Proceso</option>
-                            <option value="completed" className="dark:bg-[#0f0f11]">Completado</option>
-                            <option value="cancelled" className="dark:bg-[#0f0f11]">Cancelado</option>
+                            <option value="preparing" className="dark:bg-[#0f0f11]">En Preparación</option>
+                            <option value="ready" className="dark:bg-[#0f0f11]">Listo</option>
+                            <option value="delivered" className="dark:bg-[#0f0f11]">Entregado</option>
                         </select>
                     </div>
                 </div>
@@ -252,7 +252,8 @@ export default function OrdersIndex({ orders }: PageProps) {
 
                                     <div className="flex flex-wrap gap-2 mb-4">
                                         <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${
-                                            order.status === 'completed' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' :
+                                            order.status === 'ready' || order.status === 'delivered' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' :
+                                            order.status === 'preparing' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' :
                                             order.status === 'pending' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' : 
                                             'bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20'
                                         }`}>
@@ -404,9 +405,9 @@ export default function OrdersIndex({ orders }: PageProps) {
                                     className="w-full rounded-2xl bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:border-amber-500 focus:ring-amber-500/30"
                                 >
                                     <option value="pending" className="dark:bg-[#0f0f11]">Pendiente</option>
-                                    <option value="processing" className="dark:bg-[#0f0f11]">En Proceso</option>
-                                    <option value="completed" className="dark:bg-[#0f0f11]">Completado</option>
-                                    <option value="cancelled" className="dark:bg-[#0f0f11]">Cancelado</option>
+                                    <option value="preparing" className="dark:bg-[#0f0f11]">En Preparación</option>
+                                    <option value="ready" className="dark:bg-[#0f0f11]">Listo</option>
+                                    <option value="delivered" className="dark:bg-[#0f0f11]">Entregado</option>
                                 </select>
                             </div>
 
