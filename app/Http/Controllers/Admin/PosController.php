@@ -32,6 +32,7 @@ class PosController extends Controller
                 'user_id' => $userId,
                 'delivery_id' => $userId, 
                 'status' => 'pending',
+                'pin' => str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT),
                 'delivery_type' => $validated['delivery_type'] ?? 'takeaway', 
                 'delivery_address' => $validated['delivery_address'] ?? null,
                 'payment_method' => $validated['payment_method'],
