@@ -1,12 +1,11 @@
 import { Link, useForm, router } from '@inertiajs/react';
 import { 
     PlusCircle, Calendar, CreditCard, 
-    Eye, Edit3, Trash2, X, MapPin, User, ShieldAlert, Package, ShoppingBag,
+    Eye, Edit3, Trash2, X, MapPin, User, UserCheck, ShieldAlert, Package, ShoppingBag,
     Search, Filter 
 } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 import FlashAlert from '@/components/flash-alert';
-
 
 interface Product {
     id: number;
@@ -29,7 +28,7 @@ interface UserRelation {
 
 interface Order {
     id: number;
-    user_id: number;
+    user_id?: number | null;
     delivery_id: number;
     status: string;
     delivery_type: string;
@@ -38,10 +37,13 @@ interface Order {
     payment_status: string;
     payment_gateway_id: string | null;
     total_price: number;
+    guest_name?: string | null;
+    guest_phone?: string | null;
+    guest_email?: string | null;
     created_at: string;
     items?: OrderItem[];
-    user?: UserRelation;
-    delivery?: UserRelation;
+    user?: UserRelation | null;
+    delivery?: UserRelation | null;
 }
 
 interface PageProps {
@@ -49,8 +51,6 @@ interface PageProps {
 }
 
 export default function OrdersIndex({ orders }: PageProps) {
-    const orderList = Array.isArray(orders) ? orders : orders?.data || [];
-
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
@@ -59,7 +59,7 @@ export default function OrdersIndex({ orders }: PageProps) {
     const [modalEdit, setModalEdit] = useState(false);
     const [modalDelete, setModalDelete] = useState(false);
 
-    const { data, setData, put, processing, delete: destroy, processing: deleting } = useForm({
+    const { data, setData, put, processing } = useForm({
         status: '',
         payment_status: '',
         delivery_type: '',
@@ -70,22 +70,60 @@ export default function OrdersIndex({ orders }: PageProps) {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
     };
 
+    // Función inteligente para renderizar el cliente según su tipo
+    const renderCustomerInfo = (order: Order) => {
+        if (order.user) {
+            return (
+                <div className="flex items-center gap-2">
+                    <span className="p-1 bg-amber-500/10 text-amber-500 rounded-lg shrink-0">
+                        <UserCheck className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0">
+                        <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{order.user.name}</p>
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-amber-500">Cliente Registrado</span>
+                    </div>
+                </div>
+            );
+        }
+
+        if (order.guest_name) {
+            return (
+                <div className="flex items-center gap-2">
+                    <span className="p-1 bg-purple-500/10 text-purple-400 rounded-lg shrink-0">
+                        <User className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0">
+                        <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{order.guest_name}</p>
+                        <div className="flex items-center gap-1.5 text-[10px] text-purple-400 font-bold uppercase tracking-wider">
+                            <span>Invitado</span>
+                            {order.guest_phone && <span>• {order.guest_phone}</span>}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return <span className="text-slate-400">Sin datos de cliente</span>;
+    };
+
     const filteredOrders = useMemo(() => {
+        const orderList = Array.isArray(orders) ? orders : orders?.data || [];
+
         return orderList.filter((order) => {
             const matchesStatus = statusFilter === 'all' || order.status.toLowerCase() === statusFilter.toLowerCase();
-
             const term = searchTerm.toLowerCase().trim();
             const matchesSearch = 
                 term === '' ||
                 order.id.toString().includes(term) ||
                 order.user?.name?.toLowerCase().includes(term) ||
+                order.guest_name?.toLowerCase().includes(term) ||
+                order.guest_phone?.toLowerCase().includes(term) ||
                 order.delivery_address?.toLowerCase().includes(term) ||
                 order.payment_method?.toLowerCase().includes(term);
 
             return matchesStatus && matchesSearch;
         });
-    }, [orderList, searchTerm, statusFilter]);
-
+    }, [orders, searchTerm, statusFilter]);
 
     const handleOpenShow = (order: Order) => {
         setSelectedOrder(order);
@@ -154,7 +192,7 @@ export default function OrdersIndex({ orders }: PageProps) {
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Buscar por ID (#123), cliente, dirección..."
+                            placeholder="Buscar por ID (#123), cliente, invitado, dirección..."
                             className="w-full pl-11 pr-10 py-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-amber-500 focus:ring-amber-500/30 transition-all shadow-sm"
                         />
                         {searchTerm && (
@@ -205,6 +243,11 @@ export default function OrdersIndex({ orders }: PageProps) {
                                             <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total</span>
                                             <span className="text-lg font-black text-amber-600 dark:text-amber-400">{formatMoney(order.total_price)}</span>
                                         </div>
+                                    </div>
+
+                                    {/* Mostrar cliente en tarjeta */}
+                                    <div className="mb-4 bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-slate-200/60 dark:border-white/5">
+                                        {renderCustomerInfo(order)}
                                     </div>
 
                                     <div className="flex flex-wrap gap-2 mb-4">
@@ -262,6 +305,7 @@ export default function OrdersIndex({ orders }: PageProps) {
                 )}
             </div>
 
+            {/* Modal de Detalle */}
             {modalShow && selectedOrder && (
                 <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <div className="bg-white dark:bg-[#0f0f11] border-t sm:border border-slate-200 dark:border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl overflow-hidden max-h-[92vh] flex flex-col">
@@ -278,15 +322,13 @@ export default function OrdersIndex({ orders }: PageProps) {
                         <div className="p-5 sm:p-6 space-y-6 overflow-y-auto">
                             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 text-sm bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200/60 dark:border-white/10">
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Cliente</p>
-                                    <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-1">
-                                        <User className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {selectedOrder.user?.name || `ID: ${selectedOrder.user_id}`}
-                                    </p>
+                                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase mb-1">Cliente / Comprador</p>
+                                    {renderCustomerInfo(selectedOrder)}
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Repartidor</p>
+                                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase mb-1">Repartidor</p>
                                     <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-1">
-                                        <User className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {selectedOrder.delivery?.name || `ID: ${selectedOrder.delivery_id}`}
+                                        <User className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {selectedOrder.delivery?.name || 'Sin asignar'}
                                     </p>
                                 </div>
                                 <div>
@@ -342,6 +384,7 @@ export default function OrdersIndex({ orders }: PageProps) {
                 </div>
             )}
 
+            {/* Modal de Edición */}
             {modalEdit && selectedOrder && (
                 <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <div className="bg-white dark:bg-[#0f0f11] border-t sm:border border-slate-200 dark:border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md overflow-hidden max-h-[92vh] flex flex-col">
@@ -426,6 +469,7 @@ export default function OrdersIndex({ orders }: PageProps) {
                 </div>
             )}
 
+            {/* Modal de Eliminación */}
             {modalDelete && selectedOrder && (
                 <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <div className="bg-white dark:bg-[#0f0f11] border-t sm:border border-slate-200 dark:border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 space-y-4">

@@ -4,7 +4,9 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 export default function FlashAlert() {
     const { flash } = usePage().props as any;
 
-    if (!flash?.success && !flash?.error) return null;
+    if (!flash?.success && !flash?.error) {
+return null;
+}
 
     return (
         <>

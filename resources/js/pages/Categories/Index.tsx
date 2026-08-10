@@ -1,6 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Layers, Tag, Eye, PackageX, ImageIcon, Package, ShieldAlert, X } from 'lucide-react';
-import React, { useState } from 'react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Layers, Tag, Eye, PackageX, ImageIcon, Package, ShieldAlert } from 'lucide-react';import React, { useState } from 'react';
 import FlashAlert from '@/components/flash-alert';
 
 interface Category {
@@ -80,6 +79,7 @@ export default function Index({ categories = [], products = [] }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (editingCategory) {
             put(route('admin.categories.update', editingCategory.id), {
                 onSuccess: () => closeModal(),
@@ -92,7 +92,10 @@ export default function Index({ categories = [], products = [] }: Props) {
     };
 
     const handleDelete = () => {
-        if (!deletingCategory) return;
+        if (!deletingCategory) {
+return;
+}
+
         destroy(route('admin.categories.destroy', deletingCategory.id), {
             onSuccess: () => setDeletingCategory(null),
         });

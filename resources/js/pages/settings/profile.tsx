@@ -34,7 +34,7 @@ export default function Profile({
                 <Heading
                     variant="small"
                     title="Profile"
-                    description="Update your name and email address"
+                    description="Update your profile details, contact information, and delivery address"
                 />
 
                 <Form
@@ -82,6 +82,46 @@ export default function Profile({
                                 <InputError
                                     className="mt-2"
                                     message={errors.email}
+                                />
+                            </div>
+
+                            {/* Teléfono / WhatsApp */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone">Phone / WhatsApp</Label>
+
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    className="mt-1 block w-full"
+                                    defaultValue={auth.user.phone ?? ''}
+                                    name="phone"
+                                    autoComplete="tel"
+                                    placeholder="e.g. +54 3446 123456"
+                                />
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.phone}
+                                />
+                            </div>
+
+                            {/* Dirección de entrega predeterminada */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="address">Default delivery address</Label>
+
+                                <Input
+                                    id="address"
+                                    type="text"
+                                    className="mt-1 block w-full"
+                                    defaultValue={auth.user.address ?? ''}
+                                    name="address"
+                                    autoComplete="street-address"
+                                    placeholder="e.g. Urquiza 450, Depto 2B"
+                                />
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.address}
                                 />
                             </div>
 

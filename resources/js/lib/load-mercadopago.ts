@@ -1,9 +1,17 @@
 let sdkPromise: Promise<void> | null = null;
 
 export function loadMercadoPagoSdk(): Promise<void> {
-    if (typeof window === 'undefined') return Promise.resolve();
-    if ((window as any).MercadoPago) return Promise.resolve();
-    if (sdkPromise) return sdkPromise;
+    if (typeof window === 'undefined') {
+return Promise.resolve();
+}
+
+    if ((window as any).MercadoPago) {
+return Promise.resolve();
+}
+
+    if (sdkPromise) {
+return sdkPromise;
+}
 
     sdkPromise = new Promise((resolve, reject) => {
         const script = document.createElement('script');

@@ -1,13 +1,16 @@
-## Descripción
-<!-- Breve resumen de los cambios o la funcionalidad agregada -->
+## Description
+<!-- Brief summary of the changes or feature added -->
 
-## 🛠️ Cambios introducidos
-- [ ] Backend (Controladores, Modelos, Migraciones, Rutas)
-- [ ] Frontend (Componentes React, Inertia, Tailwind)
-- [ ] Configuración / Dependencias (`.env`, `composer`, `npm`)
+## Changes Introduced
+- [ ] Backend (Controllers, Models, Migrations, Routes)
+- [ ] Frontend (React, Inertia, Tailwind Components)
+- [ ] Configuration / Dependencies (`.env`, `composer`, `npm`)
 
-## Pasos para verificar/probar
+## Steps to Verify/Test
 1. 
 
-## Evidencia Visual (Opcional)
-<!-- Arrastrá y soltá capturas de pantalla o GIFs si hubo cambios en la interfaz -->
+## Visual Evidence 
+
+| Desktop View | Mobile View |
+| :---: | :---: |
+| <!-- Drag and drop desktop screenshots here --> | <!-- Drag and drop mobile screenshots here --> |

@@ -1,22 +1,34 @@
 <?php
 
+use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MenuController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\PublicOrderController;
 use App\Http\Controllers\MercadoPagoController;
+use App\Http\Controllers\MenuController as PublicMenuController;
+use App\Http\Controllers\Client\MenuController as ClientMenuController;
+use App\Http\Controllers\Client\DashboardController as ClientDashboardController;
 
-Route::get('/', [MenuController::class, 'index'])->name('home');
+Route::get('/', [PublicMenuController::class, 'index'])->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+Route::get('/dashboard', function () {
+    if (auth()->user()?->hasRole('client')) {
+        return redirect()->route('client.dashboard');
+    }
+    return redirect()->route('admin.orders');
+})->middleware(['auth'])->name('dashboard');
+
+Route::middleware(['auth', 'role:client'])->prefix('mi-cuenta')->name('client.')->group(function () {
+    Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/menu', [ClientMenuController::class, 'index'])->name('menu');
+    Route::post('/pedido', [ClientMenuController::class, 'store'])->name('order.store');
 });
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-
+    Route::get('/dashboard', [OrderController::class, 'index'])->name('dashboard');
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');

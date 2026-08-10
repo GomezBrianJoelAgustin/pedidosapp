@@ -10,10 +10,8 @@ use App\Http\Requests\Admin\UpdateOrderRequest;
 
 class OrderController extends Controller
 {
-    
     public function index()
     {
-
         $orders = Order::with(['items.product', 'user', 'delivery'])->latest()->get();
 
         return Inertia::render('Orders/Index', [

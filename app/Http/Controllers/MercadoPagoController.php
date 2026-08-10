@@ -23,7 +23,7 @@ class MercadoPagoController extends Controller
             'issuer_id' => 'nullable|string',
             'installments' => 'required|integer',
             'transaction_amount' => 'required|numeric',
-            'payer.email' => 'required|email',
+            'payer.email' => 'nullable|string',
             'payer.identification.type' => 'nullable|string',
             'payer.identification.number' => 'nullable|string',
         ]);
@@ -60,16 +60,10 @@ class MercadoPagoController extends Controller
             ]);
         } catch (MPApiException $e) {
             $apiResponse = $e->getApiResponse();
-
-            Log::error('Error de la API de Mercado Pago', [
-                'status_code' => $apiResponse?->getStatusCode(),
-                'content' => $apiResponse?->getContent(),
-            ]);
-
+            
             return response()->json([
-                'status' => 'rejected',
-                'status_detail' => 'api_error',
-                'error' => $apiResponse?->getContent(),
+                'status' => 'error_mp',
+                'message' => $apiResponse?->getContent() ?? $e->getMessage(),
             ], 500);
         } catch (\Exception $e) {
             Log::error('Error al procesar pago con Mercado Pago', [
@@ -78,9 +72,10 @@ class MercadoPagoController extends Controller
             ]);
 
             return response()->json([
-                'status' => 'rejected',
-                'status_detail' => 'internal_error',
-                'error' => $e->getMessage(),
+                'status' => 'error_php',
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
             ], 500);
         }
     }
