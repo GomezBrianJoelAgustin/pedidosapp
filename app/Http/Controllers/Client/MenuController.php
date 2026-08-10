@@ -7,10 +7,12 @@ use App\Http\Requests\Client\StoreClientOrderRequest;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
+use App\Mail\OrderConfirmationMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Mail;
 
 class MenuController extends Controller
 {
@@ -53,7 +55,7 @@ class MenuController extends Controller
         DB::transaction(function () use ($validated, $user) {
             $order = Order::create([
                 'user_id' => $user->id,
-                'status' => 'pending',
+                'status' => 'awaiting_approval',
                 'pin' => str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT),
                 'payment_status' => ($validated['payment_gateway_status'] ?? 'pending') === 'approved' ? 'paid' : 'pending',
                 'payment_method' => $validated['payment_method'],
@@ -71,6 +73,8 @@ class MenuController extends Controller
                     'price' => $item['price'],
                 ]);
             }
+
+            Mail::to($user->email)->queue(new OrderConfirmationMail($order->load('items.product')));
         });
 
         return redirect()->route('client.dashboard')->with('success', '¡Pedido realizado con éxito!');

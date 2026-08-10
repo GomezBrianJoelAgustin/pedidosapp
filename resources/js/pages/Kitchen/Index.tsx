@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { ChefHat, Clock, Package, User, MapPin, CreditCard, Eye, CheckCircle, X, Filter, Search, ChevronRight } from 'lucide-react';
+import { ChefHat, Clock, Package, User, MapPin, CreditCard, Eye, CheckCircle, X, Filter, Search, ChevronRight, Bell } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
+import { usePolling } from '@/hooks/use-polling';
 
 interface Product {
     id: number;
@@ -47,12 +48,31 @@ interface PageProps {
 
 export default function KitchenIndex({ orders }: PageProps) {
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'preparing' | 'ready'>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'preparing' | 'ready'>('all');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [modalDetail, setModalDetail] = useState(false);
+    const [toast, setToast] = useState<string | null>(null);
 
     const orderList = useMemo(() => {
         return Array.isArray(orders) ? orders : orders?.data || [];
+    }, [orders]);
+
+    const { refresh } = usePolling({
+        interval: 5000,
+        enabled: true,
+        onNewOrder: () => {
+            setToast('¡Nuevo pedido recibido!');
+            setTimeout(() => setToast(null), 4000);
+        },
+    });
+
+    useEffect(() => {
+        if (!orders) return;
+        const list = Array.isArray(orders) ? orders : orders?.data || [];
+        if (list.length > orderList.length && orderList.length > 0) {
+            setToast('¡Nuevo pedido recibido!');
+            setTimeout(() => setToast(null), 4000);
+        }
     }, [orders]);
 
     const filteredOrders = useMemo(() => {
@@ -90,13 +110,15 @@ export default function KitchenIndex({ orders }: PageProps) {
     };
 
     const statusBadge: Record<string, { label: string; className: string }> = {
-        pending: { label: 'Pendiente', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
+        awaiting_approval: { label: 'Pendiente de Aprobación', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
+        approved: { label: 'Aprobado', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
         preparing: { label: 'En Preparación', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
         ready: { label: 'Listo', className: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' },
         delivered: { label: 'Entregado', className: 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-500/20' },
+        rejected: { label: 'Rechazado', className: 'bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' },
     };
 
-    const pendingCount = orderList.filter((o) => o.status === 'pending').length;
+    const pendingCount = orderList.filter((o) => o.status === 'approved').length;
     const preparingCount = orderList.filter((o) => o.status === 'preparing').length;
     const readyCount = orderList.filter((o) => o.status === 'ready').length;
 
@@ -104,6 +126,13 @@ export default function KitchenIndex({ orders }: PageProps) {
         <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-800 dark:text-white p-4 sm:p-6 font-sans transition-colors duration-200">
             <div className="max-w-7xl mx-auto space-y-6">
                 <FlashAlert />
+
+                {toast && (
+                    <div className="fixed top-4 right-4 z-50 bg-amber-500 text-white px-6 py-3 rounded-2xl shadow-lg shadow-amber-500/30 flex items-center gap-2 animate-bounce">
+                        <Bell className="w-5 h-5" />
+                        <span className="font-bold text-sm">{toast}</span>
+                    </div>
+                )}
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 dark:bg-white/[0.03] p-5 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-none">
                     <div>
@@ -168,7 +197,7 @@ export default function KitchenIndex({ orders }: PageProps) {
                             className="w-full pl-10 pr-8 py-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-800 dark:text-white focus:border-amber-500 focus:ring-amber-500/30 transition-all shadow-sm font-medium"
                         >
                             <option value="all" className="dark:bg-[#0f0f11]">Todos los Estados</option>
-                            <option value="pending" className="dark:bg-[#0f0f11]">Pendiente</option>
+                            <option value="approved" className="dark:bg-[#0f0f11]">Aprobado</option>
                             <option value="preparing" className="dark:bg-[#0f0f11]">En Preparación</option>
                             <option value="ready" className="dark:bg-[#0f0f11]">Listo</option>
                         </select>
@@ -225,9 +254,9 @@ export default function KitchenIndex({ orders }: PageProps) {
                                         </div>
 
                                         <div className="flex flex-wrap gap-2 mb-4">
-                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${badge.className}`}>
-                                                {badge.label}
-                                            </span>
+                                <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
+                                    {statusBadge[order.status]?.label || order.status}
+                                </span>
                                             <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
                                                 <CreditCard className="w-3.5 h-3.5" />
                                                 {order.payment_method} ({order.payment_status})
@@ -257,12 +286,12 @@ export default function KitchenIndex({ orders }: PageProps) {
                                         >
                                             <Eye className="w-4 h-4" /> Detalle
                                         </button>
-                                        {order.status === 'pending' && (
+                                        {order.status === 'approved' && (
                                             <button
                                                 onClick={() => updateStatus(order.id, 'preparing')}
                                                 className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                             >
-                                                <ChefHat className="w-4 h-4" /> Preparar
+                                                <ChefHat className="w-4 h-4" /> Aceptar
                                             </button>
                                         )}
                                         {order.status === 'preparing' && (
@@ -338,7 +367,8 @@ export default function KitchenIndex({ orders }: PageProps) {
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">PIN de Validación</p>
-                                    <p className="font-mono text-2xl font-black text-slate-900 dark:text-white mt-1 tracking-widest">{selectedOrder.pin || '----'}</p>
+                                    <p className="font-mono text-lg font-black text-slate-400 dark:text-slate-600 mt-1 tracking-widest">••••</p>
+                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Solicitá el PIN al cliente al momento de la entrega.</p>
                                 </div>
                             </div>
 

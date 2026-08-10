@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import {
     Truck, Package, User, MapPin, CreditCard,
-    Eye, CheckCircle, X, Filter, Search, Lock, ChevronRight
+    Eye, CheckCircle, X, Filter, Search, Lock, ChevronRight, Bell
 } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
+import { usePolling } from '@/hooks/use-polling';
 
 interface Product {
     id: number;
@@ -55,6 +56,7 @@ export default function DeliveryIndex({ orders }: PageProps) {
     const [modalDetail, setModalDetail] = useState(false);
     const [modalPin, setModalPin] = useState(false);
     const [pinError, setPinError] = useState<string | null>(null);
+    const [toast, setToast] = useState<string | null>(null);
 
     const { data: pinData, setData: setPinData, post: postPin, processing: pinProcessing, reset: resetPin } = useForm({
         pin: '',
@@ -63,6 +65,15 @@ export default function DeliveryIndex({ orders }: PageProps) {
     const orderList = useMemo(() => {
         return Array.isArray(orders) ? orders : orders?.data || [];
     }, [orders]);
+
+    const { refresh } = usePolling({
+        interval: 5000,
+        enabled: true,
+        onNewOrder: () => {
+            setToast('¡Nuevo pedido listo para entregar!');
+            setTimeout(() => setToast(null), 4000);
+        },
+    });
 
     const filteredOrders = useMemo(() => {
         return orderList.filter((order) => {
@@ -111,10 +122,12 @@ export default function DeliveryIndex({ orders }: PageProps) {
     };
 
     const statusBadge: Record<string, { label: string; className: string }> = {
-        pending: { label: 'Pendiente', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
+        awaiting_approval: { label: 'Pendiente de Aprobación', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
+        approved: { label: 'Aprobado', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
         preparing: { label: 'En Preparación', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
         ready: { label: 'Listo para Entregar', className: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' },
         delivered: { label: 'Entregado', className: 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-500/20' },
+        rejected: { label: 'Rechazado', className: 'bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' },
     };
 
     const readyCount = orderList.filter((o) => o.status === 'ready').length;
@@ -124,6 +137,13 @@ export default function DeliveryIndex({ orders }: PageProps) {
         <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-800 dark:text-white p-4 sm:p-6 font-sans transition-colors duration-200">
             <div className="max-w-7xl mx-auto space-y-6">
                 <FlashAlert />
+
+                {toast && (
+                    <div className="fixed top-4 right-4 z-50 bg-indigo-500 text-white px-6 py-3 rounded-2xl shadow-lg shadow-indigo-500/30 flex items-center gap-2 animate-bounce">
+                        <Bell className="w-5 h-5" />
+                        <span className="font-bold text-sm">{toast}</span>
+                    </div>
+                )}
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 dark:bg-white/[0.03] p-5 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-none">
                     <div>
@@ -235,9 +255,9 @@ export default function DeliveryIndex({ orders }: PageProps) {
                                         </div>
 
                                         <div className="flex flex-wrap gap-2 mb-4">
-                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${badge.className}`}>
-                                                {badge.label}
-                                            </span>
+                                <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
+                                    {statusBadge[order.status]?.label || order.status}
+                                </span>
                                             <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
                                                 <CreditCard className="w-3.5 h-3.5" />
                                                 {order.payment_method} ({order.payment_status})
@@ -252,10 +272,6 @@ export default function DeliveryIndex({ orders }: PageProps) {
                                             <p className="flex items-center gap-2">
                                                 <Package className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                                 {order.items?.length || 0} ítem(s)
-                                            </p>
-                                            <p className="flex items-center gap-2">
-                                                <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                                                PIN: <span className="font-mono font-bold text-slate-700 dark:text-slate-300 tracking-widest">{order.pin || '----'}</span>
                                             </p>
                                         </div>
                                     </div>
@@ -340,7 +356,8 @@ export default function DeliveryIndex({ orders }: PageProps) {
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">PIN de Validación</p>
-                                    <p className="font-mono text-2xl font-black text-slate-900 dark:text-white mt-1 tracking-widest">{selectedOrder.pin || '----'}</p>
+                                    <p className="font-mono text-lg font-black text-slate-400 dark:text-slate-600 mt-1 tracking-widest">••••</p>
+                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Solicitá el PIN al cliente al momento de la entrega.</p>
                                 </div>
                             </div>
 

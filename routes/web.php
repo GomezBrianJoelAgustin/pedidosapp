@@ -71,6 +71,8 @@ Route::middleware(['auth', 'role:delivery'])->prefix('cadetes')->name('delivery.
 
 Route::middleware(['auth', 'role:cashier'])->prefix('caja')->name('cashier.')->group(function () {
     Route::get('/', [CashierController::class, 'index'])->name('dashboard');
+    Route::post('/orders/{order}/approve', [CashierController::class, 'approve'])->name('orders.approve');
+    Route::post('/orders/{order}/reject', [CashierController::class, 'reject'])->name('orders.reject');
     Route::post('/orders/{order}/assign-delivery', [CashierController::class, 'assignDelivery'])->name('orders.assign-delivery');
     Route::post('/orders/{order}/mark-cash-paid', [CashierController::class, 'markCashPaid'])->name('orders.mark-cash-paid');
 });

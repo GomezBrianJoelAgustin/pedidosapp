@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import {
     Wallet, UserCheck, Clock, Package, MapPin, CreditCard,
-    Eye, CheckCircle, X, Filter, Search, DollarSign, Truck, ChevronRight
+    Eye, CheckCircle, X, Filter, Search, DollarSign, Truck, ChevronRight, Bell
 } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
+import { usePolling } from '@/hooks/use-polling';
 
 interface Product {
     id: number;
@@ -51,26 +52,54 @@ interface Order {
 }
 
 interface PageProps {
+    awaitingApproval: Order[];
     pendingAssignment: Order[];
     pendingCashPayment: Order[];
     recentOrders: Order[];
     deliveryUsers: DeliveryUser[];
 }
 
-export default function CashierIndex({ pendingAssignment, pendingCashPayment, recentOrders, deliveryUsers }: PageProps) {
+export default function CashierIndex({ awaitingApproval, pendingAssignment, pendingCashPayment, recentOrders, deliveryUsers }: PageProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [modalDetail, setModalDetail] = useState(false);
     const [modalAssign, setModalAssign] = useState(false);
     const [modalCash, setModalCash] = useState(false);
+    const [modalReject, setModalReject] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
+    const [toast, setToast] = useState<string | null>(null);
 
-    const { data: assignData, setData: setAssignData, post: postAssign, processing: assignProcessing, reset: resetAssign } = useForm({
-        delivery_id: '',
+    const { refresh } = usePolling({
+        interval: 5000,
+        enabled: true,
+        onNewOrder: () => {
+            setToast('¡Nuevo pedido pendiente de aprobación!');
+            setTimeout(() => setToast(null), 4000);
+        },
     });
 
-    const { data: cashData, setData: setCashData, post: postCash, processing: cashProcessing, reset: resetCash } = useForm({
-        payment_status: 'paid',
-    });
+    const handleApprove = (order: Order) => {
+        router.post(route('cashier.orders.approve', order.id), {}, {
+            onSuccess: () => {
+                setSelectedOrder(null);
+            },
+        });
+    };
+
+    const handleReject = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedOrder) return;
+
+        router.post(route('cashier.orders.reject', selectedOrder.id), {
+            rejection_reason: rejectReason,
+        }, {
+            onSuccess: () => {
+                setModalReject(false);
+                setRejectReason('');
+                setSelectedOrder(null);
+            },
+        });
+    };
 
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
@@ -127,16 +156,25 @@ export default function CashierIndex({ pendingAssignment, pendingCashPayment, re
     }, [recentOrders, searchTerm]);
 
     const statusBadge: Record<string, { label: string; className: string }> = {
-        pending: { label: 'Pendiente', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
+        awaiting_approval: { label: 'Pendiente de Aprobación', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
+        approved: { label: 'Aprobado', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
         preparing: { label: 'En Preparación', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
         ready: { label: 'Listo', className: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' },
         delivered: { label: 'Entregado', className: 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-500/20' },
+        rejected: { label: 'Rechazado', className: 'bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' },
     };
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-800 dark:text-white p-4 sm:p-6 font-sans transition-colors duration-200">
             <div className="max-w-7xl mx-auto space-y-6">
                 <FlashAlert />
+
+                {toast && (
+                    <div className="fixed top-4 right-4 z-50 bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-lg shadow-emerald-500/30 flex items-center gap-2 animate-bounce">
+                        <Bell className="w-5 h-5" />
+                        <span className="font-bold text-sm">{toast}</span>
+                    </div>
+                )}
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 dark:bg-white/[0.03] p-5 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-none">
                     <div>
@@ -167,6 +205,101 @@ export default function CashierIndex({ pendingAssignment, pendingCashPayment, re
                         </div>
                     </div>
                 </div>
+
+                {awaitingApproval.length > 0 && (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Pedidos Pendientes de Aprobación</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            {awaitingApproval.map((order) => (
+                                <div key={`approval-${order.id}`} className="bg-white dark:bg-white/[0.03] hover:dark:bg-white/[0.05] border border-amber-200 dark:border-amber-500/20 hover:border-amber-300 dark:hover:border-amber-500/40 rounded-3xl p-5 sm:p-6 shadow-sm dark:shadow-none transition-all hover:-translate-y-1 hover:shadow-md flex flex-col justify-between">
+                                    <div>
+                                        <div className="flex items-center justify-between border-b border-amber-100 dark:border-white/10 pb-4 mb-4">
+                                            <div>
+                                                <span className="text-xs font-semibold text-amber-500 dark:text-amber-400 uppercase tracking-wider">Pedido</span>
+                                                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">#{order.id}</h3>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total</span>
+                                                <span className="text-lg font-black text-amber-600 dark:text-amber-400">{formatMoney(order.total_price)}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-4 bg-amber-50 dark:bg-amber-500/5 p-3 rounded-2xl border border-amber-200/60 dark:border-amber-500/10">
+                                            {order.user ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="p-1 bg-amber-500/10 text-amber-500 rounded-lg shrink-0">
+                                                        <UserCheck className="w-4 h-4" />
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{order.user.name}</p>
+                                                        <span className="text-[10px] uppercase tracking-wider font-bold text-amber-500">Cliente Registrado</span>
+                                                    </div>
+                                                </div>
+                                            ) : order.guest_name ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="p-1 bg-purple-500/10 text-purple-400 rounded-lg shrink-0">
+                                                        <UserCheck className="w-4 h-4" />
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{order.guest_name}</p>
+                                                        <span className="text-[10px] uppercase tracking-wider font-bold text-purple-400">Invitado</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-slate-400 text-sm">Sin datos de cliente</span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['pending'].className}`}>
+                                                {statusBadge[order.status]?.label || order.status}
+                                            </span>
+                                            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
+                                                <CreditCard className="w-3.5 h-3.5" />
+                                                {order.payment_method} ({order.payment_status})
+                                            </span>
+                                        </div>
+
+                                        <div className="text-xs text-slate-500 dark:text-slate-400 space-y-2 mb-6">
+                                            <p className="flex items-center gap-2">
+                                                <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                                {order.delivery_address || 'Retiro en Local'}
+                                            </p>
+                                            <p className="flex items-center gap-2">
+                                                <Package className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                                {order.items?.length || 0} ítem(s)
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pt-4 border-t border-amber-100 dark:border-white/10">
+                                        <button
+                                            onClick={() => { setSelectedOrder(order); setModalDetail(true); }}
+                                            className="flex-1 py-2.5 px-3 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                        >
+                                            <Eye className="w-4 h-4" /> Detalle
+                                        </button>
+                                        <button
+                                            onClick={() => handleApprove(order)}
+                                            className="flex-1 py-2.5 px-3 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                        >
+                                            <CheckCircle className="w-4 h-4" /> Aceptar
+                                        </button>
+                                        <button
+                                            onClick={() => { setSelectedOrder(order); setModalReject(true); }}
+                                            className="flex-1 py-2.5 px-3 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-600 text-rose-600 dark:text-rose-400 hover:text-white border border-rose-200 dark:border-rose-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                        >
+                                            <X className="w-4 h-4" /> Rechazar
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {pendingAssignment.length > 0 && (
                     <div className="space-y-4">
@@ -515,7 +648,8 @@ export default function CashierIndex({ pendingAssignment, pendingCashPayment, re
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">PIN de Validación</p>
-                                    <p className="font-mono text-2xl font-black text-slate-900 dark:text-white mt-1 tracking-widest">{selectedOrder.pin || '----'}</p>
+                                    <p className="font-mono text-lg font-black text-slate-400 dark:text-slate-600 mt-1 tracking-widest">••••</p>
+                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Solicitá el PIN al cliente al momento de la entrega.</p>
                                 </div>
                             </div>
 
@@ -604,6 +738,55 @@ export default function CashierIndex({ pendingAssignment, pendingCashPayment, re
                                     className="px-5 py-2.5 text-sm font-bold bg-blue-500 hover:bg-blue-400 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Asignar Cadete
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {modalReject && selectedOrder && (
+                <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+                    <div className="bg-white dark:bg-[#0f0f11] border-t sm:border border-slate-200 dark:border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 space-y-5">
+                        <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
+                            <div className="p-2.5 bg-rose-100 dark:bg-rose-500/10 rounded-xl">
+                                <X className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Rechazar Pedido</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Pedido #{selectedOrder.id}</p>
+                            </div>
+                        </div>
+
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Ingresá el motivo del rechazo (opcional). El pedido se marcará como rechazado.
+                        </p>
+
+                        <form onSubmit={handleReject} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Motivo del rechazo</label>
+                                <textarea
+                                    value={rejectReason}
+                                    onChange={(e) => setRejectReason(e.target.value)}
+                                    placeholder="Ej: Productos agotados, fuera de horario..."
+                                    rows={3}
+                                    className="w-full rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:border-rose-500 focus:ring-rose-500/30 p-3"
+                                />
+                            </div>
+
+                            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => { setModalReject(false); setRejectReason(''); setSelectedOrder(null); }}
+                                    className="px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-5 py-2.5 text-sm font-bold bg-rose-500 hover:bg-rose-400 text-white rounded-xl shadow-lg shadow-rose-500/25 transition-all active:scale-95"
+                                >
+                                    Confirmar Rechazo
                                 </button>
                             </div>
                         </form>

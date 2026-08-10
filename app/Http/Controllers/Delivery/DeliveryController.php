@@ -14,7 +14,8 @@ class DeliveryController extends Controller
         $orders = Order::with(['items.product', 'user', 'delivery'])
             ->whereIn('status', ['ready', 'delivered'])
             ->latest()
-            ->get();
+            ->get()
+            ->makeHidden(['pin']);
 
         return Inertia::render('Delivery/Index', [
             'orders' => $orders,

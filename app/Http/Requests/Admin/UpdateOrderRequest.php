@@ -23,7 +23,7 @@ class UpdateOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|string|in:pending,preparing,ready,delivered',
+            'status' => 'required|string|in:pending,awaiting_approval,approved,rejected,preparing,ready,delivered',
             'payment_status' => 'required|string|in:pending,paid,failed',
             'delivery_type' => 'nullable|string|in:takeaway,delivery',
             'delivery_address' => 'required_if:delivery_type,delivery|nullable|string',
