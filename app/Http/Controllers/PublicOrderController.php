@@ -31,6 +31,8 @@ class PublicOrderController extends Controller
 
         $order = DB::transaction(function () use ($validated, $paymentStatus) {
             $order = Order::create([
+                'user_id' => '',
+                'delivery_id' => '',
                 'guest_name' => $validated['guest_name'],
                 'guest_phone' => $validated['guest_phone'],
                 'guest_email' => $validated['guest_email'] ?? null,
