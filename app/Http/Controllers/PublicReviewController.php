@@ -1,15 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Client;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Review;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 
-class ReviewController extends Controller
+class PublicReviewController extends Controller
 {
     public function store(Request $request, Order $order)
     {
@@ -24,7 +21,6 @@ class ReviewController extends Controller
         }
 
         $order->review()->create([
-            'user_id' => Auth::id(),
             'food_rating' => $request->food_rating,
             'delivery_rating' => $request->delivery_rating,
             'comment' => $request->comment,

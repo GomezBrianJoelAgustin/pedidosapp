@@ -16,7 +16,7 @@ class StorePublicOrderRequest extends FormRequest
         return [
             'guest_name' => 'required|string|max:255',
             'guest_phone' => 'required|string|max:30',
-            'guest_email' => 'required_if:payment_method,card|email|max:255',
+            'guest_email' => 'required_if:payment_method,card|nullable|email|max:255',
             'payment_method' => 'required|string|in:effective,card,transfer',
             'delivery_type' => 'required|string|in:takeaway,delivery',
             'delivery_address' => 'required_if:delivery_type,delivery|nullable|string',

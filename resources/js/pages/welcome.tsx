@@ -39,6 +39,24 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
     const { flash } = usePage().props as any;
     const [cartOpen, setCartOpen] = useState(false);
 
+    useEffect(() => {
+        const savedCart = localStorage.getItem('guest_cart');
+        if (savedCart) {
+            try {
+                const parsed = JSON.parse(savedCart);
+                if (parsed?.items?.length) {
+                    updateCart(parsed.items);
+                }
+            } catch {
+                // ignore
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('guest_cart', JSON.stringify({ items: data.items, total_price: data.total_price }));
+    }, [data.items, data.total_price]);
+
     const { data, setData, post, processing, errors, reset } = useForm({
         guest_name: '',
         guest_phone: '',
@@ -106,10 +124,16 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         }
 
         post(route('public.orders.store'), data, {
-            onSuccess: () => {
+            onSuccess: (page) => {
                 reset();
                 setCartOpen(false);
                 setPaymentError(null);
+                localStorage.removeItem('guest_cart');
+
+                const token = page.props?.order?.tracking_token;
+                if (token) {
+                    localStorage.setItem('active_guest_order', token);
+                }
             },
             onError: (errors) => {
                 console.error('Error al crear la orden:', errors);

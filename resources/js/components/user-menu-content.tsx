@@ -9,7 +9,6 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { edit } from '@/routes/profile';
-import { route } from 'ziggy-js';
 import type { User } from '@/types';
 
 type Props = {
@@ -21,9 +20,12 @@ export function UserMenuContent({ user }: Props) {
 
     const handleLogout = () => {
         cleanup();
-        router.post(route('logout'), {}, {
+        router.post(window.route('logout'), {}, {
             onSuccess: () => {
-                window.location.href = route('home');
+                window.location.href = '/';
+            },
+            onError: () => {
+                window.location.href = '/';
             },
         });
     };

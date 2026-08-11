@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Mail\OrderConfirmationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class PublicOrderController extends Controller
 {
@@ -37,6 +38,7 @@ class PublicOrderController extends Controller
                 'guest_phone' => $validated['guest_phone'],
                 'guest_email' => $validated['guest_email'] ?? null,
                 'status' => 'awaiting_approval',
+                'tracking_token' => Str::random(64),
                 'pin' => str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT),
                 'delivery_type' => $validated['delivery_type'],
                 'delivery_address' => $validated['delivery_address'] ?? null,
@@ -66,6 +68,10 @@ class PublicOrderController extends Controller
             ? 'El pago fue rechazado. Por favor intentá con otro medio de pago.'
             : "¡Gracias {$validated['guest_name']}! Tu pedido #{$order->id} fue recibido.";
 
-        return redirect()->route('home')->with($paymentStatus === 'failed' ? 'error' : 'success', $message);
+        if ($paymentStatus === 'failed') {
+            return redirect()->route('home')->with('error', $message);
+        }
+
+        return redirect()->route('public.order.track', ['token' => $order->tracking_token]);
     }
 }
