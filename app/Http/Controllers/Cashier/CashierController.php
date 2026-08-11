@@ -29,7 +29,7 @@ class CashierController extends Controller
 
         $pendingCashPayment = Order::with(['items.product', 'user', 'delivery'])
             ->where('payment_method', 'effective')
-            ->where('payment_status', 'pending_payment')
+            ->whereIn('payment_status', ['pending', 'pending_payment', 'pay_later'])
             ->whereNotIn('status', ['delivered'])
             ->latest()
             ->get()

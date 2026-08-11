@@ -276,6 +276,20 @@ export default function ClientDashboard() {
                                         ))}
                                     </div>
 
+                                    {order.pin && order.status !== 'delivered' && (
+                                        <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl">
+                                            <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">
+                                                PIN de entrega
+                                            </p>
+                                            <p className="text-2xl font-black text-amber-700 dark:text-amber-300 tracking-[0.2em] text-center">
+                                                {order.pin}
+                                            </p>
+                                            <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 text-center">
+                                                Dictá este código al cadete al momento de la entrega.
+                                            </p>
+                                        </div>
+                                    )}
+
                                     {order.status === 'delivered' && !order.review ? (
                                         <ReviewForm orderId={order.id} />
                                     ) : order.review ? (

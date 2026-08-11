@@ -124,10 +124,28 @@ export default function KitchenIndex({ orders }: PageProps) {
         const isPaid = paymentStatus === 'paid';
         const isPending = paymentStatus === 'pending_payment' || paymentStatus === 'pay_later' || paymentStatus === 'pending';
 
+        if (isPaid) {
+            return (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-1">
+                    <DollarSign className="w-3.5 h-3.5" />
+                    Pago Completado
+                </span>
+            );
+        }
+
+        if (isPending) {
+            return (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
+                    <DollarSign className="w-3.5 h-3.5" />
+                    Paga Después
+                </span>
+            );
+        }
+
         return (
-            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
+            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/20 flex items-center gap-1">
                 <DollarSign className="w-3.5 h-3.5" />
-                {isPaid ? 'Paga Ahora' : isPending ? 'Paga Después' : paymentStatus}
+                {paymentStatus}
             </span>
         );
     };
@@ -290,10 +308,12 @@ export default function KitchenIndex({ orders }: PageProps) {
                                                 <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                                 {new Date(order.created_at).toLocaleString('es-AR')}
                                             </p>
-                                            <p className="flex items-center gap-2 truncate">
-                                                <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                                                {order.delivery_address || 'Retiro en Local'}
-                                            </p>
+                                            {order.delivery_type !== 'takeaway' && (
+                                                <p className="flex items-center gap-2 truncate">
+                                                    <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                                    {order.delivery_address || 'Retiro en Local'}
+                                                </p>
+                                            )}
                                             <p className="flex items-center gap-2">
                                                 <Package className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                                 {order.items?.length || 0} ítem(s)
@@ -378,12 +398,14 @@ export default function KitchenIndex({ orders }: PageProps) {
                                     <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Tipo Entrega</p>
                                     <p className="font-medium text-slate-800 dark:text-slate-200 capitalize mt-1">{selectedOrder.delivery_type}</p>
                                 </div>
-                                <div>
-                                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Dirección</p>
-                                    <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-1">
-                                        <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {selectedOrder.delivery_address || 'Retiro en Local'}
-                                    </p>
-                                </div>
+                                {selectedOrder.delivery_type !== 'takeaway' && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Dirección</p>
+                                        <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-1">
+                                            <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {selectedOrder.delivery_address || 'Retiro en Local'}
+                                        </p>
+                                    </div>
+                                )}
                                 <div>
                                     <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Pago</p>
                                     <p className="font-medium text-slate-800 dark:text-slate-200 mt-1 capitalize">{selectedOrder.payment_method} ({selectedOrder.payment_status})</p>
