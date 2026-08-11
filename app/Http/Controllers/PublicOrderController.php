@@ -81,7 +81,7 @@ class PublicOrderController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect()->route('home')->with('error', 'Ocurrió un error inesperado al crear el pedido. Intentá de nuevo.');
+            return redirect()->route('home')->with('error', 'Ocurrió un error inesperado al crear el pedido: ' . $e->getMessage());
         }
     }
 }
