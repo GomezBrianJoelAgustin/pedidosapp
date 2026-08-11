@@ -67,7 +67,7 @@ export default function DeliveryIndex({ orders }: PageProps) {
     }, [orders]);
 
     const { refresh } = usePolling({
-        interval: 5000,
+        interval: 1000,
         enabled: true,
         onNewOrder: () => {
             setToast('¡Nuevo pedido listo para entregar!');

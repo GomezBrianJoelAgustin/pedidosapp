@@ -1,6 +1,6 @@
 import FlashAlert from '@/components/flash-alert';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, X, Filter, Star } from 'lucide-react';
 import { usePolling } from '@/hooks/use-polling';
 
@@ -27,11 +27,13 @@ interface Order {
     id: number;
     status: string;
     payment_status: string;
+    payment_method: string;
     total_price: number;
     pin: string;
     created_at: string;
     items: OrderItem[];
     delivery_type?: string;
+    delivery_address?: string | null;
     review?: Review | null;
 }
 
@@ -51,19 +53,24 @@ interface PageProps {
 
 export default function ClientDashboard() {
     const { auth, orders } = usePage<PageProps>().props;
+    const [localOrders, setLocalOrders] = useState<Order[]>(orders);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'awaiting_approval' | 'approved' | 'preparing' | 'ready' | 'out_for_delivery' | 'at_location' | 'delivered' | 'rejected'>('all');
+
+    useEffect(() => {
+        setLocalOrders(orders);
+    }, [orders]);
 
     usePolling({ interval: 5000, enabled: true });
 
     const filteredOrders = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
-        return orders.filter((order) => {
+        return localOrders.filter((order) => {
             const matchesSearch = term === '' || order.id.toString().includes(term);
             const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
-    }, [orders, searchTerm, statusFilter]);
+    }, [localOrders, searchTerm, statusFilter]);
 
     const getStatusBadge = (status: string, deliveryType?: string) => {
         let label = status;
@@ -160,6 +167,14 @@ export default function ClientDashboard() {
             hour: '2-digit',
             minute: '2-digit',
         });
+    };
+
+    const handleReviewSubmitted = (orderId: number, review: { food_rating: number; delivery_rating?: number; comment?: string }) => {
+        setLocalOrders((prev) =>
+            prev.map((order) =>
+                order.id === orderId ? { ...order, review: { ...review, id: Date.now() } as Review } : order,
+            ),
+        );
     };
 
     return (
@@ -291,7 +306,7 @@ export default function ClientDashboard() {
                                     )}
 
                                     {order.status === 'delivered' && !order.review ? (
-                                        <ReviewForm orderId={order.id} />
+                                        <ReviewForm orderId={order.id} onReviewSubmitted={(review) => handleReviewSubmitted(order.id, review)} />
                                     ) : order.review ? (
                                         <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl">
                                             <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">
@@ -351,13 +366,13 @@ function StarRating({ value, onChange, label }: { value: number; onChange: (v: n
 
 interface ReviewFormProps {
     orderId: number;
+    onReviewSubmitted?: (review: { food_rating: number; delivery_rating?: number; comment?: string }) => void;
 }
 
-function ReviewForm({ orderId }: ReviewFormProps) {
+function ReviewForm({ orderId, onReviewSubmitted }: ReviewFormProps) {
     const [foodRating, setFoodRating] = useState(0);
     const [deliveryRating, setDeliveryRating] = useState(0);
     const [comment, setComment] = useState('');
-    const [submitted, setSubmitted] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -369,18 +384,16 @@ function ReviewForm({ orderId }: ReviewFormProps) {
             {
                 preserveScroll: true,
                 preserveState: true,
-                onSuccess: () => setSubmitted(true),
+                onSuccess: () => {
+                    onReviewSubmitted?.({
+                        food_rating: foodRating,
+                        delivery_rating: deliveryRating || undefined,
+                        comment: comment || undefined,
+                    });
+                },
             }
         );
     };
-
-    if (submitted) {
-        return (
-            <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl">
-                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">¡Gracias por tu reseña!</p>
-            </div>
-        );
-    }
 
     return (
         <form onSubmit={handleSubmit} className="mb-4 p-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl space-y-3">
