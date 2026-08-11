@@ -42,7 +42,6 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
     const { data, setData, post, processing, errors, reset } = useForm({
         guest_name: '',
         guest_phone: '',
-        guest_email: '',
         payment_method: 'effective',
         delivery_type: 'takeaway',
         delivery_address: '',
@@ -172,7 +171,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
     };
 
     useEffect(() => {
-        if (data.payment_method !== 'card' || !mercadopagoPublicKey || !data.guest_email || data.total_price <= 0) {
+        if (data.payment_method !== 'card' || !mercadopagoPublicKey || data.total_price <= 0) {
             return;
         }
 
@@ -193,9 +192,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
             bricksBuilder.create('payment', 'payment-brick-container', {
                 initialization: {
                     amount: data.total_price,
-                    payer: { 
-                        email: data.guest_email, 
-                    },
+                    payer: {},
                 },
                 customization: {
                     paymentMethods: {
@@ -278,7 +275,6 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                 router.post(route('public.orders.store'), {
                                     guest_name: data.guest_name,
                                     guest_phone: data.guest_phone,
-                                    guest_email: data.guest_email,
                                     payment_method: data.payment_method,
                                     delivery_type: data.delivery_type,
                                     delivery_address: data.delivery_address,
@@ -327,7 +323,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                 brickControllerRef.current.unmount();
             }
         };
-    }, [data.payment_method, data.guest_email, data.total_price, mercadopagoPublicKey]);
+    }, [data.payment_method, data.total_price, mercadopagoPublicKey]);
 
     return (
         <>
@@ -732,23 +728,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                     </div>
 
                                     {data.payment_method === 'card' && (
-                                        <div className="space-y-3">
-                                            <input
-                                                type="email"
-                                                placeholder="Tu email (para el comprobante de pago)"
-                                                value={data.guest_email}
-                                                onChange={(e) => setData('guest_email', e.target.value)}
-                                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
-                                            />
-                                            {errors.guest_email && <p className="text-rose-400 text-xs">{errors.guest_email}</p>}
-                                            <div ref={brickContainerRef} id="payment-brick-container" />
-                                            {paymentError && (
-                                                <p className="text-rose-400 text-xs">{paymentError}</p>
-                                            )}
-                                            {paymentProcessing && (
-                                                <p className="text-amber-400 text-xs text-center">Procesando pago...</p>
-                                            )}
-                                        </div>
+                                        <div ref={brickContainerRef} id="payment-brick-container" />
                                     )}
 
                                     <div className="flex items-center justify-between pt-2">
