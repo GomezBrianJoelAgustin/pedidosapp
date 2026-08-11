@@ -1,7 +1,7 @@
 import FlashAlert from '@/components/flash-alert';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
-import { Search, X, Filter } from 'lucide-react';
+import { Search, X, Filter, Star } from 'lucide-react';
 import { usePolling } from '@/hooks/use-polling';
 
 interface Product {
@@ -16,6 +16,13 @@ interface OrderItem {
     product: Product;
 }
 
+interface Review {
+    id: number;
+    food_rating: number;
+    delivery_rating?: number;
+    comment?: string;
+}
+
 interface Order {
     id: number;
     status: string;
@@ -25,6 +32,7 @@ interface Order {
     created_at: string;
     items: OrderItem[];
     delivery_type?: string;
+    review?: Review | null;
 }
 
 interface User {
@@ -78,10 +86,10 @@ export default function ClientDashboard() {
             className = 'bg-sky-500/10 text-sky-500 border-sky-500/20';
         } else if (status === 'at_location') {
             label = 'El Cadete Está Afuera';
-            className = 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+            className = 'bg-orange-500/10 text-orange-500 border-orange-500/20';
         } else if (status === 'delivered') {
             label = 'Entregado';
-            className = 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+            className = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
         } else if (status === 'rejected') {
             label = 'Rechazado';
             className = 'bg-rose-500/10 text-rose-500 border-rose-500/20';
@@ -268,19 +276,28 @@ export default function ClientDashboard() {
                                         ))}
                                     </div>
 
-                                    {order.pin && (
-                                        <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl">
-                                            <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">
-                                                PIN de entrega
+                                    {order.status === 'delivered' && !order.review ? (
+                                        <ReviewForm orderId={order.id} />
+                                    ) : order.review ? (
+                                        <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl">
+                                            <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">
+                                                Tu reseña
                                             </p>
-                                            <p className="text-2xl font-black text-amber-700 dark:text-amber-300 tracking-[0.2em] text-center">
-                                                {order.pin}
-                                            </p>
-                                            <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 text-center">
-                                                Dictá este código al cadete al momento de la entrega.
-                                            </p>
+                                            <div className="flex items-center gap-1 mb-1">
+                                                <span className="text-xs text-slate-600 dark:text-slate-300">Comida:</span>
+                                                <span className="text-amber-500 font-bold">{'★'.repeat(order.review.food_rating)}{'☆'.repeat(5 - order.review.food_rating)}</span>
+                                            </div>
+                                            {order.review.delivery_rating && (
+                                                <div className="flex items-center gap-1 mb-1">
+                                                    <span className="text-xs text-slate-600 dark:text-slate-300">Cadete:</span>
+                                                    <span className="text-amber-500 font-bold">{'★'.repeat(order.review.delivery_rating)}{'☆'.repeat(5 - order.review.delivery_rating)}</span>
+                                                </div>
+                                            )}
+                                            {order.review.comment && (
+                                                <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{order.review.comment}"</p>
+                                            )}
                                         </div>
-                                    )}
+                                    ) : null}
                                 </div>
 
                                 <div className="pt-4 border-t border-slate-100 dark:border-white/10 flex justify-between items-center">
@@ -295,5 +312,81 @@ export default function ClientDashboard() {
                 )}
             </main>
         </div>
+    );
+}
+
+function StarRating({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) {
+    return (
+        <div className="flex items-center gap-1">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1">{label}</span>
+            {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                    key={star}
+                    type="button"
+                    onClick={() => onChange(star)}
+                    className="p-1"
+                >
+                    <Star
+                        className={`w-5 h-5 ${star <= value ? 'text-amber-500 fill-amber-500' : 'text-slate-300 dark:text-slate-600'}`}
+                    />
+                </button>
+            ))}
+        </div>
+    );
+}
+
+interface ReviewFormProps {
+    orderId: number;
+}
+
+function ReviewForm({ orderId }: ReviewFormProps) {
+    const [foodRating, setFoodRating] = useState(0);
+    const [deliveryRating, setDeliveryRating] = useState(0);
+    const [comment, setComment] = useState('');
+    const [submitted, setSubmitted] = useState(false);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!foodRating) return;
+
+        router.post(
+            route('client.orders.review', orderId),
+            { food_rating: foodRating, delivery_rating: deliveryRating || undefined, comment: comment || undefined },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => setSubmitted(true),
+            }
+        );
+    };
+
+    if (submitted) {
+        return (
+            <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl">
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">¡Gracias por tu reseña!</p>
+            </div>
+        );
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="mb-4 p-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl space-y-3">
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Calificá tu pedido</p>
+            <StarRating value={foodRating} onChange={setFoodRating} label="Comida" />
+            <StarRating value={deliveryRating} onChange={setDeliveryRating} label="Cadete" />
+            <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Dejanos un comentario..."
+                rows={2}
+                className="w-full rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm p-2"
+            />
+            <button
+                type="submit"
+                disabled={!foodRating}
+                className="px-4 py-2 text-sm font-bold bg-amber-500 hover:bg-amber-400 text-white rounded-xl disabled:opacity-50"
+            >
+                Enviar Reseña
+            </button>
+        </form>
     );
 }

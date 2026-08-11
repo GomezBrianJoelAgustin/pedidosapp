@@ -37,6 +37,7 @@ Route::middleware(['auth', 'role:client'])->prefix('mi-cuenta')->name('client.')
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
     Route::get('/menu', [ClientMenuController::class, 'index'])->name('menu');
     Route::post('/pedido', [ClientMenuController::class, 'store'])->name('order.store');
+    Route::post('/orders/{order}/review', [Client\ReviewController::class, 'store'])->name('orders.review');
 });
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
