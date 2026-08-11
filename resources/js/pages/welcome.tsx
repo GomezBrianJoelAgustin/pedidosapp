@@ -109,6 +109,12 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
             onSuccess: () => {
                 reset();
                 setCartOpen(false);
+                setPaymentError(null);
+            },
+            onError: (errors) => {
+                console.error('Error al crear la orden:', errors);
+                const messages = Object.values(errors || {}).flat().join(' ');
+                setPaymentError(messages || 'No se pudo crear el pedido. Revisá los datos e intentá de nuevo.');
             },
         });
     };

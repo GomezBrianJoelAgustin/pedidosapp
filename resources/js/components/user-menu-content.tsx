@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
+import { route } from 'ziggy-js';
 import type { User } from '@/types';
 
 type Props = {
@@ -21,7 +21,11 @@ export function UserMenuContent({ user }: Props) {
 
     const handleLogout = () => {
         cleanup();
-        window.location.href = logout();
+        router.post(route('logout'), {}, {
+            onSuccess: () => {
+                window.location.href = route('home');
+            },
+        });
     };
 
     return (
@@ -47,16 +51,15 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-                <Link
-                    className="block w-full cursor-pointer"
-                    href={logout()}
-                    as="button"
+                <button
+                    type="button"
+                    className="block w-full cursor-pointer text-left"
                     onClick={handleLogout}
                     data-test="logout-button"
                 >
                     <LogOut className="mr-2" />
                     Log out
-                </Link>
+                </button>
             </DropdownMenuItem>
         </>
     );
