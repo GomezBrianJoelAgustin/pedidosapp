@@ -306,7 +306,8 @@ export default function KitchenIndex({ orders }: PageProps) {
                                         )}
                                         {order.status === 'ready' && (
                                             <span className="flex-1 py-2.5 px-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5">
-                                                <CheckCircle className="w-4 h-4" /> Esperando Cadete
+                                                <CheckCircle className="w-4 h-4" />
+                                                {order.delivery_type === 'takeaway' ? 'Listo para retirar' : 'Esperando Cadete'}
                                             </span>
                                         )}
                                     </div>

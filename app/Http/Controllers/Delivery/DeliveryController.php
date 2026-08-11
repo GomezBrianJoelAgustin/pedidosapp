@@ -12,6 +12,7 @@ class DeliveryController extends Controller
     public function index()
     {
         $orders = Order::with(['items.product', 'user', 'delivery'])
+            ->where('delivery_type', 'delivery')
             ->whereIn('status', ['ready', 'delivered'])
             ->latest()
             ->get()

@@ -425,12 +425,14 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                         >
                                             <Eye className="w-4 h-4" /> Detalle
                                         </button>
-                                        <button
-                                            onClick={() => handleOpenAssign(order)}
-                                            className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                                        >
-                                            <Truck className="w-4 h-4" /> Asignar
-                                        </button>
+                                        {order.delivery_type === 'delivery' && (
+                                            <button
+                                                onClick={() => handleOpenAssign(order)}
+                                                className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            >
+                                                <Truck className="w-4 h-4" /> Asignar
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -541,7 +543,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {filteredRecentOrders.map((order) => {
                                 const badge = statusBadge[order.status] || statusBadge['awaiting_approval'];
-                                const isPendingAssignment = order.delivery_type === 'delivery' && !order.delivery_id;
+                                const isPendingAssignment = order.delivery_type === 'delivery' && !order.delivery_id && order.status === 'approved';
                                 const isPendingCash = order.payment_method === 'effective' && order.payment_status === 'pending';
 
                                 return (
