@@ -13,6 +13,10 @@ class PublicOrderController extends Controller
 {
     public function store(StorePublicOrderRequest $request)
     {
+        if ($request->user()) {
+            return redirect()->route('client.menu')->with('info', 'Iniciá sesión como cliente para hacer un pedido desde tu cuenta.');
+        }
+
         $validated = $request->validated();
 
         $paymentStatus = 'pending';
@@ -62,6 +66,10 @@ class PublicOrderController extends Controller
             ? 'El pago fue rechazado. Por favor intentá con otro medio de pago.'
             : "¡Gracias {$validated['guest_name']}! Tu pedido #{$order->id} fue recibido.";
 
-        return redirect()->route('home')->with($paymentStatus === 'failed' ? 'error' : 'success', $message);
+        if ($paymentStatus === 'failed') {
+            return redirect()->route('home')->with('error', $message);
+        }
+
+        return redirect()->route('public.order.track', ['token' => $order->tracking_token]);
     }
 }
