@@ -19,6 +19,14 @@ class PublicOrderController extends Controller
 
         $validated = $request->validated();
 
+        dd('PUBLIC_ORDER_STORE_REACHED', [
+            'payment_method' => $validated['payment_method'] ?? null,
+            'payment_gateway_status' => $validated['payment_gateway_status'] ?? null,
+            'guest_email' => $validated['guest_email'] ?? null,
+            'total_price' => $validated['total_price'] ?? null,
+            'items_count' => is_array($validated['items'] ?? null) ? count($validated['items']) : null,
+        ]);
+
         $paymentStatus = 'pending';
 
         if ($validated['payment_method'] === 'card') {
