@@ -84,6 +84,14 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         }
     }, []);
 
+    useEffect(() => {
+        const path = window.location.pathname;
+        if (path === '/' || path === '/home') {
+            localStorage.removeItem('guest_cart');
+            reset();
+        }
+    }, []);
+
     const addToCart = (product: Product) => {
         const existingIndex = data.items.findIndex(item => item.product_id === product.id);
         const updated = [...data.items];
