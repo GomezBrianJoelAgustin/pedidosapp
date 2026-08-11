@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { ChefHat, Clock, Package, User, MapPin, CreditCard, Eye, CheckCircle, X, Filter, Search, ChevronRight } from 'lucide-react';
+import { ChefHat, Clock, Package, User, MapPin, CreditCard, Eye, CheckCircle, X, Filter, Search, ChevronRight, Bell, DollarSign } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
+import { usePolling } from '@/hooks/use-polling';
 
 interface Product {
     id: number;
@@ -47,12 +48,31 @@ interface PageProps {
 
 export default function KitchenIndex({ orders }: PageProps) {
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'preparing' | 'ready'>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'preparing' | 'ready'>('all');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [modalDetail, setModalDetail] = useState(false);
+    const [toast, setToast] = useState<string | null>(null);
 
     const orderList = useMemo(() => {
         return Array.isArray(orders) ? orders : orders?.data || [];
+    }, [orders]);
+
+    const { refresh } = usePolling({
+        interval: 5000,
+        enabled: true,
+        onNewOrder: () => {
+            setToast('¡Nuevo pedido recibido!');
+            setTimeout(() => setToast(null), 4000);
+        },
+    });
+
+    useEffect(() => {
+        if (!orders) return;
+        const list = Array.isArray(orders) ? orders : orders?.data || [];
+        if (list.length > orderList.length && orderList.length > 0) {
+            setToast('¡Nuevo pedido recibido!');
+            setTimeout(() => setToast(null), 4000);
+        }
     }, [orders]);
 
     const filteredOrders = useMemo(() => {
@@ -77,6 +97,8 @@ export default function KitchenIndex({ orders }: PageProps) {
 
     const updateStatus = (orderId: number, status: 'preparing' | 'ready') => {
         router.put(route('kitchen.orders.update', orderId), { status }, {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 if (selectedOrder?.id === orderId) {
                     setSelectedOrder({ ...selectedOrder, status });
@@ -89,14 +111,57 @@ export default function KitchenIndex({ orders }: PageProps) {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
     };
 
-    const statusBadge: Record<string, { label: string; className: string }> = {
-        pending: { label: 'Pendiente', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
-        preparing: { label: 'En Preparación', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
-        ready: { label: 'Listo', className: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' },
-        delivered: { label: 'Entregado', className: 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-500/20' },
+    const getPaymentBadge = (paymentMethod: string, paymentStatus: string) => {
+        if (paymentMethod !== 'effective') {
+            return (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
+                    <CreditCard className="w-3.5 h-3.5" />
+                    {paymentStatus === 'paid' ? 'Pagado' : paymentStatus === 'failed' ? 'Rechazado' : 'Pendiente'}
+                </span>
+            );
+        }
+
+        const isPaid = paymentStatus === 'paid';
+        const isPending = paymentStatus === 'pending_payment' || paymentStatus === 'pay_later' || paymentStatus === 'pending';
+
+        if (isPaid) {
+            return (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-1">
+                    <DollarSign className="w-3.5 h-3.5" />
+                    Pago Completado
+                </span>
+            );
+        }
+
+        if (isPending) {
+            return (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
+                    <DollarSign className="w-3.5 h-3.5" />
+                    Paga Después
+                </span>
+            );
+        }
+
+        return (
+            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/20 flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5" />
+                {paymentStatus}
+            </span>
+        );
     };
 
-    const pendingCount = orderList.filter((o) => o.status === 'pending').length;
+    const statusBadge: Record<string, { label: string; className: string }> = {
+        awaiting_approval: { label: 'Pendiente de Aprobación', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
+        approved: { label: 'Aprobado', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
+        preparing: { label: 'En Preparación', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
+        ready: { label: 'Listo', className: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' },
+        out_for_delivery: { label: 'Enviando al Cadete', className: 'bg-sky-100 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-500/20' },
+        at_location: { label: 'El Cadete Está Afuera', className: 'bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20' },
+        delivered: { label: 'Entregado', className: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' },
+        rejected: { label: 'Rechazado', className: 'bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' },
+    };
+
+    const pendingCount = orderList.filter((o) => o.status === 'approved').length;
     const preparingCount = orderList.filter((o) => o.status === 'preparing').length;
     const readyCount = orderList.filter((o) => o.status === 'ready').length;
 
@@ -104,6 +169,13 @@ export default function KitchenIndex({ orders }: PageProps) {
         <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-800 dark:text-white p-4 sm:p-6 font-sans transition-colors duration-200">
             <div className="max-w-7xl mx-auto space-y-6">
                 <FlashAlert />
+
+                {toast && (
+                    <div className="fixed top-4 right-4 z-50 bg-amber-500 text-white px-6 py-3 rounded-2xl shadow-lg shadow-amber-500/30 flex items-center gap-2 animate-bounce">
+                        <Bell className="w-5 h-5" />
+                        <span className="font-bold text-sm">{toast}</span>
+                    </div>
+                )}
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 dark:bg-white/[0.03] p-5 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-none">
                     <div>
@@ -168,7 +240,7 @@ export default function KitchenIndex({ orders }: PageProps) {
                             className="w-full pl-10 pr-8 py-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-800 dark:text-white focus:border-amber-500 focus:ring-amber-500/30 transition-all shadow-sm font-medium"
                         >
                             <option value="all" className="dark:bg-[#0f0f11]">Todos los Estados</option>
-                            <option value="pending" className="dark:bg-[#0f0f11]">Pendiente</option>
+                            <option value="approved" className="dark:bg-[#0f0f11]">Aprobado</option>
                             <option value="preparing" className="dark:bg-[#0f0f11]">En Preparación</option>
                             <option value="ready" className="dark:bg-[#0f0f11]">Listo</option>
                         </select>
@@ -183,7 +255,7 @@ export default function KitchenIndex({ orders }: PageProps) {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {filteredOrders.map((order) => {
-                            const badge = statusBadge[order.status] || statusBadge['pending'];
+                            const badge = statusBadge[order.status] || statusBadge['awaiting_approval'];
                             return (
                                 <div key={order.id} className="bg-white dark:bg-white/[0.03] hover:dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-3xl p-5 sm:p-6 shadow-sm dark:shadow-none transition-all hover:-translate-y-1 hover:shadow-md flex flex-col justify-between group">
                                     <div>
@@ -225,13 +297,10 @@ export default function KitchenIndex({ orders }: PageProps) {
                                         </div>
 
                                         <div className="flex flex-wrap gap-2 mb-4">
-                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${badge.className}`}>
-                                                {badge.label}
-                                            </span>
-                                            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
-                                                <CreditCard className="w-3.5 h-3.5" />
-                                                {order.payment_method} ({order.payment_status})
-                                            </span>
+                                 <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
+                                     {statusBadge[order.status]?.label || order.status}
+                                 </span>
+                                            {getPaymentBadge(order.payment_method, order.payment_status)}
                                         </div>
 
                                         <div className="text-xs text-slate-500 dark:text-slate-400 space-y-2 mb-6">
@@ -239,10 +308,12 @@ export default function KitchenIndex({ orders }: PageProps) {
                                                 <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                                 {new Date(order.created_at).toLocaleString('es-AR')}
                                             </p>
-                                            <p className="flex items-center gap-2 truncate">
-                                                <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                                                {order.delivery_address || 'Retiro en Local'}
-                                            </p>
+                                            {order.delivery_type !== 'takeaway' && (
+                                                <p className="flex items-center gap-2 truncate">
+                                                    <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                                    {order.delivery_address || 'Retiro en Local'}
+                                                </p>
+                                            )}
                                             <p className="flex items-center gap-2">
                                                 <Package className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                                 {order.items?.length || 0} ítem(s)
@@ -257,12 +328,12 @@ export default function KitchenIndex({ orders }: PageProps) {
                                         >
                                             <Eye className="w-4 h-4" /> Detalle
                                         </button>
-                                        {order.status === 'pending' && (
+                                        {order.status === 'approved' && (
                                             <button
                                                 onClick={() => updateStatus(order.id, 'preparing')}
                                                 className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                             >
-                                                <ChefHat className="w-4 h-4" /> Preparar
+                                                <ChefHat className="w-4 h-4" /> Aceptar
                                             </button>
                                         )}
                                         {order.status === 'preparing' && (
@@ -275,7 +346,8 @@ export default function KitchenIndex({ orders }: PageProps) {
                                         )}
                                         {order.status === 'ready' && (
                                             <span className="flex-1 py-2.5 px-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5">
-                                                <CheckCircle className="w-4 h-4" /> Esperando Cadete
+                                                <CheckCircle className="w-4 h-4" />
+                                                {order.delivery_type === 'takeaway' ? 'Listo para retirar' : 'Esperando Cadete'}
                                             </span>
                                         )}
                                     </div>
@@ -326,19 +398,22 @@ export default function KitchenIndex({ orders }: PageProps) {
                                     <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Tipo Entrega</p>
                                     <p className="font-medium text-slate-800 dark:text-slate-200 capitalize mt-1">{selectedOrder.delivery_type}</p>
                                 </div>
-                                <div>
-                                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Dirección</p>
-                                    <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-1">
-                                        <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {selectedOrder.delivery_address || 'Retiro en Local'}
-                                    </p>
-                                </div>
+                                {selectedOrder.delivery_type !== 'takeaway' && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Dirección</p>
+                                        <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-1">
+                                            <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" /> {selectedOrder.delivery_address || 'Retiro en Local'}
+                                        </p>
+                                    </div>
+                                )}
                                 <div>
                                     <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Pago</p>
                                     <p className="font-medium text-slate-800 dark:text-slate-200 mt-1 capitalize">{selectedOrder.payment_method} ({selectedOrder.payment_status})</p>
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">PIN de Validación</p>
-                                    <p className="font-mono text-2xl font-black text-slate-900 dark:text-white mt-1 tracking-widest">{selectedOrder.pin || '----'}</p>
+                                    <p className="font-mono text-lg font-black text-slate-400 dark:text-slate-600 mt-1 tracking-widest">••••</p>
+                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Solicitá el PIN al cliente al momento de la entrega.</p>
                                 </div>
                             </div>
 

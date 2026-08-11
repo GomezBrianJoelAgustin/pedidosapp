@@ -37,6 +37,7 @@ Route::middleware(['auth', 'role:client'])->prefix('mi-cuenta')->name('client.')
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
     Route::get('/menu', [ClientMenuController::class, 'index'])->name('menu');
     Route::post('/pedido', [ClientMenuController::class, 'store'])->name('order.store');
+    Route::post('/orders/{order}/review', [\App\Http\Controllers\Client\ReviewController::class, 'store'])->name('orders.review');
 });
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
@@ -66,13 +67,19 @@ Route::middleware(['auth', 'role:chef'])->prefix('cocina')->name('kitchen.')->gr
 
 Route::middleware(['auth', 'role:delivery'])->prefix('cadetes')->name('delivery.')->group(function () {
     Route::get('/', [DeliveryController::class, 'index'])->name('dashboard');
+    Route::post('/orders/{order}/mark-out-for-delivery', [DeliveryController::class, 'markOutForDelivery'])->name('orders.mark-out-for-delivery');
+    Route::post('/orders/{order}/mark-at-location', [DeliveryController::class, 'markAtLocation'])->name('orders.mark-at-location');
     Route::post('/orders/{order}/validate-pin', [DeliveryController::class, 'validatePin'])->name('orders.validate-pin');
 });
 
 Route::middleware(['auth', 'role:cashier'])->prefix('caja')->name('cashier.')->group(function () {
     Route::get('/', [CashierController::class, 'index'])->name('dashboard');
+    Route::post('/orders/{order}/approve', [CashierController::class, 'approve'])->name('orders.approve');
+    Route::post('/orders/{order}/reject', [CashierController::class, 'reject'])->name('orders.reject');
     Route::post('/orders/{order}/assign-delivery', [CashierController::class, 'assignDelivery'])->name('orders.assign-delivery');
     Route::post('/orders/{order}/mark-cash-paid', [CashierController::class, 'markCashPaid'])->name('orders.mark-cash-paid');
+    Route::post('/orders/{order}/validate-pin', [CashierController::class, 'validatePin'])->name('orders.validate-pin');
+    Route::post('/orders/{order}/update-payment-status', [CashierController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
 });
 
 Route::post('/pedido', [PublicOrderController::class, 'store'])->name('public.orders.store');

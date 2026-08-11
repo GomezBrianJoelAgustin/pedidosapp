@@ -12,9 +12,10 @@ class KitchenController extends Controller
     public function index()
     {
         $orders = Order::with(['items.product', 'user', 'delivery'])
-            ->whereIn('status', ['pending', 'preparing', 'ready'])
+            ->whereIn('status', ['approved', 'preparing', 'ready'])
             ->latest()
-            ->get();
+            ->get()
+            ->makeHidden(['pin']);
 
         return Inertia::render('Kitchen/Index', [
             'orders' => $orders,

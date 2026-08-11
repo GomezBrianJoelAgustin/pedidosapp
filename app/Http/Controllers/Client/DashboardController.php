@@ -12,7 +12,7 @@ class DashboardController extends Controller
     public function index(): Response
     {
         $orders = Order::where('user_id', auth()->id())
-            ->with('items.product')
+            ->with('items.product', 'review')
             ->latest()
             ->get();
 

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePublicOrderRequest;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Mail\OrderConfirmationMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class PublicOrderController extends Controller
 {
@@ -30,7 +32,7 @@ class PublicOrderController extends Controller
                 'guest_name' => $validated['guest_name'],
                 'guest_phone' => $validated['guest_phone'],
                 'guest_email' => $validated['guest_email'] ?? null,
-                'status' => 'pending',
+                'status' => 'awaiting_approval',
                 'pin' => str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT),
                 'delivery_type' => $validated['delivery_type'],
                 'delivery_address' => $validated['delivery_address'] ?? null,
@@ -51,6 +53,10 @@ class PublicOrderController extends Controller
 
             return $order;
         });
+
+        if ($order->guest_email && $paymentStatus !== 'failed') {
+            Mail::to($order->guest_email)->queue(new OrderConfirmationMail($order->load('items.product')));
+        }
 
         $message = $paymentStatus === 'failed'
             ? 'El pago fue rechazado. Por favor intentá con otro medio de pago.'
