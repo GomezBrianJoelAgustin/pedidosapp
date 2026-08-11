@@ -92,7 +92,6 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         }
 
         updateCart(updated);
-        setCartOpen(true);
     };
 
     const updateQuantity = (productId: number, delta: number) => {
