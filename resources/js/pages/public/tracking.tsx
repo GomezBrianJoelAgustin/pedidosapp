@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { Package, MapPin, CreditCard, Star, Lock, CheckCircle, XCircle } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
+import { usePolling } from '@/hooks/use-polling';
 
 interface OrderItem {
     id: number;
@@ -54,6 +55,8 @@ export default function PublicTracking({ order, review, canReview }: PageProps) 
             localStorage.setItem('active_guest_order', String(order.id));
         }
     }, [order?.id]);
+
+    usePolling({ interval: 5000, enabled: true });
 
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
