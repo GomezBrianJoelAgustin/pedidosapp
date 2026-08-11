@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Mail\OrderConfirmationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class PublicOrderController extends Controller
 {
