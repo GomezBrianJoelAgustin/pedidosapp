@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import {
     Wallet, UserCheck, Clock, Package, MapPin, CreditCard,
-    Eye, CheckCircle, X, Filter, Search, DollarSign, Truck, ChevronRight, Bell
+    Eye, CheckCircle, X, Filter, Search, DollarSign, Truck, ChevronRight, Bell, Lock
 } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
 import { usePolling } from '@/hooks/use-polling';
@@ -971,34 +971,43 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
             {modalPin && selectedOrder && (
                 <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <div className="bg-white dark:bg-[#0f0f11] border-t sm:border border-slate-200 dark:border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 space-y-5">
-                        <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
-                            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl">
-                                <CheckCircle className="w-6 h-6" />
+                        <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400">
+                            <div className="p-2.5 bg-indigo-100 dark:bg-indigo-500/10 rounded-xl">
+                                <Lock className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Validar PIN</h3>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Validar Entrega</h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">Pedido #{selectedOrder.id}</p>
                             </div>
                         </div>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Ingresá el PIN de 4 dígitos que el cliente dictó para confirmar la entrega.
+                            Ingresá el PIN de 4 dígitos que te mostró el cliente para confirmar la entrega.
                         </p>
+
+                        {pinError && (
+                            <div className="p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 rounded-xl text-sm">
+                                {pinError}
+                            </div>
+                        )}
 
                         <form onSubmit={handleValidatePin} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">PIN</label>
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">PIN de 4 dígitos</label>
                                 <input
                                     type="text"
-                                    value={pinInput}
-                                    onChange={(e) => setPinInput(e.target.value)}
-                                    placeholder="1234"
+                                    inputMode="numeric"
                                     maxLength={4}
-                                    className="w-full rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:border-emerald-500 focus:ring-emerald-500/30 p-3 text-center tracking-[0.5em] font-mono text-lg"
+                                    value={pinInput}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                        setPinInput(val);
+                                        setPinError(null);
+                                    }}
+                                    placeholder="0000"
+                                    className="w-full text-center text-3xl font-mono tracking-[0.5em] rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500/30 py-4"
+                                    autoFocus
                                 />
-                                {pinError && (
-                                    <p className="text-xs text-rose-500 mt-1">{pinError}</p>
-                                )}
                             </div>
 
                             <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
@@ -1012,7 +1021,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                 <button
                                     type="submit"
                                     disabled={pinInput.length !== 4}
-                                    className="px-5 py-2.5 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl shadow-lg shadow-emerald-500/25 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-5 py-2.5 text-sm font-bold bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl shadow-lg shadow-indigo-500/25 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Confirmar Entrega
                                 </button>
