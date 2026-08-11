@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { ChefHat, Clock, Package, User, MapPin, CreditCard, Eye, CheckCircle, X, Filter, Search, ChevronRight, Bell } from 'lucide-react';
+import { ChefHat, Clock, Package, User, MapPin, CreditCard, Eye, CheckCircle, X, Filter, Search, ChevronRight, Bell, DollarSign } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
 import { usePolling } from '@/hooks/use-polling';
 
@@ -109,6 +109,27 @@ export default function KitchenIndex({ orders }: PageProps) {
 
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
+    };
+
+    const getPaymentBadge = (paymentMethod: string, paymentStatus: string) => {
+        if (paymentMethod !== 'effective') {
+            return (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
+                    <CreditCard className="w-3.5 h-3.5" />
+                    {paymentStatus === 'paid' ? 'Pagado' : paymentStatus === 'failed' ? 'Rechazado' : 'Pendiente'}
+                </span>
+            );
+        }
+
+        const isPaid = paymentStatus === 'paid';
+        const isPending = paymentStatus === 'pending_payment' || paymentStatus === 'pay_later' || paymentStatus === 'pending';
+
+        return (
+            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5" />
+                {isPaid ? 'Paga Ahora' : isPending ? 'Paga Después' : paymentStatus}
+            </span>
+        );
     };
 
     const statusBadge: Record<string, { label: string; className: string }> = {
@@ -256,13 +277,10 @@ export default function KitchenIndex({ orders }: PageProps) {
                                         </div>
 
                                         <div className="flex flex-wrap gap-2 mb-4">
-                                <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
-                                    {statusBadge[order.status]?.label || order.status}
-                                </span>
-                                            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
-                                                <CreditCard className="w-3.5 h-3.5" />
-                                                {order.payment_method} ({order.payment_status})
-                                            </span>
+                                 <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
+                                     {statusBadge[order.status]?.label || order.status}
+                                 </span>
+                                            {getPaymentBadge(order.payment_method, order.payment_status)}
                                         </div>
 
                                         <div className="text-xs text-slate-500 dark:text-slate-400 space-y-2 mb-6">

@@ -13,7 +13,7 @@ class DeliveryController extends Controller
     {
         $orders = Order::with(['items.product', 'user', 'delivery'])
             ->where('delivery_type', 'delivery')
-            ->whereIn('status', ['ready', 'delivered'])
+            ->whereIn('status', ['ready', 'out_for_delivery', 'at_location', 'delivered'])
             ->latest()
             ->get()
             ->makeHidden(['pin']);
@@ -21,6 +21,20 @@ class DeliveryController extends Controller
         return Inertia::render('Delivery/Index', [
             'orders' => $orders,
         ]);
+    }
+
+    public function markOutForDelivery(Request $request, Order $order)
+    {
+        $order->update(['status' => 'out_for_delivery']);
+
+        return back()->with('success', 'Pedido marcado como en camino.');
+    }
+
+    public function markAtLocation(Request $request, Order $order)
+    {
+        $order->update(['status' => 'at_location']);
+
+        return back()->with('success', 'Pedido marcado como cadete en la puerta.');
     }
 
     public function validatePin(Request $request, Order $order)

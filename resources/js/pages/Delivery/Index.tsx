@@ -123,16 +123,41 @@ export default function DeliveryIndex({ orders }: PageProps) {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
     };
 
+    const getPaymentBadge = (paymentMethod: string, paymentStatus: string) => {
+        if (paymentMethod !== 'effective') {
+            return (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
+                    <CreditCard className="w-3.5 h-3.5" />
+                    {paymentStatus === 'paid' ? 'Pagado' : paymentStatus === 'failed' ? 'Rechazado' : 'Pendiente'}
+                </span>
+            );
+        }
+
+        const isPaid = paymentStatus === 'paid';
+        const isPending = paymentStatus === 'pending_payment' || paymentStatus === 'pay_later' || paymentStatus === 'pending';
+
+        return (
+            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5" />
+                {isPaid ? 'Paga Ahora' : isPending ? 'Paga Después' : paymentStatus}
+            </span>
+        );
+    };
+
     const statusBadge: Record<string, { label: string; className: string }> = {
         awaiting_approval: { label: 'Pendiente de Aprobación', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
         approved: { label: 'Aprobado', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
         preparing: { label: 'En Preparación', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
         ready: { label: 'Listo para Entregar', className: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' },
+        out_for_delivery: { label: 'Viajando al Destino', className: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' },
+        at_location: { label: 'El Cadete Está Afuera', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
         delivered: { label: 'Entregado', className: 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-500/20' },
         rejected: { label: 'Rechazado', className: 'bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' },
     };
 
     const readyCount = orderList.filter((o) => o.status === 'ready').length;
+    const outCount = orderList.filter((o) => o.status === 'out_for_delivery').length;
+    const atLocationCount = orderList.filter((o) => o.status === 'at_location').length;
     const deliveredCount = orderList.filter((o) => o.status === 'delivered').length;
 
     return (
@@ -156,14 +181,32 @@ export default function DeliveryIndex({ orders }: PageProps) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
                         <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl">
                             <Package className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Listos para Entregar</p>
+                            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Listos</p>
                             <p className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{readyCount}</p>
+                        </div>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/20 rounded-2xl p-4 flex items-center gap-3">
+                        <div className="p-2.5 bg-blue-100 dark:bg-blue-500/10 rounded-xl">
+                            <Truck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">En Camino</p>
+                            <p className="text-2xl font-black text-blue-700 dark:text-blue-300">{outCount}</p>
+                        </div>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-4 flex items-center gap-3">
+                        <div className="p-2.5 bg-amber-100 dark:bg-amber-500/10 rounded-xl">
+                            <MapPin className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">En la Puerta</p>
+                            <p className="text-2xl font-black text-amber-700 dark:text-amber-300">{atLocationCount}</p>
                         </div>
                     </div>
                     <div className="bg-slate-100 dark:bg-slate-500/5 border border-slate-200 dark:border-slate-500/20 rounded-2xl p-4 flex items-center gap-3">
@@ -257,13 +300,10 @@ export default function DeliveryIndex({ orders }: PageProps) {
                                         </div>
 
                                         <div className="flex flex-wrap gap-2 mb-4">
-                                <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
-                                    {statusBadge[order.status]?.label || order.status}
-                                </span>
-                                            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
-                                                <CreditCard className="w-3.5 h-3.5" />
-                                                {order.payment_method} ({order.payment_status})
+                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
+                                                {statusBadge[order.status]?.label || order.status}
                                             </span>
+                                            {getPaymentBadge(order.payment_method, order.payment_status)}
                                         </div>
 
                                         <div className="text-xs text-slate-500 dark:text-slate-400 space-y-2 mb-6">
@@ -281,16 +321,32 @@ export default function DeliveryIndex({ orders }: PageProps) {
                                     <div className="flex items-center gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
                                         <button
                                             onClick={() => handleOpenDetail(order)}
-                                            className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            className="flex-1 py-2.5 px-3 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                         >
                                             <Eye className="w-4 h-4" /> Detalle
                                         </button>
                                         {order.status === 'ready' && (
                                             <button
+                                                onClick={() => router.post(route('delivery.orders.mark-out-for-delivery', order.id), {}, { preserveScroll: true, preserveState: true })}
+                                                className="flex-1 py-2.5 px-3 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            >
+                                                <Truck className="w-4 h-4" /> Pedido Recibido / En Camino
+                                            </button>
+                                        )}
+                                        {order.status === 'out_for_delivery' && (
+                                            <button
+                                                onClick={() => router.post(route('delivery.orders.mark-at-location', order.id), {}, { preserveScroll: true, preserveState: true })}
+                                                className="flex-1 py-2.5 px-3 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-600 text-amber-600 dark:text-amber-400 hover:text-white border border-amber-200 dark:border-amber-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            >
+                                                <MapPin className="w-4 h-4" /> Llegué a la Ubicación
+                                            </button>
+                                        )}
+                                        {order.status === 'at_location' && (
+                                            <button
                                                 onClick={() => handleOpenPin(order)}
                                                 className="flex-1 py-2.5 px-3 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                                             >
-                                                <Lock className="w-4 h-4" /> Validar PIN
+                                                <Lock className="w-4 h-4" /> Ingresar PIN
                                             </button>
                                         )}
                                         {order.status === 'delivered' && (

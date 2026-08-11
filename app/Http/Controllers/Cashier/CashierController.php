@@ -29,7 +29,7 @@ class CashierController extends Controller
 
         $pendingCashPayment = Order::with(['items.product', 'user', 'delivery'])
             ->where('payment_method', 'effective')
-            ->where('payment_status', 'pending')
+            ->where('payment_status', 'pending_payment')
             ->whereNotIn('status', ['delivered'])
             ->latest()
             ->get()
@@ -155,5 +155,18 @@ class CashierController extends Controller
         ]);
 
         return back()->with('success', 'Pedido marcado como entregado correctamente.');
+    }
+
+    public function updatePaymentStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'payment_status' => 'required|string|in:paid,pending_payment,pay_later',
+        ]);
+
+        $order->update([
+            'payment_status' => $request->payment_status,
+        ]);
+
+        return back()->with('success', 'Modalidad de pago actualizada.');
     }
 }

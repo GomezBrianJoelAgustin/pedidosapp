@@ -43,7 +43,7 @@ interface PageProps {
 export default function ClientDashboard() {
     const { auth, orders } = usePage<PageProps>().props;
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<'all' | 'awaiting_approval' | 'approved' | 'preparing' | 'ready' | 'delivered' | 'rejected'>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'awaiting_approval' | 'approved' | 'preparing' | 'ready' | 'out_for_delivery' | 'at_location' | 'delivered' | 'rejected'>('all');
 
     usePolling({ interval: 5000, enabled: true });
 
@@ -62,6 +62,8 @@ export default function ClientDashboard() {
             approved: { label: 'Aprobado', class: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
             preparing: { label: 'En Preparación', class: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
             ready: { label: 'Listo', class: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+            out_for_delivery: { label: 'Viajando al Destino', class: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
+            at_location: { label: 'El Cadete Está Afuera', class: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
             delivered: { label: 'Entregado', class: 'bg-slate-500/10 text-slate-500 border-slate-500/20' },
             rejected: { label: 'Rechazado', class: 'bg-rose-500/10 text-rose-500 border-rose-500/20' },
         };
@@ -78,35 +80,52 @@ export default function ClientDashboard() {
         );
     };
 
-    const getPaymentBadge = (status: string) => {
+    const getPaymentBadge = (paymentMethod: string, status: string) => {
         const isPaid = status === 'paid';
         const isFailed = status === 'failed';
+        const isPending = status === 'pending_payment' || status === 'pay_later' || status === 'pending';
 
-        if (isPaid) {
+        if (paymentMethod !== 'effective') {
+            if (isPaid) {
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                        Pagado
+                    </span>
+                );
+            }
+            if (isFailed) {
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-rose-500/10 text-rose-500 border-rose-500/20">
+                        Rechazado
+                    </span>
+                );
+            }
             return (
-                <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-500 border-emerald-500/20`}
-                >
-                    Pagado
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-amber-500/10 text-amber-500 border-amber-500/20">
+                    Pendiente de pago
                 </span>
             );
         }
 
-        if (isFailed) {
+        if (isPaid) {
             return (
-                <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-rose-500/10 text-rose-500 border-rose-500/20`}
-                >
-                    Rechazado
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                    Paga Ahora
+                </span>
+            );
+        }
+
+        if (isPending) {
+            return (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-amber-500/10 text-amber-500 border-amber-500/20">
+                    Paga Después
                 </span>
             );
         }
 
         return (
-            <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-amber-500/10 text-amber-500 border-amber-500/20`}
-            >
-                Pendiente de pago
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-rose-500/10 text-rose-500 border-rose-500/20">
+                {status}
             </span>
         );
     };
@@ -172,6 +191,8 @@ export default function ClientDashboard() {
                             <option value="approved" className="dark:bg-[#0f0f11]">Aprobado</option>
                             <option value="preparing" className="dark:bg-[#0f0f11]">En Preparación</option>
                             <option value="ready" className="dark:bg-[#0f0f11]">Listo</option>
+                            <option value="out_for_delivery" className="dark:bg-[#0f0f11]">Viajando al Destino</option>
+                            <option value="at_location" className="dark:bg-[#0f0f11]">El Cadete Está Afuera</option>
                             <option value="delivered" className="dark:bg-[#0f0f11]">Entregado</option>
                             <option value="rejected" className="dark:bg-[#0f0f11]">Rechazado</option>
                         </select>
@@ -209,7 +230,7 @@ export default function ClientDashboard() {
                                         </div>
                                         <div className="flex flex-col items-end gap-1.5">
                                             {getStatusBadge(order.status)}
-                                            {getPaymentBadge(order.payment_status)}
+                                            {getPaymentBadge(order.payment_method, order.payment_status)}
                                         </div>
                                     </div>
 

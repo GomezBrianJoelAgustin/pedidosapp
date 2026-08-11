@@ -66,6 +66,8 @@ Route::middleware(['auth', 'role:chef'])->prefix('cocina')->name('kitchen.')->gr
 
 Route::middleware(['auth', 'role:delivery'])->prefix('cadetes')->name('delivery.')->group(function () {
     Route::get('/', [DeliveryController::class, 'index'])->name('dashboard');
+    Route::post('/orders/{order}/mark-out-for-delivery', [DeliveryController::class, 'markOutForDelivery'])->name('orders.mark-out-for-delivery');
+    Route::post('/orders/{order}/mark-at-location', [DeliveryController::class, 'markAtLocation'])->name('orders.mark-at-location');
     Route::post('/orders/{order}/validate-pin', [DeliveryController::class, 'validatePin'])->name('orders.validate-pin');
 });
 
@@ -76,6 +78,7 @@ Route::middleware(['auth', 'role:cashier'])->prefix('caja')->name('cashier.')->g
     Route::post('/orders/{order}/assign-delivery', [CashierController::class, 'assignDelivery'])->name('orders.assign-delivery');
     Route::post('/orders/{order}/mark-cash-paid', [CashierController::class, 'markCashPaid'])->name('orders.mark-cash-paid');
     Route::post('/orders/{order}/validate-pin', [CashierController::class, 'validatePin'])->name('orders.validate-pin');
+    Route::post('/orders/{order}/update-payment-status', [CashierController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
 });
 
 Route::post('/pedido', [PublicOrderController::class, 'store'])->name('public.orders.store');
