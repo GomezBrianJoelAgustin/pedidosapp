@@ -73,6 +73,12 @@ export default function ClientDashboard() {
         } else if (status === 'ready') {
             label = deliveryType === 'takeaway' ? 'Listo para retirar' : 'Esperando Cadete';
             className = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+        } else if (status === 'out_for_delivery') {
+            label = 'Enviando al Cadete';
+            className = 'bg-sky-500/10 text-sky-500 border-sky-500/20';
+        } else if (status === 'at_location') {
+            label = 'El Cadete Está Afuera';
+            className = 'bg-amber-500/10 text-amber-500 border-amber-500/20';
         } else if (status === 'delivered') {
             label = 'Entregado';
             className = 'bg-slate-500/10 text-slate-500 border-slate-500/20';
@@ -118,7 +124,7 @@ export default function ClientDashboard() {
         if (isPaid) {
             return (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                    Paga Ahora
+                    Pago Completado
                 </span>
             );
         }

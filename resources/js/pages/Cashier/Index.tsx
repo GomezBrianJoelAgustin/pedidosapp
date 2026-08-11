@@ -141,7 +141,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
         return (
             <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
                 <DollarSign className="w-3.5 h-3.5" />
-                {isPaid ? 'Paga Ahora' : isPending ? 'Paga Después' : paymentStatus}
+                {isPaid ? 'Pago Completado' : isPending ? 'Paga Después' : paymentStatus}
             </span>
         );
     };

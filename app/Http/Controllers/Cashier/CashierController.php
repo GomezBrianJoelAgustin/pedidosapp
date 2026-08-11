@@ -36,7 +36,7 @@ class CashierController extends Controller
             ->makeHidden(['pin']);
 
         $recentOrders = Order::with(['items.product', 'user', 'delivery'])
-            ->whereIn('status', ['awaiting_approval', 'approved', 'preparing', 'ready', 'delivered', 'rejected'])
+            ->whereIn('status', ['awaiting_approval', 'approved', 'preparing', 'ready', 'out_for_delivery', 'at_location', 'delivered', 'rejected'])
             ->latest()
             ->take(20)
             ->get()
