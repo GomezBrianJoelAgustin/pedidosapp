@@ -82,7 +82,7 @@ Route::middleware(['auth', 'role:cashier'])->prefix('caja')->name('cashier.')->g
     Route::post('/orders/{order}/update-payment-status', [CashierController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
 });
 
-Route::post('/pedido', [PublicOrderController::class, 'store'])->name('public.orders.store');
+Route::post('/pedido', [PublicOrderController::class, 'store'])->middleware('guest')->name('public.orders.store');
 Route::post('/pagos/mercadopago', [MercadoPagoController::class, 'processPayment'])->name('mercadopago.process');
 
 require __DIR__.'/settings.php';

@@ -105,7 +105,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
             return;
         }
 
-        post(route('public.orders.store'), {
+        post(route('public.orders.store'), data, {
             onSuccess: () => {
                 reset();
                 setCartOpen(false);

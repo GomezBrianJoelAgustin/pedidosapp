@@ -32,7 +32,7 @@ layout: (name) => {
         case pageName.startsWith('auth/'):
             return AuthLayout;
         case pageName.startsWith('settings/'):
-            return [AppLayout, SettingsLayout];
+            return SettingsLayout;
         default:
             return AppLayout;
     }

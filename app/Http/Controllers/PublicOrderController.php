@@ -13,6 +13,10 @@ class PublicOrderController extends Controller
 {
     public function store(StorePublicOrderRequest $request)
     {
+        if ($request->user()) {
+            return redirect()->route('client.menu')->with('info', 'Iniciá sesión como cliente para hacer un pedido desde tu cuenta.');
+        }
+
         $validated = $request->validated();
 
         $paymentStatus = 'pending';
