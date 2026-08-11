@@ -31,8 +31,6 @@ class PublicOrderController extends Controller
 
         $order = DB::transaction(function () use ($validated, $paymentStatus) {
             $order = Order::create([
-                'user_id' => null,
-                'delivery_id' => null,
                 'guest_name' => $validated['guest_name'],
                 'guest_phone' => $validated['guest_phone'],
                 'guest_email' => $validated['guest_email'] ?? null,
@@ -66,15 +64,6 @@ class PublicOrderController extends Controller
         $message = $paymentStatus === 'failed'
             ? 'El pago fue rechazado. Por favor intentá con otro medio de pago.'
             : "¡Gracias {$validated['guest_name']}! Tu pedido #{$order->id} fue recibido.";
-
-        \Illuminate\Support\Facades\Log::error('PublicOrderController::store ENTRY', [
-            'order_id' => $order->id,
-            'payment_method' => $validated['payment_method'],
-            'payment_gateway_status' => $validated['payment_gateway_status'] ?? null,
-            'payment_status' => $paymentStatus,
-            'tracking_token' => $order->tracking_token,
-            'redirect_to' => $paymentStatus === 'failed' ? 'home' : 'public.order.track',
-        ]);
 
         if ($paymentStatus === 'failed') {
             return redirect()->route('home')->with('error', $message);
