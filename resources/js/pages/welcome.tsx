@@ -55,6 +55,9 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         setData(prev => ({ ...prev, items: newItems, total_price: total }));
     };
 
+    const formatMoney = (amount: number) =>
+        new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
+
     useEffect(() => {
         const savedCart = localStorage.getItem('guest_cart');
         if (savedCart) {
