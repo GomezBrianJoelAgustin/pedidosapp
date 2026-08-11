@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StorePublicOrderRequest extends FormRequest
 {
@@ -30,15 +32,11 @@ class StorePublicOrderRequest extends FormRequest
         ];
     }
 
-    public function messages(): array
+    protected function failedValidation(Validator $validator)
     {
-        return [
-            'guest_name.required' => 'Ingresá tu nombre para continuar.',
-            'guest_phone.required' => 'Ingresá un teléfono de contacto.',
-            'guest_email.required_if' => 'Ingresá tu email para pagar con tarjeta.',
-            'delivery_address.required_if' => 'Ingresá la dirección de entrega.',
-            'items.required' => 'El carrito no puede estar vacío.',
-            'items.min' => 'Agregá al menos un producto.',
-        ];
+        throw new HttpResponseException(response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors(),
+        ], 422));
     }
 }
