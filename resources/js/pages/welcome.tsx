@@ -39,6 +39,22 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
     const { flash } = usePage().props as any;
     const [cartOpen, setCartOpen] = useState(false);
 
+    const { data, setData, post, processing, errors, reset } = useForm({
+        guest_name: '',
+        guest_phone: '',
+        guest_email: '',
+        payment_method: 'effective',
+        delivery_type: 'takeaway',
+        delivery_address: '',
+        items: [] as CartItem[],
+        total_price: 0,
+    });
+
+    const updateCart = (newItems: CartItem[]) => {
+        const total = newItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        setData(prev => ({ ...prev, items: newItems, total_price: total }));
+    };
+
     useEffect(() => {
         const savedCart = localStorage.getItem('guest_cart');
         if (savedCart) {
@@ -56,25 +72,6 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
     useEffect(() => {
         localStorage.setItem('guest_cart', JSON.stringify({ items: data.items, total_price: data.total_price }));
     }, [data.items, data.total_price]);
-
-    const { data, setData, post, processing, errors, reset } = useForm({
-        guest_name: '',
-        guest_phone: '',
-        guest_email: '',
-        payment_method: 'effective',
-        delivery_type: 'takeaway',
-        delivery_address: '',
-        items: [] as CartItem[],
-        total_price: 0,
-    });
-
-    const formatMoney = (amount: number) =>
-        new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
-
-    const updateCart = (newItems: CartItem[]) => {
-        const total = newItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-        setData(prev => ({ ...prev, items: newItems, total_price: total }));
-    };
 
     const addToCart = (product: Product) => {
         const existingIndex = data.items.findIndex(item => item.product_id === product.id);
