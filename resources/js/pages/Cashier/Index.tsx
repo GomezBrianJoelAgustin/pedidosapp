@@ -114,6 +114,13 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
         });
     };
 
+    const getStatusBadgeLabel = (order: Order) => {
+        if (order.status === 'ready') {
+            return order.delivery_type === 'takeaway' ? 'Listo para retirar' : 'Esperando Cadete';
+        }
+        return statusBadge[order.status]?.label || order.status;
+    };
+
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
     };
@@ -347,7 +354,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
 
                                         <div className="flex flex-wrap gap-2 mb-4">
                                             <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
-                                                {statusBadge[order.status]?.label || order.status}
+                                                {getStatusBadgeLabel(order)}
                                             </span>
                                             <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
                                                 <CreditCard className="w-3.5 h-3.5" />
@@ -442,7 +449,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
 
                                         <div className="flex flex-wrap gap-2 mb-4">
                                             <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
-                                                {statusBadge[order.status]?.label || order.status}
+                                                {getStatusBadgeLabel(order)}
                                             </span>
                                             {getPaymentBadge(order.payment_method, order.payment_status)}
                                         </div>
@@ -530,7 +537,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
 
                                         <div className="flex flex-wrap gap-2 mb-4">
                                             <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
-                                                {statusBadge[order.status]?.label || order.status}
+                                                {getStatusBadgeLabel(order)}
                                             </span>
                                             {getPaymentBadge(order.payment_method, order.payment_status)}
                                         </div>
@@ -626,7 +633,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
 
                                             <div className="flex flex-wrap gap-2 mb-4">
                                                 <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${badge.className}`}>
-                                                    {badge.label}
+                                                    {getStatusBadgeLabel(order)}
                                                 </span>
                                                 {getPaymentBadge(order.payment_method, order.payment_status)}
                                                 {isPendingAssignment && (
@@ -741,7 +748,7 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
 
                                         <div className="flex flex-wrap gap-2 mb-4">
                                             <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
-                                                {statusBadge[order.status]?.label || order.status}
+                                                {getStatusBadgeLabel(order)}
                                             </span>
                                             {getPaymentBadge(order.payment_method, order.payment_status)}
                                             {order.payment_method === 'effective' && order.payment_status !== 'paid' && order.status !== 'rejected' && (

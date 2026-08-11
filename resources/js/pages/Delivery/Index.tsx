@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import {
     Truck, Package, User, MapPin, CreditCard,
-    Eye, CheckCircle, X, Filter, Search, Lock, ChevronRight, Bell
+    Eye, CheckCircle, X, Filter, Search, Lock, ChevronRight, Bell, DollarSign
 } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
 import { usePolling } from '@/hooks/use-polling';

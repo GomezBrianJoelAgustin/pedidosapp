@@ -24,6 +24,7 @@ interface Order {
     pin: string;
     created_at: string;
     items: OrderItem[];
+    delivery_type?: string;
 }
 
 interface User {
@@ -56,26 +57,33 @@ export default function ClientDashboard() {
         });
     }, [orders, searchTerm, statusFilter]);
 
-    const getStatusBadge = (status: string) => {
-        const statusMap: Record<string, { label: string; class: string }> = {
-            awaiting_approval: { label: 'Pendiente de Aprobación', class: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-            approved: { label: 'Aprobado', class: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-            preparing: { label: 'En Preparación', class: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-            ready: { label: 'Listo', class: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-            out_for_delivery: { label: 'Viajando al Destino', class: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-            at_location: { label: 'El Cadete Está Afuera', class: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-            delivered: { label: 'Entregado', class: 'bg-slate-500/10 text-slate-500 border-slate-500/20' },
-            rejected: { label: 'Rechazado', class: 'bg-rose-500/10 text-rose-500 border-rose-500/20' },
-        };
+    const getStatusBadge = (status: string, deliveryType?: string) => {
+        let label = status;
+        let className = 'bg-slate-500/10 text-slate-500 border-slate-500/20';
 
-        const config = statusMap[status] || {
-            label: status,
-            class: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
-        };
+        if (status === 'awaiting_approval') {
+            label = 'Pendiente de Aprobación';
+            className = 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+        } else if (status === 'approved') {
+            label = 'Aprobado';
+            className = 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+        } else if (status === 'preparing') {
+            label = 'En Preparación';
+            className = 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+        } else if (status === 'ready') {
+            label = deliveryType === 'takeaway' ? 'Listo para retirar' : 'Esperando Cadete';
+            className = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+        } else if (status === 'delivered') {
+            label = 'Entregado';
+            className = 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+        } else if (status === 'rejected') {
+            label = 'Rechazado';
+            className = 'bg-rose-500/10 text-rose-500 border-rose-500/20';
+        }
 
         return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.class}`}>
-                {config.label}
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${className}`}>
+                {label}
             </span>
         );
     };
@@ -229,7 +237,7 @@ export default function ClientDashboard() {
                                             </p>
                                         </div>
                                         <div className="flex flex-col items-end gap-1.5">
-                                            {getStatusBadge(order.status)}
+                                            {getStatusBadge(order.status, order.delivery_type)}
                                             {getPaymentBadge(order.payment_method, order.payment_status)}
                                         </div>
                                     </div>
