@@ -19,10 +19,6 @@ class ReviewController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        if ($order->review) {
-            return back()->with('error', 'Ya has enviado una reseña para este pedido.');
-        }
-
         $order->review()->create([
             'user_id' => Auth::id(),
             'food_rating' => $request->food_rating,
