@@ -158,6 +158,37 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
         });
     };
 
+    const [modalPin, setModalPin] = useState(false);
+    const [pinInput, setPinInput] = useState('');
+    const [pinError, setPinError] = useState<string | null>(null);
+
+    const handleOpenValidatePin = (order: Order) => {
+        setSelectedOrder(order);
+        setPinInput('');
+        setPinError(null);
+        setModalPin(true);
+    };
+
+    const handleValidatePin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedOrder) return;
+
+        router.post(route('cashier.orders.validate-pin', selectedOrder.id), {
+            pin: pinInput,
+        }, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                setModalPin(false);
+                setPinInput('');
+                setPinError(null);
+            },
+            onError: (errors) => {
+                setPinError(errors.pin || 'Error al validar el PIN.');
+            },
+        });
+    };
+
     const filteredRecentOrders = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
         if (!term) return recentOrders;
@@ -604,6 +635,14 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                                     <DollarSign className="w-4 h-4" /> Cobrar
                                                 </button>
                                             )}
+                                            {order.delivery_type === 'takeaway' && order.status === 'ready' && (
+                                                <button
+                                                    onClick={() => handleOpenValidatePin(order)}
+                                                    className="flex-1 py-2.5 px-3 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                                >
+                                                    <CheckCircle className="w-4 h-4" /> Entregar
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -922,6 +961,60 @@ export default function CashierIndex({ awaitingApproval, pendingAssignment, pend
                                     className="px-5 py-2.5 text-sm font-bold bg-amber-500 hover:bg-amber-400 text-white rounded-xl shadow-lg shadow-amber-500/25 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Confirmar Pago
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {modalPin && selectedOrder && (
+                <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+                    <div className="bg-white dark:bg-[#0f0f11] border-t sm:border border-slate-200 dark:border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 space-y-5">
+                        <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
+                            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl">
+                                <CheckCircle className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Validar PIN</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Pedido #{selectedOrder.id}</p>
+                            </div>
+                        </div>
+
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Ingresá el PIN de 4 dígitos que el cliente dictó para confirmar la entrega.
+                        </p>
+
+                        <form onSubmit={handleValidatePin} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">PIN</label>
+                                <input
+                                    type="text"
+                                    value={pinInput}
+                                    onChange={(e) => setPinInput(e.target.value)}
+                                    placeholder="1234"
+                                    maxLength={4}
+                                    className="w-full rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-sm focus:border-emerald-500 focus:ring-emerald-500/30 p-3 text-center tracking-[0.5em] font-mono text-lg"
+                                />
+                                {pinError && (
+                                    <p className="text-xs text-rose-500 mt-1">{pinError}</p>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => { setModalPin(false); setPinInput(''); setPinError(null); }}
+                                    className="px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={pinInput.length !== 4}
+                                    className="px-5 py-2.5 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl shadow-lg shadow-emerald-500/25 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Confirmar Entrega
                                 </button>
                             </div>
                         </form>

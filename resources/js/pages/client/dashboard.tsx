@@ -80,15 +80,33 @@ export default function ClientDashboard() {
 
     const getPaymentBadge = (status: string) => {
         const isPaid = status === 'paid';
+        const isFailed = status === 'failed';
+
+        if (isPaid) {
+            return (
+                <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-500 border-emerald-500/20`}
+                >
+                    Pagado
+                </span>
+            );
+        }
+
+        if (isFailed) {
+            return (
+                <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-rose-500/10 text-rose-500 border-rose-500/20`}
+                >
+                    Rechazado
+                </span>
+            );
+        }
+
         return (
             <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                    isPaid
-                        ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                        : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                }`}
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-amber-500/10 text-amber-500 border-amber-500/20`}
             >
-                {isPaid ? 'Pagado' : 'Pendiente de pago'}
+                Pendiente de pago
             </span>
         );
     };

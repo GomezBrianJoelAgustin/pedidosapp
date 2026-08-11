@@ -92,6 +92,7 @@ class CashierController extends Controller
             'status' => 'rejected',
             'approved_by' => $user->id,
             'rejection_reason' => $request->input('rejection_reason'),
+            'payment_status' => 'failed',
         ]);
 
         return back()->with('success', 'Pedido rechazado correctamente.');
@@ -137,5 +138,22 @@ class CashierController extends Controller
         ]);
 
         return back()->with('success', 'Pago en efectivo marcado como recibido.');
+    }
+
+    public function validatePin(Request $request, Order $order)
+    {
+        $request->validate([
+            'pin' => 'required|string|size:4',
+        ]);
+
+        if ($order->pin !== $request->pin) {
+            return back()->withErrors(['pin' => 'El PIN ingresado es incorrecto.'])->withInput();
+        }
+
+        $order->update([
+            'status' => 'delivered',
+        ]);
+
+        return back()->with('success', 'Pedido marcado como entregado correctamente.');
     }
 }

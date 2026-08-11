@@ -75,6 +75,7 @@ Route::middleware(['auth', 'role:cashier'])->prefix('caja')->name('cashier.')->g
     Route::post('/orders/{order}/reject', [CashierController::class, 'reject'])->name('orders.reject');
     Route::post('/orders/{order}/assign-delivery', [CashierController::class, 'assignDelivery'])->name('orders.assign-delivery');
     Route::post('/orders/{order}/mark-cash-paid', [CashierController::class, 'markCashPaid'])->name('orders.mark-cash-paid');
+    Route::post('/orders/{order}/validate-pin', [CashierController::class, 'validatePin'])->name('orders.validate-pin');
 });
 
 Route::post('/pedido', [PublicOrderController::class, 'store'])->name('public.orders.store');
