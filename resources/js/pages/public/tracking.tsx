@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Package, MapPin, CreditCard, Star, Lock, CheckCircle, XCircle } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
 
