@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
-import { ShoppingBag, Plus, Minus, X, CheckCircle, Instagram, Facebook, MessageCircle, Music2, MapPin, Clock, Phone, Sparkles, ChefHat, Leaf, Flame, Star, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, X, Trash2, CheckCircle, Instagram, Facebook, MessageCircle, Music2, MapPin, Clock, Phone, Sparkles, ChefHat, Leaf, Flame, Star, ArrowRight } from 'lucide-react';
 import React, { useState, useRef, useEffect } from 'react';
 import FlashAlert from '@/components/flash-alert';
 import { loadMercadoPagoSdk } from '@/lib/load-mercadopago';
@@ -76,6 +76,14 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         localStorage.setItem('guest_cart', JSON.stringify({ items: data.items, total_price: data.total_price }));
     }, [data.items, data.total_price]);
 
+    useEffect(() => {
+        const path = window.location.pathname;
+        if (path === '/' || path === '/home') {
+            localStorage.removeItem('guest_cart');
+            reset();
+        }
+    }, []);
+
     const addToCart = (product: Product) => {
         const existingIndex = data.items.findIndex(item => item.product_id === product.id);
         const updated = [...data.items];
@@ -111,6 +119,11 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
 
     const removeFromCart = (productId: number) => {
         updateCart(data.items.filter(item => item.product_id !== productId));
+    };
+
+    const clearCart = () => {
+        updateCart([]);
+        localStorage.removeItem('guest_cart');
     };
 
     const totalItems = data.items.reduce((acc, item) => acc + item.quantity, 0);
@@ -572,9 +585,14 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                     <div className="w-full sm:w-96 h-full bg-[#0f0f11] border-l border-white/10 flex flex-col">
                         <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0">
                             <h2 className="text-lg font-bold text-white">Detalle del pedido</h2>
-                            <button onClick={() => setCartOpen(false)} className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-white/5">
-                                <X className="w-5 h-5" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button onClick={clearCart} className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-white/5">
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                                <button onClick={() => setCartOpen(false)} className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-white/5">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto">
