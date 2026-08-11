@@ -145,7 +145,11 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                 const token = page.props?.order?.tracking_token;
                 if (token) {
                     localStorage.setItem('active_guest_order', token);
+                    router.visit(route('public.order.track', token));
+                    return;
                 }
+
+                router.visit(route('home'));
             },
             onError: (errors) => {
                 console.error('Error al crear la orden:', errors);
@@ -271,9 +275,20 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                     payment_gateway_id: String(result.id),
                                     payment_gateway_status: result.status,
                                 }, {
-                                    onSuccess: () => {
+                                    onSuccess: (page) => {
                                         reset();
                                         setCartOpen(false);
+                                        setPaymentError(null);
+                                        localStorage.removeItem('guest_cart');
+
+                                        const token = page.props?.order?.tracking_token;
+                                        if (token) {
+                                            localStorage.setItem('active_guest_order', token);
+                                            router.visit(route('public.order.track', token));
+                                            return;
+                                        }
+
+                                        router.visit(route('home'));
                                     },
                                     onError: (errors) => {
                                         console.error('Error al crear la orden:', errors);
