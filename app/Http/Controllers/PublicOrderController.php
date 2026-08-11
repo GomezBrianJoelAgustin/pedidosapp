@@ -37,6 +37,7 @@ class PublicOrderController extends Controller
                 'guest_phone' => $validated['guest_phone'],
                 'guest_email' => $validated['guest_email'] ?? null,
                 'status' => 'awaiting_approval',
+                'tracking_token' => Str::random(64),
                 'pin' => str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT),
                 'delivery_type' => $validated['delivery_type'],
                 'delivery_address' => $validated['delivery_address'] ?? null,
@@ -66,7 +67,7 @@ class PublicOrderController extends Controller
             ? 'El pago fue rechazado. Por favor intentá con otro medio de pago.'
             : "¡Gracias {$validated['guest_name']}! Tu pedido #{$order->id} fue recibido.";
 
-        \Illuminate\Support\Facades\Log::info('PublicOrderController::store', [
+        \Illuminate\Support\Facades\Log::error('PublicOrderController::store ENTRY', [
             'order_id' => $order->id,
             'payment_method' => $validated['payment_method'],
             'payment_gateway_status' => $validated['payment_gateway_status'] ?? null,
