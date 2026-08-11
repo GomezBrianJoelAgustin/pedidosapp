@@ -66,6 +66,15 @@ class PublicOrderController extends Controller
             ? 'El pago fue rechazado. Por favor intentá con otro medio de pago.'
             : "¡Gracias {$validated['guest_name']}! Tu pedido #{$order->id} fue recibido.";
 
+        \Illuminate\Support\Facades\Log::info('PublicOrderController::store', [
+            'order_id' => $order->id,
+            'payment_method' => $validated['payment_method'],
+            'payment_gateway_status' => $validated['payment_gateway_status'] ?? null,
+            'payment_status' => $paymentStatus,
+            'tracking_token' => $order->tracking_token,
+            'redirect_to' => $paymentStatus === 'failed' ? 'home' : 'public.order.track',
+        ]);
+
         if ($paymentStatus === 'failed') {
             return redirect()->route('home')->with('error', $message);
         }

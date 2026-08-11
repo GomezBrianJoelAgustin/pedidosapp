@@ -145,22 +145,26 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
 
         post(route('public.orders.store'), data, {
             onSuccess: (page) => {
+                console.log('[checkout] onSuccess page.props:', page.props);
                 reset();
                 setCartOpen(false);
                 setPaymentError(null);
                 localStorage.removeItem('guest_cart');
 
                 const token = page.props?.order?.tracking_token;
+                console.log('[checkout] tracking_token from response:', token);
                 if (token) {
                     localStorage.setItem('active_guest_order', token);
+                    console.log('[checkout] navigating to tracking:', route('public.order.track', token));
                     router.visit(route('public.order.track', token));
                     return;
                 }
 
+                console.log('[checkout] no token found, navigating home');
                 router.visit(route('home'));
             },
             onError: (errors) => {
-                console.error('Error al crear la orden:', errors);
+                console.error('[checkout] onError:', errors);
                 const messages = Object.values(errors || {}).flat().join(' ');
                 setPaymentError(messages || 'No se pudo crear el pedido. Revisá los datos e intentá de nuevo.');
             },
