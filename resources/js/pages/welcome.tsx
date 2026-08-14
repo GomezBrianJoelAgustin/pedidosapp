@@ -394,17 +394,17 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                 </section>
             </div>
 
-                <section id="menu" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
-                    <h2 className="text-3xl font-serif text-white mb-10 text-center md:text-left">Nuestra Carta</h2>
+                <section id="menu" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-[#3d2c21]">
+                    <h2 className="text-3xl font-serif text-[#f5f0eb] mb-10 text-center md:text-left">Nuestra Carta</h2>
 
                     {menu.length === 0 ? (
-                        <div className="text-center py-12 text-slate-500 rounded-2xl bg-white/[0.02] border border-white/5">
+                        <div className="text-center py-12 text-[#f5f0eb]/60 rounded-2xl bg-[#1c1611] border border-[#3d2c21]">
                             <p>Aún no hay productos cargados en el menú.</p>
                         </div>
                     ) : (
                         menu.map((category) => (
                             <div key={category.id} className="mb-14">
-                                <h3 className="text-xl font-medium text-amber-400 mb-6 tracking-wide border-b border-amber-500/10 pb-2">
+                                <h3 className="text-xl font-medium text-[#d4af37] mb-6 tracking-wide border-b border-[#d4af37]/10 pb-2">
                                     {category.name}
                                 </h3>
 
@@ -412,9 +412,9 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                     {category.products?.map((product) => (
                                         <div
                                             key={product.id}
-                                            className="group bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-amber-500/30 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col"
+                                            className="group relative bg-[#1c1611] border border-[#3d2c21] hover:border-[#d4af37]/40 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-md hover:shadow-[#d4af37]/10"
                                         >
-                                            <div className="aspect-square w-full bg-white/5 overflow-hidden relative">
+                                            <div className="aspect-square w-full bg-[#1c1611]/80 overflow-hidden relative">
                                                 {product.image ? (
                                                     <img
                                                         src={product.image}
@@ -422,25 +422,25 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-slate-600 text-xs">
+                                                    <div className="w-full h-full flex items-center justify-center text-[#f5f0eb]/40 text-xs">
                                                         Sin imagen
                                                     </div>
                                                 )}
-                                                <span className="absolute bottom-2 right-2 font-mono text-amber-300 font-bold bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-xs">
+                                                <span className="absolute bottom-2 right-2 font-mono text-[#d4af37] font-bold bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-xs">
                                                     {formatMoney(Number(product.price))}
                                                 </span>
                                             </div>
 
                                             <div className="p-3 flex flex-col flex-1 justify-between gap-2">
-                                                <h4 className="font-semibold text-white text-sm leading-tight group-hover:text-amber-300 transition-colors line-clamp-2">
+                                                <h4 className="font-semibold text-[#f5f0eb] text-sm leading-tight group-hover:text-[#d4af37] transition-colors line-clamp-2">
                                                     {product.name}
                                                 </h4>
 
                                                 <button
                                                     onClick={() => addToCart(product)}
-                                                    className="w-full bg-white/5 hover:bg-amber-500 text-slate-300 hover:text-black py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-1"
+                                                    className="self-start p-2.5 rounded-full border border-[#d4af37]/40 bg-[#1c1611]/90 text-[#d4af37] hover:bg-[#d4af37] hover:text-black transition-all duration-300 shadow-lg shadow-black/20 hover:shadow-[#d4af37]/30"
                                                 >
-                                                    <Plus className="w-3.5 h-3.5" /> Agregar
+                                                    <Plus className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </div>
@@ -603,15 +603,17 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                 </footer>
             </div>
 
-            {totalItems > 0 && !cartOpen && (
-                <button
-                    onClick={() => setCartOpen(true)}
-                    className="fixed bottom-6 right-6 z-40 bg-amber-500 hover:bg-amber-400 text-black font-bold px-5 py-3.5 rounded-full shadow-2xl shadow-amber-500/30 flex items-center gap-2 transition-all active:scale-95"
-                >
-                    <ShoppingBag className="w-5 h-5" />
-                    {totalItems} {totalItems === 1 ? 'ítem' : 'ítems'} · {formatMoney(data.total_price)}
-                </button>
-            )}
+            <button
+                onClick={() => setCartOpen(true)}
+                className="fixed bottom-6 right-6 z-50 bg-[#e63946] hover:bg-[#e63946]/90 text-white p-4 rounded-full shadow-lg shadow-[#e63946]/30 transition-all active:scale-95"
+            >
+                <ShoppingBag className="w-5 h-5" />
+                {totalItems > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-[#d4af37] text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                        {totalItems}
+                    </span>
+                )}
+            </button>
 
             {cartOpen && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
