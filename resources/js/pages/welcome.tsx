@@ -329,43 +329,42 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         <>
             <Head title="Bienvenidos" />
 
-            <div className="relative bg-charcoal text-warm-white font-sans overflow-x-hidden selection:bg-ember selection:text-white">
+            <div className="relative min-h-screen w-full bg-charcoal text-warm-white font-sans overflow-x-hidden selection:bg-ember selection:text-white">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(200,120,60,0.25),transparent_55%),radial-gradient(circle_at_80%_20%,rgba(180,100,40,0.18),transparent_50%)]" />
+                <div className="absolute inset-0 bg-[url('/images/hero-bg.jfif')] bg-cover bg-center bg-no-repeat" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
 
-                <div className="relative">
-                    <div className="absolute inset-x-0 top-0 bottom-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/hero-bg.jfif')" }} />
-                    <div className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+                <div className="relative z-10 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-clay/20">
+                    <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-gold via-amber-200 to-amber-400 bg-clip-text text-transparent">
+                        Empandas
+                    </span>
 
-                    <header className="relative z-10 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-clay/20">
-                        <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-gold via-amber-200 to-amber-400 bg-clip-text text-transparent">
-                            Empandas
-                        </span>
+                    <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-warm-white/70">
+                        <a href="#menu" className="hover:text-gold transition-colors">Carta</a>
+                        <a href="#nosotros" className="hover:text-gold transition-colors">Nosotros</a>
+                        <a href="#redes" className="hover:text-gold transition-colors">Redes</a>
+                    </nav>
 
-                        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-warm-white/70">
-                            <a href="#menu" className="hover:text-gold transition-colors">Carta</a>
-                            <a href="#nosotros" className="hover:text-gold transition-colors">Nosotros</a>
-                            <a href="#redes" className="hover:text-gold transition-colors">Redes</a>
-                        </nav>
-
-                        <div className="flex items-center gap-4">
-                            {auth?.user ? (
-                                <Link href={route('dashboard')} className="text-sm font-medium text-warm-white/70 hover:text-gold transition">
-                                    Panel
+                    <div className="flex items-center gap-4">
+                        {auth?.user ? (
+                            <Link href={route('dashboard')} className="text-sm font-medium text-warm-white/70 hover:text-gold transition">
+                                Panel
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href={route('login')} className="text-sm font-medium text-warm-white/70 hover:text-gold transition">
+                                    Iniciar sesión
                                 </Link>
-                            ) : (
-                                <>
-                                    <Link href={route('login')} className="text-sm font-medium text-warm-white/70 hover:text-gold transition">
-                                        Iniciar sesión
-                                    </Link>
-                                    <Link href={route('register')} className="bg-gradient-to-r from-amber-600 to-ember text-white text-xs md:text-sm font-semibold px-5 py-2.5 rounded-full hover:from-amber-500 hover:to-ember/90 transition shadow-lg shadow-ember/20">
-                                        Registrarse
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-                    </header>
+                                <Link href={route('register')} className="bg-gradient-to-r from-amber-600 to-ember text-white text-xs md:text-sm font-semibold px-5 py-2.5 rounded-full hover:from-amber-500 hover:to-ember/90 transition shadow-lg shadow-ember/20">
+                                    Registrarse
+                                </Link>
+                            </>
+                        )}
+                    </div>
+                </div>
 
-                    <section className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-20 text-center flex flex-col items-center justify-center">
+                <section className="relative z-10 flex-1 flex items-center justify-center px-6 py-20">
+                    <div className="max-w-5xl mx-auto w-full text-center">
                         <FlashAlert />
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ember/10 border border-ember/20 text-xs font-bold text-gold tracking-wide mb-10">
                             <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
@@ -379,7 +378,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                             </span>
                         </h1>
 
-                        <p className="max-w-2xl text-warm-white/70 text-base md:text-lg font-light leading-relaxed mb-12">
+                        <p className="max-w-2xl text-warm-white/70 text-base md:text-lg font-light leading-relaxed mb-12 mx-auto">
                             Empanadas artesanales hechas con ingredientes seleccionados, horneadas al momento. Directo a tu mesa.
                         </p>
 
@@ -388,13 +387,12 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                             <ArrowRight className="relative z-10 w-4 h-4 transition-transform group-hover:translate-x-1" />
                             <span className="absolute inset-0 rounded-full bg-gradient-to-r from-ember/10 via-gold/10 to-ember/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </a>
-                    </section>
-                </div>
+                    </div>
+                </section>
+            </div>
 
-                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-charcoal to-transparent z-10" />
-
-                <section id="menu" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
-                    <h2 className="text-3xl font-serif text-white mb-10 text-center md:text-left">Nuestra Carta</h2>
+            <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
+                <h2 className="text-3xl font-serif text-white mb-10 text-center md:text-left">Nuestra Carta</h2>
 
                     {menu.length === 0 ? (
                         <div className="text-center py-12 text-slate-500 rounded-2xl bg-white/[0.02] border border-white/5">
@@ -437,9 +435,9 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
 
                                                 <button
                                                     onClick={() => addToCart(product)}
-                                                    className="w-full bg-white/5 hover:bg-amber-500 text-slate-300 hover:text-black py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-1"
+                                                    className="self-start p-2.5 rounded-full border border-gold/40 bg-charcoal/80 text-gold hover:bg-gold hover:text-black transition-all duration-300 shadow-lg shadow-black/20 hover:shadow-gold/30"
                                                 >
-                                                    <Plus className="w-3.5 h-3.5" /> Agregar
+                                                    <Plus className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </div>
@@ -602,15 +600,17 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                 </footer>
             </div>
 
-            {totalItems > 0 && !cartOpen && (
-                <button
-                    onClick={() => setCartOpen(true)}
-                    className="fixed bottom-6 right-6 z-40 bg-amber-500 hover:bg-amber-400 text-black font-bold px-5 py-3.5 rounded-full shadow-2xl shadow-amber-500/30 flex items-center gap-2 transition-all active:scale-95"
-                >
-                    <ShoppingBag className="w-5 h-5" />
-                    {totalItems} {totalItems === 1 ? 'ítem' : 'ítems'} · {formatMoney(data.total_price)}
-                </button>
-            )}
+            <button
+                onClick={() => setCartOpen(true)}
+                className="fixed bottom-6 left-6 z-40 bg-crimson hover:bg-crimson/90 text-white p-4 rounded-full shadow-lg shadow-crimson/30 transition-all active:scale-95"
+            >
+                <ShoppingBag className="w-5 h-5" />
+                {totalItems > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-gold text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                        {totalItems}
+                    </span>
+                )}
+            </button>
 
             {cartOpen && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
@@ -759,7 +759,22 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                         </div>
                     </div>
                 </div>
-            )}
+            <button
+                onClick={() => setCartOpen(true)}
+                className="fixed bottom-6 left-6 z-40 bg-crimson hover:bg-crimson/90 text-white p-4 rounded-full shadow-lg shadow-crimson/30 transition-all active:scale-95"
+            >
+                <ShoppingBag className="w-5 h-5" />
+                {totalItems > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-gold text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                        {totalItems}
+                    </span>
+                )}
+            </button>
         </>
     );
+}
+
+function CartModal({ cartOpen, setCartOpen, data, updateQuantity, removeFromCart, clearCart, totalItems, formatMoney, paymentError, paymentProcessing, handleCheckout, processing, errors, setData }: any) {
+    // ... existing cart modal logic ...
+    return null;
 }
