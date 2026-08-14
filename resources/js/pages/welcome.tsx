@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
+﻿import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { ShoppingBag, Plus, Minus, X, Trash2, CheckCircle, Instagram, Facebook, MessageCircle, Music2, MapPin, Clock, Phone, Sparkles, ChefHat, Leaf, Flame, Star, ArrowRight } from 'lucide-react';
 import React, { useState, useRef, useEffect } from 'react';
 import FlashAlert from '@/components/flash-alert';
@@ -329,70 +329,73 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         <>
             <Head title="Bienvenidos" />
 
-            <div className="relative min-h-screen w-full bg-charcoal text-warm-white font-sans overflow-x-hidden selection:bg-ember selection:text-white">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(200,120,60,0.25),transparent_55%),radial-gradient(circle_at_80%_20%,rgba(180,100,40,0.18),transparent_50%)]" />
-                <div className="absolute inset-0 bg-[url('/images/hero-bg.jfif')] bg-cover bg-center bg-no-repeat" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+            <div className="relative bg-[#09090b] text-[#f8fafc] font-sans overflow-x-hidden selection:bg-amber-500 selection:text-white">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-amber-950/20 via-slate-900/10 to-transparent rounded-full blur-[120px] pointer-events-none" />
 
-                <div className="relative z-10 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-clay/20">
-                    <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-gold via-amber-200 to-amber-400 bg-clip-text text-transparent">
-                        Empandas
-                    </span>
+                <div className="relative min-h-screen flex flex-col">
+                    <div
+                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                        style={{ backgroundImage: "url('/images/hero-bg.jfif')" }}
+                    />
+                    <div className="absolute inset-0 bg-black/40" />
 
-                    <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-warm-white/70">
-                        <a href="#menu" className="hover:text-gold transition-colors">Carta</a>
-                        <a href="#nosotros" className="hover:text-gold transition-colors">Nosotros</a>
-                        <a href="#redes" className="hover:text-gold transition-colors">Redes</a>
-                    </nav>
-
-                    <div className="flex items-center gap-4">
-                        {auth?.user ? (
-                            <Link href={route('dashboard')} className="text-sm font-medium text-warm-white/70 hover:text-gold transition">
-                                Panel
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href={route('login')} className="text-sm font-medium text-warm-white/70 hover:text-gold transition">
-                                    Iniciar sesión
-                                </Link>
-                                <Link href={route('register')} className="bg-gradient-to-r from-amber-600 to-ember text-white text-xs md:text-sm font-semibold px-5 py-2.5 rounded-full hover:from-amber-500 hover:to-ember/90 transition shadow-lg shadow-ember/20">
-                                    Registrarse
-                                </Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-
-                <section className="relative z-10 flex-1 flex items-center justify-center px-6 py-20">
-                    <div className="max-w-5xl mx-auto w-full text-center">
-                        <FlashAlert />
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ember/10 border border-ember/20 text-xs font-bold text-gold tracking-wide mb-10">
-                            <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                            ¡LAS MAS RICAS!
+                    <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between border-b border-white/5 shrink-0">
+                        <div className="flex items-center">
+                            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-200 via-white to-slate-200 bg-clip-text text-transparent">
+                                Empandas
+                            </span>
                         </div>
 
-                        <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.05] text-warm-white mb-8">
-                            Dorado perfecto. <br />
-                            <span className="font-script text-6xl md:text-8xl lg:text-[9rem] text-gold drop-shadow-[0_0_25px_rgba(220,160,60,0.35)]">
-                                Sabor inolvidable.
-                            </span>
-                        </h1>
+                        <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+                            <a href="#menu" className="hover:text-white transition-colors">Carta</a>
+                            <a href="#nosotros" className="hover:text-white transition-colors">Nosotros</a>
+                            <a href="#redes" className="hover:text-white transition-colors">Redes</a>
+                        </nav>
 
-                        <p className="max-w-2xl text-warm-white/70 text-base md:text-lg font-light leading-relaxed mb-12 mx-auto">
-                            Empanadas artesanales hechas con ingredientes seleccionados, horneadas al momento. Directo a tu mesa.
-                        </p>
+                        <div className="flex items-center space-x-4">
+                            {auth?.user ? (
+                                <Link href={route('dashboard')} className="text-sm font-medium text-slate-300 hover:text-white transition">
+                                    Panel
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link href={route('login')} className="text-sm font-medium text-slate-300 hover:text-white transition">
+                                        Iniciar sesión
+                                    </Link>
+                                    <Link href={route('register')} className="bg-white text-black text-xs md:text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-slate-200 transition shadow-lg shadow-white/5">
+                                        Registrarse
+                                    </Link>
+                                </>
+                            )}
+                        </div>
+                    </header>
 
-                        <a href="#menu" className="group relative inline-flex items-center gap-2 bg-charcoal text-gold px-8 py-4 rounded-full font-bold text-base border border-gold/30 hover:border-gold transition-all duration-300 shadow-[0_0_25px_-8px_var(--ember-glow)] hover:shadow-[0_0_35px_-6px_var(--ember-glow)]">
-                            <span className="relative z-10">Ver Menú Completo</span>
-                            <ArrowRight className="relative z-10 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                            <span className="absolute inset-0 rounded-full bg-gradient-to-r from-ember/10 via-gold/10 to-ember/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </a>
+                <section className="relative z-10 max-w-4xl mx-auto px-6 text-center flex flex-col items-center justify-center flex-1">
+                    <FlashAlert />
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-amber-400 tracking-wide mb-8 backdrop-blur-md">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        ¡LAS MAS RICAS!
                     </div>
+
+                    <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.1] text-white mb-6">
+                        Dorado perfecto. <br />
+                        <span className="font-sans italic font-light bg-gradient-to-r from-amber-200 via-slate-200 to-white bg-clip-text text-transparent">
+                            Sabor inolvidable.
+                        </span>
+                    </h1>
+
+                    <p className="max-w-xl text-slate-400 text-base md:text-lg font-light leading-relaxed mb-10">
+                        Empanadas artesanales hechas con ingredientes seleccionados, horneadas al momento. Directo a tu mesa.
+                    </p>
+
+                    <a href="#menu" className="bg-white text-black px-8 py-4 rounded-full font-semibold text-base hover:bg-slate-200 transition-all duration-300 shadow-xl shadow-white/5">
+                        Ver Menú Completo
+                    </a>
                 </section>
             </div>
 
-            <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
-                <h2 className="text-3xl font-serif text-white mb-10 text-center md:text-left">Nuestra Carta</h2>
+                <section id="menu" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
+                    <h2 className="text-3xl font-serif text-white mb-10 text-center md:text-left">Nuestra Carta</h2>
 
                     {menu.length === 0 ? (
                         <div className="text-center py-12 text-slate-500 rounded-2xl bg-white/[0.02] border border-white/5">
@@ -435,9 +438,9 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
 
                                                 <button
                                                     onClick={() => addToCart(product)}
-                                                    className="self-start p-2.5 rounded-full border border-gold/40 bg-charcoal/80 text-gold hover:bg-gold hover:text-black transition-all duration-300 shadow-lg shadow-black/20 hover:shadow-gold/30"
+                                                    className="w-full bg-white/5 hover:bg-amber-500 text-slate-300 hover:text-black py-2 rounded-xl text-xs font-bold tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-1"
                                                 >
-                                                    <Plus className="w-4 h-4" />
+                                                    <Plus className="w-3.5 h-3.5" /> Agregar
                                                 </button>
                                             </div>
                                         </div>
@@ -600,17 +603,15 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                 </footer>
             </div>
 
-            <button
-                onClick={() => setCartOpen(true)}
-                className="fixed bottom-6 left-6 z-40 bg-crimson hover:bg-crimson/90 text-white p-4 rounded-full shadow-lg shadow-crimson/30 transition-all active:scale-95"
-            >
-                <ShoppingBag className="w-5 h-5" />
-                {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-gold text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
-                        {totalItems}
-                    </span>
-                )}
-            </button>
+            {totalItems > 0 && !cartOpen && (
+                <button
+                    onClick={() => setCartOpen(true)}
+                    className="fixed bottom-6 right-6 z-40 bg-amber-500 hover:bg-amber-400 text-black font-bold px-5 py-3.5 rounded-full shadow-2xl shadow-amber-500/30 flex items-center gap-2 transition-all active:scale-95"
+                >
+                    <ShoppingBag className="w-5 h-5" />
+                    {totalItems} {totalItems === 1 ? 'ítem' : 'ítems'} · {formatMoney(data.total_price)}
+                </button>
+            )}
 
             {cartOpen && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
@@ -759,22 +760,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                         </div>
                     </div>
                 </div>
-            <button
-                onClick={() => setCartOpen(true)}
-                className="fixed bottom-6 left-6 z-40 bg-crimson hover:bg-crimson/90 text-white p-4 rounded-full shadow-lg shadow-crimson/30 transition-all active:scale-95"
-            >
-                <ShoppingBag className="w-5 h-5" />
-                {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-gold text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
-                        {totalItems}
-                    </span>
-                )}
-            </button>
+            )}
         </>
     );
-}
-
-function CartModal({ cartOpen, setCartOpen, data, updateQuantity, removeFromCart, clearCart, totalItems, formatMoney, paymentError, paymentProcessing, handleCheckout, processing, errors, setData }: any) {
-    // ... existing cart modal logic ...
-    return null;
 }
