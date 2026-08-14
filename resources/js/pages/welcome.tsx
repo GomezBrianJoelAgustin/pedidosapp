@@ -333,6 +333,8 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(200,120,60,0.25),transparent_55%),radial-gradient(circle_at_80%_20%,rgba(180,100,40,0.18),transparent_50%)]" />
                 <div className="absolute inset-0 bg-gradient-to-b from-charcoal/80 via-charcoal/60 to-charcoal" />
 
+                <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-40 mix-blend-overlay" />
+
                 <header className="relative z-10 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-clay/20">
                     <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-gold via-amber-200 to-amber-400 bg-clip-text text-transparent">
                         Empandas
@@ -362,30 +364,36 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                     </div>
                 </header>
 
-                <section className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-20 text-center flex flex-col items-center justify-center">
-                    <FlashAlert />
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ember/10 border border-ember/20 text-xs font-bold text-gold tracking-wide mb-10">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                        ¡LAS MAS RICAS!
+                <section className="relative z-10 min-h-[calc(100vh-80px)] flex items-center">
+                    <div className="max-w-7xl mx-auto px-6 py-20 w-full">
+                        <div className="max-w-2xl">
+                            <FlashAlert />
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ember/10 border border-ember/20 text-xs font-bold text-gold tracking-wide mb-10">
+                                <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+                                ¡LAS MAS RICAS!
+                            </div>
+
+                            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.05] text-warm-white mb-8">
+                                Dorado perfecto. <br />
+                                <span className="font-script text-6xl md:text-8xl lg:text-[9rem] text-gold drop-shadow-[0_0_25px_rgba(220,160,60,0.35)]">
+                                    Sabor inolvidable.
+                                </span>
+                            </h1>
+
+                            <p className="text-warm-white/70 text-base md:text-lg font-light leading-relaxed mb-12">
+                                Empanadas artesanales hechas con ingredientes seleccionados, horneadas al momento. Directo a tu mesa.
+                            </p>
+
+                            <a href="#menu" className="group relative inline-flex items-center gap-2 bg-charcoal text-gold px-8 py-4 rounded-full font-bold text-base border border-gold/30 hover:border-gold transition-all duration-300 shadow-[0_0_25px_-8px_var(--ember-glow)] hover:shadow-[0_0_35px_-6px_var(--ember-glow)]">
+                                <span className="relative z-10">Ver Menú Completo</span>
+                                <ArrowRight className="relative z-10 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                <span className="absolute inset-0 rounded-full bg-gradient-to-r from-ember/10 via-gold/10 to-ember/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </a>
+                        </div>
                     </div>
-
-                    <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.05] text-warm-white mb-8">
-                        Dorado perfecto. <br />
-                        <span className="font-script text-6xl md:text-8xl lg:text-[9rem] text-gold drop-shadow-[0_0_25px_rgba(220,160,60,0.35)]">
-                            Sabor inolvidable.
-                        </span>
-                    </h1>
-
-                    <p className="max-w-2xl text-warm-white/70 text-base md:text-lg font-light leading-relaxed mb-12">
-                        Empanadas artesanales hechas con ingredientes seleccionados, horneadas al momento. Directo a tu mesa.
-                    </p>
-
-                    <a href="#menu" className="group relative inline-flex items-center gap-2 bg-charcoal text-gold px-8 py-4 rounded-full font-bold text-base border border-gold/30 hover:border-gold transition-all duration-300 shadow-[0_0_25px_-8px_var(--ember-glow)] hover:shadow-[0_0_35px_-6px_var(--ember-glow)]">
-                        <span className="relative z-10">Ver Menú Completo</span>
-                        <ArrowRight className="relative z-10 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                        <span className="absolute inset-0 rounded-full bg-gradient-to-r from-ember/10 via-gold/10 to-ember/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </a>
                 </section>
+
+                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-charcoal to-transparent z-10" />
 
                 <section id="menu" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
                     <h2 className="text-3xl font-serif text-white mb-10 text-center md:text-left">Nuestra Carta</h2>
