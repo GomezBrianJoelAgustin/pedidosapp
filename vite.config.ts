@@ -15,6 +15,12 @@ export default defineConfig({
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
                 }),
+                bunny('Playfair Display', {
+                    weights: [400, 700],
+                }),
+                bunny('Dancing Script', {
+                    weights: [400, 500],
+                }),
             ],
         }),
         inertia(),
