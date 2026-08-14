@@ -329,31 +329,32 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         <>
             <Head title="Bienvenidos" />
 
-            <div className="relative min-h-screen bg-[#09090b] text-[#f8fafc] font-sans overflow-x-hidden selection:bg-amber-500 selection:text-white">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-amber-950/20 via-slate-900/10 to-transparent rounded-full blur-[120px] pointer-events-none" />
+            <div className="relative min-h-screen bg-charcoal text-warm-white font-sans overflow-x-hidden selection:bg-ember selection:text-white">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(200,120,60,0.25),transparent_55%),radial-gradient(circle_at_80%_20%,rgba(180,100,40,0.18),transparent_50%)]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-charcoal/80 via-charcoal/60 to-charcoal" />
 
-                <header className="relative z-10 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-white/5">
-                    <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                <header className="relative z-10 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-clay/20">
+                    <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-gold via-amber-200 to-amber-400 bg-clip-text text-transparent">
                         Empandas
                     </span>
 
-                    <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-                        <a href="#menu" className="hover:text-white transition-colors">Carta</a>
-                        <a href="#nosotros" className="hover:text-white transition-colors">Nosotros</a>
-                        <a href="#redes" className="hover:text-white transition-colors">Redes</a>
+                    <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-warm-white/70">
+                        <a href="#menu" className="hover:text-gold transition-colors">Carta</a>
+                        <a href="#nosotros" className="hover:text-gold transition-colors">Nosotros</a>
+                        <a href="#redes" className="hover:text-gold transition-colors">Redes</a>
                     </nav>
 
                     <div className="flex items-center gap-4">
                         {auth?.user ? (
-                            <Link href={route('dashboard')} className="text-sm font-medium text-slate-400 hover:text-white transition">
+                            <Link href={route('dashboard')} className="text-sm font-medium text-warm-white/70 hover:text-gold transition">
                                 Panel
                             </Link>
                         ) : (
                             <>
-                                <Link href={route('login')} className="text-sm font-medium text-slate-400 hover:text-white transition">
+                                <Link href={route('login')} className="text-sm font-medium text-warm-white/70 hover:text-gold transition">
                                     Iniciar sesión
                                 </Link>
-                                <Link href={route('register')} className="bg-white text-black text-xs md:text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-slate-200 transition shadow-lg shadow-white/5">
+                                <Link href={route('register')} className="bg-gradient-to-r from-amber-600 to-ember text-white text-xs md:text-sm font-semibold px-5 py-2.5 rounded-full hover:from-amber-500 hover:to-ember/90 transition shadow-lg shadow-ember/20">
                                     Registrarse
                                 </Link>
                             </>
@@ -361,26 +362,28 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                     </div>
                 </header>
 
-                <section className="relative z-10 max-w-4xl mx-auto px-6 pt-20 pb-16 text-center flex flex-col items-center justify-center">
+                <section className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-20 text-center flex flex-col items-center justify-center">
                     <FlashAlert />
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-amber-400 tracking-wide mb-8 backdrop-blur-md">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ember/10 border border-ember/20 text-xs font-bold text-gold tracking-wide mb-10">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
                         ¡LAS MAS RICAS!
                     </div>
 
-                    <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.1] text-white mb-6">
+                    <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.05] text-warm-white mb-8">
                         Dorado perfecto. <br />
-                        <span className="font-sans italic font-light bg-gradient-to-r from-amber-200 via-slate-200 to-white bg-clip-text text-transparent">
+                        <span className="font-script text-6xl md:text-8xl lg:text-[9rem] text-gold drop-shadow-[0_0_25px_rgba(220,160,60,0.35)]">
                             Sabor inolvidable.
                         </span>
                     </h1>
 
-                    <p className="max-w-xl text-slate-400 text-base md:text-lg font-light leading-relaxed mb-10">
+                    <p className="max-w-2xl text-warm-white/70 text-base md:text-lg font-light leading-relaxed mb-12">
                         Empanadas artesanales hechas con ingredientes seleccionados, horneadas al momento. Directo a tu mesa.
                     </p>
 
-                    <a href="#menu" className="bg-white text-black px-8 py-4 rounded-full font-semibold text-base hover:bg-slate-200 transition-all duration-300 shadow-xl shadow-white/5">
-                        Ver Menú Completo
+                    <a href="#menu" className="group relative inline-flex items-center gap-2 bg-charcoal text-gold px-8 py-4 rounded-full font-bold text-base border border-gold/30 hover:border-gold transition-all duration-300 shadow-[0_0_25px_-8px_var(--ember-glow)] hover:shadow-[0_0_35px_-6px_var(--ember-glow)]">
+                        <span className="relative z-10">Ver Menú Completo</span>
+                        <ArrowRight className="relative z-10 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        <span className="absolute inset-0 rounded-full bg-gradient-to-r from-ember/10 via-gold/10 to-ember/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </a>
                 </section>
 
