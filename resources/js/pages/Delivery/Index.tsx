@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 import FlashAlert from '@/components/flash-alert';
 import { usePolling } from '@/hooks/use-polling';
-import OrderCard from '@/components/order-card';
 
 interface Product {
     id: number;
@@ -50,13 +49,6 @@ interface PageProps {
     orders: { data: Order[] } | Order[];
 }
 
-const columns = [
-    { key: 'ready', label: 'Listos', accent: 'gold' as const },
-    { key: 'out_for_delivery', label: 'En Camino', accent: 'ember' as const },
-    { key: 'at_location', label: 'En la Puerta', accent: 'clay' as const },
-    { key: 'delivered', label: 'Entregado', accent: 'clay' as const },
-];
-
 export default function DeliveryIndex({ orders }: PageProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'ready' | 'delivered'>('all');
@@ -82,15 +74,6 @@ export default function DeliveryIndex({ orders }: PageProps) {
             setTimeout(() => setToast(null), 4000);
         },
     });
-
-    useEffect(() => {
-        if (!orders) return;
-        const list = Array.isArray(orders) ? orders : orders?.data || [];
-        if (list.length > orderList.length && orderList.length > 0) {
-            setToast('¡Nuevo pedido listo para entregar!');
-            setTimeout(() => setToast(null), 4000);
-        }
-    }, [orders]);
 
     const filteredOrders = useMemo(() => {
         return orderList.filter((order) => {
@@ -143,8 +126,8 @@ export default function DeliveryIndex({ orders }: PageProps) {
     const getPaymentBadge = (paymentMethod: string, paymentStatus: string) => {
         if (paymentMethod !== 'effective') {
             return (
-                <span className="inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                    <CreditCard className="w-3 h-3" />
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#d4af37]/10 text-[#d4af37] border-[#d4af37]/20 flex items-center gap-1">
+                    <CreditCard className="w-3.5 h-3.5" />
                     {paymentStatus === 'paid' ? 'Pagado' : paymentStatus === 'failed' ? 'Rechazado' : 'Pendiente'}
                 </span>
             );
@@ -155,90 +138,128 @@ export default function DeliveryIndex({ orders }: PageProps) {
 
         if (isPaid) {
             return (
-                <span className="inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                    <DollarSign className="w-3 h-3" />
-                    Pagado
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-1">
+                    <DollarSign className="w-3.5 h-3.5" />
+                    Pago Completado
                 </span>
             );
         }
 
         if (isPending) {
             return (
-                <span className="inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                    <DollarSign className="w-3 h-3" />
-                    Pendiente
+                <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 flex items-center gap-1">
+                    <DollarSign className="w-3.5 h-3.5" />
+                    Paga Después
                 </span>
             );
         }
 
         return (
-            <span className="inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-300 border border-rose-500/20">
-                <DollarSign className="w-3 h-3" />
+            <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#e63946]/10 text-[#e63946] border-[#e63946]/20 flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5" />
                 {paymentStatus}
             </span>
         );
     };
 
+    const statusBadge: Record<string, { label: string; className: string }> = {
+        awaiting_approval: { label: 'Pendiente de Aprobación', className: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' },
+        approved: { label: 'Aprobado', className: 'bg-[#d4af37]/10 text-[#d4af37] border-[#d4af37]/20' },
+        preparing: { label: 'En Preparación', className: 'bg-[#e07a38]/10 text-[#e07a38] border-[#e07a38]/20' },
+        ready: { label: 'Listo', className: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' },
+        out_for_delivery: { label: 'Enviando al Cadete', className: 'bg-[#d4af37]/10 text-[#d4af37] border-[#d4af37]/20' },
+        at_location: { label: 'El Cadete Está Afuera', className: 'bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20' },
+        delivered: { label: 'Entregado', className: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' },
+        rejected: { label: 'Rechazado', className: 'bg-[#e63946]/10 text-[#e63946] border-[#e63946]/20' },
+    };
+
+    const readyCount = orderList.filter((o) => o.status === 'ready').length;
+    const outCount = orderList.filter((o) => o.status === 'out_for_delivery').length;
+    const atLocationCount = orderList.filter((o) => o.status === 'at_location').length;
+    const deliveredCount = orderList.filter((o) => o.status === 'delivered').length;
+
     return (
-        <div className="min-h-screen bg-forge text-warm-white p-3 sm:p-6 font-sans">
-            <div className="max-w-[1600px] mx-auto space-y-6">
+        <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 font-sans transition-colors duration-200">
+            <div className="max-w-7xl mx-auto space-y-6">
                 <FlashAlert />
 
                 {toast && (
-                    <div className="fixed top-4 right-4 z-50 bg-indigo-500 text-white px-6 py-3 rounded-2xl shadow-lg shadow-indigo-500/30 flex items-center gap-2 animate-bounce">
+                    <div className="fixed top-4 right-4 z-50 bg-[#e07a38] text-white px-6 py-3 rounded-2xl shadow-lg shadow-[#e07a38]/30 flex items-center gap-2 animate-bounce">
                         <Bell className="w-5 h-5" />
                         <span className="font-bold text-sm">{toast}</span>
                     </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-clay/10 border border-clay/20 p-5 sm:p-6 rounded-3xl">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card p-5 sm:p-6 rounded-3xl border border-border backdrop-blur-xl shadow-sm dark:shadow-none">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-warm-white flex items-center gap-2 sm:gap-3">
-                            <Truck className="w-7 h-7 sm:w-8 sm:h-8 text-gold" /> Panel de Cadetes
+                        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-2 sm:gap-3">
+                            <Truck className="w-7 h-7 sm:w-8 sm:h-8 text-[#e07a38]" /> Panel de Cadetes
                         </h1>
-                        <p className="text-sm text-warm-white/60 mt-1">Visualizá los pedidos listos y confirmá la entrega con PIN</p>
+                        <p className="text-sm text-muted-foreground mt-1">Visualizá los pedidos listos y confirmá la entrega con PIN</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {columns.slice(0, 3).map((column) => {
-                        const count = filteredOrders.filter((o) => o.status === column.key).length;
-                        return (
-                            <div key={column.key} className="bg-clay/5 border border-clay/20 rounded-2xl p-4 flex items-center gap-3">
-                                <div className="p-2.5 bg-ember/10 rounded-xl">
-                                    <Package className="w-5 h-5 text-ember" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-warm-white/60 uppercase tracking-wider">{column.label}</p>
-                                    <p className="text-2xl font-black text-warm-white">{count}</p>
-                                </div>
-                            </div>
-                        );
-                    })}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
+                        <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl">
+                            <Package className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Listos</p>
+                            <p className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{readyCount}</p>
+                        </div>
+                    </div>
+                    <div className="bg-[#d4af37]/5 border border-[#d4af37]/20 rounded-2xl p-4 flex items-center gap-3">
+                        <div className="p-2.5 bg-[#d4af37]/10 rounded-xl">
+                            <Truck className="w-5 h-5 text-[#e07a38]" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-[#e07a38] uppercase tracking-wider">En Camino</p>
+                            <p className="text-2xl font-black text-[#d4af37]">{outCount}</p>
+                        </div>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-4 flex items-center gap-3">
+                        <div className="p-2.5 bg-amber-100 dark:bg-amber-500/10 rounded-xl">
+                            <MapPin className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">En la Puerta</p>
+                            <p className="text-2xl font-black text-amber-700 dark:text-amber-300">{atLocationCount}</p>
+                        </div>
+                    </div>
+                    <div className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
+                        <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/10 rounded-xl">
+<CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Entregados</p>
+                        <p className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{deliveredCount}</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-clay/5 p-4 rounded-3xl border border-clay/20">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-card p-4 rounded-3xl border border-border backdrop-blur-md">
                     <div className="md:col-span-2 relative flex items-center">
-                        <Search className="w-5 h-5 absolute left-4 text-warm-white/40 pointer-events-none" />
+                        <Search className="w-5 h-5 absolute left-4 text-muted-foreground pointer-events-none" />
                         <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Buscar por ID (#123), cliente, dirección..."
-                            className="w-full pl-11 pr-10 py-3 bg-black/20 border border-clay/20 rounded-2xl text-sm text-warm-white placeholder:text-warm-white/40 focus:border-gold focus:ring-gold/30 transition-all shadow-sm"
+                            className="w-full pl-11 pr-10 py-3 bg-card border border-border rounded-2xl text-sm text-foreground placeholder-slate-400 dark:placeholder-slate-500 focus:border-[#e07a38] focus:ring-[#e07a38]/30 transition-all shadow-sm"
                         />
                         {searchTerm && (
-                            <button onClick={() => setSearchTerm('')} className="absolute right-3 p-1 text-warm-white/40 hover:text-warm-white rounded-lg">
+                            <button onClick={() => setSearchTerm('')} className="absolute right-3 p-1 text-muted-foreground hover:text-foreground rounded-lg">
                                 <X className="w-4 h-4" />
                             </button>
                         )}
                     </div>
                     <div className="relative flex items-center">
-                        <Filter className="w-4 h-4 absolute left-4 text-warm-white/40 pointer-events-none" />
+                        <Filter className="w-4 h-4 absolute left-4 text-muted-foreground pointer-events-none" />
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value as any)}
-                            className="w-full pl-10 pr-8 py-3 bg-black/20 border border-clay/20 rounded-2xl text-sm text-warm-white focus:border-gold focus:ring-gold/30 transition-all shadow-sm font-medium"
+                            className="w-full pl-10 pr-8 py-3 bg-card border border-border rounded-2xl text-sm text-foreground focus:border-[#e07a38] focus:ring-[#e07a38]/30 transition-all shadow-sm font-medium"
                         >
                             <option value="all" className="dark:bg-[#0f0f11]">Todos los Estados</option>
                             <option value="ready" className="dark:bg-[#0f0f11]">Listo para Entregar</option>
@@ -248,81 +269,111 @@ export default function DeliveryIndex({ orders }: PageProps) {
                 </div>
 
                 {filteredOrders.length === 0 ? (
-                    <div className="bg-clay/5 border border-clay/20 rounded-3xl p-10 sm:p-16 text-center text-warm-white/50 space-y-2">
+                    <div className="bg-card border border-border rounded-3xl p-10 sm:p-16 text-center text-muted-foreground space-y-2">
                         <p className="font-semibold text-lg">No se encontraron pedidos</p>
                         <p className="text-xs">Intenta ajustar la búsqueda o los filtros aplicados.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {columns.map((column) => {
-                            const columnOrders = filteredOrders.filter((o) => o.status === column.key);
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        {filteredOrders.map((order) => {
+                            const badge = statusBadge[order.status] || statusBadge['ready'];
                             return (
-                                <div key={column.key} className="flex flex-col gap-4">
-                                    <div className="flex items-center justify-between">
-                                        <h2 className="text-sm font-bold uppercase tracking-wider text-warm-white/70">{column.label}</h2>
-                                        <span className="text-xs font-bold text-warm-white/40">{columnOrders.length}</span>
+                                <div key={order.id} className="bg-card hover:dark:bg-white/[0.05] border border-border hover:border-slate-300 dark:hover:border-white/20 rounded-3xl p-5 sm:p-6 shadow-sm dark:shadow-none transition-all hover:-translate-y-1 hover:shadow-md flex flex-col justify-between group">
+                                    <div>
+                                        <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
+                                            <div>
+                                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pedido</span>
+                                                <h3 className="text-xl font-extrabold text-foreground">#{order.id}</h3>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Total</span>
+                                                <span className="text-lg font-black text-[#e07a38]">{formatMoney(order.total_price)}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-4 bg-card p-3 rounded-2xl border border-border">
+                                            {order.user ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="p-1 bg-amber-500/10 text-amber-500 rounded-lg shrink-0">
+                                                        <User className="w-4 h-4" />
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium text-foreground truncate">{order.user.name}</p>
+                                                        <span className="text-[10px] uppercase tracking-wider font-bold text-amber-500">Cliente Registrado</span>
+                                                    </div>
+                                                </div>
+                                            ) : order.guest_name ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="p-1 bg-purple-500/10 text-purple-400 rounded-lg shrink-0">
+                                                        <User className="w-4 h-4" />
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium text-foreground truncate">{order.guest_name}</p>
+                                                        <span className="text-[10px] uppercase tracking-wider font-bold text-purple-400">Invitado</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-muted-foreground text-sm">Sin datos de cliente</span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${statusBadge[order.status]?.className || statusBadge['awaiting_approval'].className}`}>
+                                                {statusBadge[order.status]?.label || order.status}
+                                            </span>
+                                            {getPaymentBadge(order.payment_method, order.payment_status)}
+                                        </div>
+
+                                        <div className="text-xs text-muted-foreground space-y-2 mb-6">
+                                            {order.delivery_type !== 'takeaway' && (
+                                                <p className="flex items-center gap-2">
+                                                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                                                    {order.delivery_address || 'Retiro en Local'}
+                                                </p>
+                                            )}
+                                            <p className="flex items-center gap-2">
+                                                <Package className="w-4 h-4 text-muted-foreground" />
+                                                {order.items?.length || 0} ítem(s)
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col gap-4">
-                                        {columnOrders.map((order) => (
-                                            <OrderCard
-                                                key={order.id}
-                                                order={order}
-                                                accent={column.accent}
-                                                header={
-                                                    <>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleOpenDetail(order);
-                                                            }}
-                                                            className="flex-1 py-2.5 px-3 bg-clay/10 hover:bg-clay/20 text-warm-white border border-clay/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                                                        >
-                                                            <Eye className="w-4 h-4" /> Detalle
-                                                        </button>
-                                                        {order.status === 'ready' && (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    router.post(route('delivery.orders.mark-out-for-delivery', order.id), {}, { preserveScroll: true, preserveState: true });
-                                                                }}
-                                                                className="flex-1 py-2.5 px-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                                                            >
-                                                                <Truck className="w-4 h-4" /> En Camino
-                                                            </button>
-                                                        )}
-                                                        {order.status === 'out_for_delivery' && (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    router.post(route('delivery.orders.mark-at-location', order.id), {}, { preserveScroll: true, preserveState: true });
-                                                                }}
-                                                                className="flex-1 py-2.5 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                                                            >
-                                                                <MapPin className="w-4 h-4" /> En la Puerta
-                                                            </button>
-                                                        )}
-                                                        {order.status === 'at_location' && (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleOpenPin(order);
-                                                                }}
-                                                                className="flex-1 py-2.5 px-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                                                            >
-                                                                <Lock className="w-4 h-4" /> Ingresar PIN
-                                                            </button>
-                                                        )}
-                                                        {order.status === 'delivered' && (
-                                                            <span className="flex-1 py-2.5 px-3 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5">
-                                                                <CheckCircle className="w-4 h-4" />
-                                                                Entregado
-                                                            </span>
-                                                        )}
-                                                    </>
-                                                }
-                                                onClick={() => handleOpenDetail(order)}
-                                            />
-                                        ))}
+
+                                    <div className="flex items-center gap-2 pt-4 border-t border-border">
+                                        <button
+                                            onClick={() => handleOpenDetail(order)}
+                                            className="flex-1 py-2.5 px-3 bg-card hover:bg-card text-foreground border border-border rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                        >
+                                            <Eye className="w-4 h-4" /> Detalle
+                                        </button>
+                                        {order.status === 'ready' && (
+                                            <button
+                                                onClick={() => router.post(route('delivery.orders.mark-out-for-delivery', order.id), {}, { preserveScroll: true, preserveState: true })}
+                                                className="flex-1 py-2.5 px-3 bg-[#d4af37]/10 hover:bg-[#d4af37] text-[#d4af37] hover:text-white border border-[#d4af37]/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            >
+                                                <Truck className="w-4 h-4" /> Pedido Recibido / En Camino
+                                            </button>
+                                        )}
+                                        {order.status === 'out_for_delivery' && (
+                                            <button
+                                                onClick={() => router.post(route('delivery.orders.mark-at-location', order.id), {}, { preserveScroll: true, preserveState: true })}
+                                                className="flex-1 py-2.5 px-3 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-600 text-amber-600 dark:text-amber-400 hover:text-white border border-amber-200 dark:border-amber-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            >
+                                                <MapPin className="w-4 h-4" /> Llegué a la Ubicación
+                                            </button>
+                                        )}
+                                        {order.status === 'at_location' && (
+                                            <button
+                                                onClick={() => handleOpenPin(order)}
+                                                className="flex-1 py-2.5 px-3 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                                            >
+                                                <Lock className="w-4 h-4" /> Ingresar PIN
+                                            </button>
+                                        )}
+                                        {order.status === 'delivered' && (
+                                            <span className="flex-1 py-2.5 px-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5">
+                                                <CheckCircle className="w-4 h-4" /> Entregado
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             );
@@ -333,70 +384,70 @@ export default function DeliveryIndex({ orders }: PageProps) {
 
             {modalDetail && selectedOrder && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
-                    <div className="bg-forge border-t sm:border border-clay/20 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl overflow-hidden max-h-[92vh] flex flex-col">
-                        <div className="p-5 sm:p-6 border-b border-clay/10 flex items-center justify-between bg-clay/5 shrink-0">
+                    <div className="bg-card border-t sm:border border-border rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl overflow-hidden max-h-[92vh] flex flex-col">
+                        <div className="p-5 sm:p-6 border-b border-border flex items-center justify-between bg-card shrink-0">
                             <div>
-                                <h2 className="text-lg sm:text-xl font-bold text-warm-white">Detalle del Pedido #{selectedOrder.id}</h2>
-                                <p className="text-xs text-warm-white/50">{new Date(selectedOrder.created_at).toLocaleString('es-AR')}</p>
+                                <h2 className="text-lg sm:text-xl font-bold text-foreground">Detalle del Pedido #{selectedOrder.id}</h2>
+                                <p className="text-xs text-muted-foreground">{new Date(selectedOrder.created_at).toLocaleString('es-AR')}</p>
                             </div>
-                            <button onClick={() => setModalDetail(false)} className="text-warm-white/40 hover:text-warm-white p-2 rounded-xl bg-clay/10">
+                            <button onClick={() => setModalDetail(false)} className="text-muted-foreground hover:text-foreground p-2 rounded-xl bg-card">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         <div className="p-5 sm:p-6 space-y-6 overflow-y-auto">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-black/20 p-4 rounded-2xl border border-clay/10">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-card p-4 rounded-2xl border border-border">
                                 <div>
-                                    <p className="text-xs font-semibold text-warm-white/50 uppercase mb-1">Cliente / Comprador</p>
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Cliente / Comprador</p>
                                     {selectedOrder.user ? (
                                         <div className="flex items-center gap-2">
-                                            <span className="p-1 bg-ember/10 text-ember rounded-lg">
+                                            <span className="p-1 bg-amber-500/10 text-amber-500 rounded-lg">
                                                 <User className="w-4 h-4" />
                                             </span>
-                                            <p className="font-medium text-warm-white">{selectedOrder.user.name}</p>
+                                            <p className="font-medium text-foreground">{selectedOrder.user.name}</p>
                                         </div>
                                     ) : selectedOrder.guest_name ? (
-                                        <p className="font-medium text-warm-white">{selectedOrder.guest_name} <span className="text-warm-white/50">({selectedOrder.guest_phone})</span></p>
+                                        <p className="font-medium text-foreground">{selectedOrder.guest_name} <span className="text-muted-foreground">({selectedOrder.guest_phone})</span></p>
                                     ) : (
-                                        <span className="text-warm-white/50">Sin datos</span>
+                                        <span className="text-muted-foreground">Sin datos</span>
                                     )}
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-warm-white/50 uppercase mb-1">Repartidor Asignado</p>
-                                    <p className="font-medium text-warm-white flex items-center gap-1.5 mt-1">
-                                        <User className="w-4 h-4 text-warm-white/50" /> {selectedOrder.delivery?.name || 'Sin asignar'}
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Repartidor Asignado</p>
+                                    <p className="font-medium text-foreground flex items-center gap-1.5 mt-1">
+                                        <User className="w-4 h-4 text-muted-foreground" /> {selectedOrder.delivery?.name || 'Sin asignar'}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-warm-white/50 uppercase">Tipo Entrega</p>
-                                    <p className="font-medium text-warm-white capitalize mt-1">{selectedOrder.delivery_type}</p>
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase">Tipo Entrega</p>
+                                    <p className="font-medium text-foreground capitalize mt-1">{selectedOrder.delivery_type}</p>
                                 </div>
                                 {selectedOrder.delivery_type !== 'takeaway' && (
                                     <div>
-                                        <p className="text-xs font-semibold text-warm-white/50 uppercase">Dirección</p>
-                                        <p className="font-medium text-warm-white flex items-center gap-1.5 mt-1">
-                                            <MapPin className="w-4 h-4 text-warm-white/50" /> {selectedOrder.delivery_address || 'Retiro en Local'}
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase">Dirección</p>
+                                        <p className="font-medium text-foreground flex items-center gap-1.5 mt-1">
+                                            <MapPin className="w-4 h-4 text-muted-foreground" /> {selectedOrder.delivery_address || 'Retiro en Local'}
                                         </p>
                                     </div>
                                 )}
                                 <div>
-                                    <p className="text-xs font-semibold text-warm-white/50 uppercase">Pago</p>
-                                    <p className="font-medium text-warm-white mt-1 capitalize">{selectedOrder.payment_method} ({selectedOrder.payment_status})</p>
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase">Pago</p>
+                                    <p className="font-medium text-foreground mt-1 capitalize">{selectedOrder.payment_method} ({selectedOrder.payment_status})</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-warm-white/50 uppercase">PIN de Validación</p>
-                                    <p className="font-mono text-lg font-black text-warm-white/40 mt-1 tracking-widest">••••</p>
-                                    <p className="text-[10px] text-warm-white/40 mt-1">Solicitá el PIN al cliente al momento de la entrega.</p>
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase">PIN de Validación</p>
+                                    <p className="font-mono text-lg font-black text-muted-foreground mt-1 tracking-widest">••••</p>
+                                    <p className="text-[10px] text-muted-foreground mt-1">Solicitá el PIN al cliente al momento de la entrega.</p>
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="font-bold text-warm-white mb-3 flex items-center gap-2">
-                                    <Package className="w-4 h-4 text-gold" /> Ítems del Pedido
+                                <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
+                                    <Package className="w-4 h-4 text-[#e07a38]" /> Ítems del Pedido
                                 </h3>
-                                <div className="border border-clay/10 rounded-2xl overflow-hidden overflow-x-auto">
+                                <div className="border border-border rounded-2xl overflow-hidden overflow-x-auto">
                                     <table className="w-full text-left text-sm">
-                                        <thead className="bg-clay/5 text-xs font-semibold text-warm-white/50 uppercase border-b border-clay/10">
+                                        <thead className="bg-card text-xs font-semibold text-muted-foreground uppercase border-b border-border">
                                             <tr>
                                                 <th className="py-3 px-4">Producto</th>
                                                 <th className="py-3 px-4 text-center">Cant.</th>
@@ -404,15 +455,15 @@ export default function DeliveryIndex({ orders }: PageProps) {
                                                 <th className="py-3 px-4 text-right">Subtotal</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-clay/10">
+                                        <tbody className="divide-y divide-border">
                                             {selectedOrder.items?.map((item) => (
-                                                <tr key={item.id} className="hover:bg-clay/5">
-                                                    <td className="py-3 px-4 font-medium text-warm-white">
+                                                <tr key={item.id} className="hover:bg-card">
+                                                    <td className="py-3 px-4 font-medium text-foreground">
                                                         {item.product?.name || `Producto #${item.product_id}`}
                                                     </td>
-                                                    <td className="py-3 px-4 text-center text-warm-white/60">{item.quantity}</td>
-                                                    <td className="py-3 px-4 text-right text-warm-white/60">{formatMoney(item.price)}</td>
-                                                    <td className="py-3 px-4 text-right font-bold text-gold">
+                                                    <td className="py-3 px-4 text-center text-muted-foreground">{item.quantity}</td>
+                                                    <td className="py-3 px-4 text-right text-muted-foreground">{formatMoney(item.price)}</td>
+                                                    <td className="py-3 px-4 text-right font-bold text-[#e07a38]">
                                                         {formatMoney(item.price * item.quantity)}
                                                     </td>
                                                 </tr>
@@ -422,9 +473,9 @@ export default function DeliveryIndex({ orders }: PageProps) {
                                 </div>
                             </div>
 
-                            <div className="flex justify-between items-center pt-2 border-t border-clay/10">
-                                <span className="font-bold text-warm-white/60">Total a Pagar:</span>
-                                <span className="text-2xl font-black text-gold">{formatMoney(selectedOrder.total_price)}</span>
+                            <div className="flex justify-between items-center pt-2 border-t border-border">
+                                <span className="font-bold text-muted-foreground">Total a Pagar:</span>
+                                <span className="text-2xl font-black text-foreground dark:text-[#e07a38]">{formatMoney(selectedOrder.total_price)}</span>
                             </div>
                         </div>
                     </div>
@@ -433,30 +484,30 @@ export default function DeliveryIndex({ orders }: PageProps) {
 
             {modalPin && selectedOrder && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
-                    <div className="bg-forge border-t sm:border border-clay/20 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 space-y-5">
-                        <div className="flex items-center gap-3 text-indigo-400">
-                            <div className="p-2.5 bg-indigo-500/10 rounded-xl">
+                    <div className="bg-card border-t sm:border border-border rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 space-y-5">
+                        <div className="flex items-center gap-3 text-[#e07a38]">
+                            <div className="p-2.5 bg-[#e07a38]/10 rounded-xl">
                                 <Lock className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-warm-white">Validar Entrega</h3>
-                                <p className="text-xs text-warm-white/50">Pedido #{selectedOrder.id}</p>
+                                <h3 className="text-lg font-bold text-foreground">Validar Entrega</h3>
+                                <p className="text-xs text-muted-foreground">Pedido #{selectedOrder.id}</p>
                             </div>
                         </div>
 
-                        <p className="text-sm text-warm-white/60">
+                        <p className="text-sm text-muted-foreground">
                             Ingresá el PIN de 4 dígitos que te mostró el cliente para confirmar la entrega.
                         </p>
 
                         {pinError && (
-                            <div className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-xl text-sm">
+                            <div className="p-3 bg-[#e63946]/10 border border-[#e63946]/30 text-[#e63946] rounded-xl text-sm">
                                 {pinError}
                             </div>
                         )}
 
                         <form onSubmit={handleValidatePin} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-warm-white/60 uppercase mb-1.5">PIN de 4 dígitos</label>
+                                <label className="block text-xs font-bold text-muted-foreground uppercase mb-1.5">PIN de 4 dígitos</label>
                                 <input
                                     type="text"
                                     inputMode="numeric"
@@ -468,7 +519,7 @@ export default function DeliveryIndex({ orders }: PageProps) {
                                         setPinError(null);
                                     }}
                                     placeholder="0000"
-                                    className="w-full text-center text-3xl font-mono tracking-[0.5em] rounded-2xl bg-black/20 border border-clay/20 text-warm-white focus:border-gold focus:ring-gold/30 py-4"
+                                    className="w-full text-center text-3xl font-mono tracking-[0.5em] rounded-2xl bg-card border border-border text-foreground focus:border-[#e07a38] focus:ring-[#e07a38]/30 py-4"
                                     autoFocus
                                 />
                             </div>
@@ -477,14 +528,14 @@ export default function DeliveryIndex({ orders }: PageProps) {
                                 <button
                                     type="button"
                                     onClick={() => { setModalPin(false); setPinError(null); }}
-                                    className="px-4 py-2.5 text-sm font-semibold text-warm-white/60 hover:bg-clay/10 rounded-xl"
+                                    className="px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:bg-card rounded-xl"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={pinProcessing || pinData.pin.length !== 4}
-                                    className="px-5 py-2.5 text-sm font-bold bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl shadow-lg shadow-indigo-500/25 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-5 py-2.5 text-sm font-bold bg-[#e07a38] hover:bg-[#e07a38]/80 text-white rounded-xl shadow-lg shadow-[#e07a38]/25 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Confirmar Entrega
                                 </button>
@@ -496,3 +547,4 @@ export default function DeliveryIndex({ orders }: PageProps) {
         </div>
     );
 }
+

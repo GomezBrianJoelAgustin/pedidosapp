@@ -1,8 +1,9 @@
 ﻿import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
-import { ShoppingBag, Plus, Minus, X, Trash2, CheckCircle, Instagram, Facebook, MessageCircle, Music2, MapPin, Clock, Phone, Sparkles, ChefHat, Leaf, Flame, Star, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, X, Trash2, CheckCircle, Instagram, Facebook, MessageCircle, Music2, MapPin, Clock, Phone, Sparkles, ChefHat, Leaf, Flame, Star, ArrowRight, Sun, Moon } from 'lucide-react';
 import React, { useState, useRef, useEffect } from 'react';
 import FlashAlert from '@/components/flash-alert';
 import { loadMercadoPagoSdk } from '@/lib/load-mercadopago';
+import { useAppearance } from '@/hooks/use-appearance';
 
 interface Product {
     id: number;
@@ -38,6 +39,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
     const brickControllerRef = useRef<any>(null);
     const { flash } = usePage().props as any;
     const [cartOpen, setCartOpen] = useState(false);
+    const { resolvedAppearance, updateAppearance } = useAppearance();
 
     const { data, setData, post, processing, errors, reset } = useForm({
         guest_name: '',
@@ -66,7 +68,6 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                     updateCart(parsed.items);
                 }
             } catch {
-                // ignore
             }
         }
     }, []);
@@ -74,14 +75,6 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
     useEffect(() => {
         localStorage.setItem('guest_cart', JSON.stringify({ items: data.items, total_price: data.total_price }));
     }, [data.items, data.total_price]);
-
-    useEffect(() => {
-        const path = window.location.pathname;
-        if (path === '/' || path === '/home') {
-            localStorage.removeItem('guest_cart');
-            reset();
-        }
-    }, []);
 
     useEffect(() => {
         const path = window.location.pathname;
@@ -329,62 +322,69 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         <>
             <Head title="Bienvenidos" />
 
-            <div className="relative bg-[#09090b] text-[#f8fafc] font-sans overflow-x-hidden selection:bg-amber-500 selection:text-white">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-amber-950/20 via-slate-900/10 to-transparent rounded-full blur-[120px] pointer-events-none" />
+            <div className="relative bg-background text-foreground font-sans overflow-x-hidden selection:bg-amber-500 selection:text-white">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-amber-950/20 via-slate-900/10 to-transparent rounded-full blur-[120px] pointer-events-none dark:from-amber-900/20 dark:via-slate-800/10" />
 
                 <div className="relative min-h-screen flex flex-col">
                     <div
-                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                        className="absolute inset-0 bg-cover bg-center bg-no-repeat animate-hero-bg"
                         style={{ backgroundImage: "url('/images/hero-bg.jfif')" }}
                     />
-                    <div className="absolute inset-0 bg-black/40" />
+                    <div className="absolute inset-0 bg-black/40 dark:bg-black/60" />
 
-                    <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between border-b border-white/5 shrink-0">
+                    <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between border-b border-border shrink-0">
                         <div className="flex items-center">
-                            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-200 via-white to-slate-200 bg-clip-text text-transparent">
+                            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-200 via-white to-slate-200 bg-clip-text text-transparent dark:from-amber-300 dark:via-slate-200 dark:to-slate-300">
                                 Empandas
                             </span>
                         </div>
 
-                        <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
-                            <a href="#menu" className="hover:text-white transition-colors">Carta</a>
-                            <a href="#nosotros" className="hover:text-white transition-colors">Nosotros</a>
-                            <a href="#redes" className="hover:text-white transition-colors">Redes</a>
+                        <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-muted-foreground">
+                            <a href="#menu" className="hover:text-foreground transition-colors">Carta</a>
+                            <a href="#nosotros" className="hover:text-foreground transition-colors">Nosotros</a>
+                            <a href="#redes" className="hover:text-foreground transition-colors">Redes</a>
                         </nav>
 
                         <div className="flex items-center space-x-4">
                             {auth?.user ? (
-                                <Link href={route('dashboard')} className="text-sm font-medium text-slate-300 hover:text-white transition">
+                                <Link href={route('dashboard')} className="text-sm font-medium text-muted-foreground hover:text-foreground transition">
                                     Panel
                                 </Link>
                             ) : (
                                 <>
-                                    <Link href={route('login')} className="text-sm font-medium text-slate-300 hover:text-white transition">
+                                    <Link href={route('login')} className="text-sm font-medium text-muted-foreground hover:text-foreground transition">
                                         Iniciar sesión
                                     </Link>
-                                    <Link href={route('register')} className="bg-white text-black text-xs md:text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-slate-200 transition shadow-lg shadow-white/5">
+                                    <Link href={route('register')} className="bg-primary text-primary-foreground text-xs md:text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-primary/90 transition shadow-lg shadow-primary/5">
                                         Registrarse
                                     </Link>
                                 </>
                             )}
+                            <button
+                                onClick={() => updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark')}
+                                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition dark:bg-white/10 dark:hover:bg-white/20"
+                                aria-label="Cambiar tema"
+                            >
+                                {resolvedAppearance === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                            </button>
                         </div>
                     </header>
 
                 <section className="relative z-10 max-w-4xl mx-auto px-6 text-center flex flex-col items-center justify-center flex-1">
                     <FlashAlert />
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-amber-400 tracking-wide mb-8 backdrop-blur-md">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 dark:bg-white/10 dark:border-white/20 text-xs font-medium text-amber-400 tracking-wide mb-8 backdrop-blur-md">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                         ¡LAS MAS RICAS!
                     </div>
 
                     <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.1] text-white mb-6">
                         Dorado perfecto. <br />
-                        <span className="font-sans italic font-light bg-gradient-to-r from-amber-200 via-slate-200 to-white bg-clip-text text-transparent">
+                        <span className="font-sans italic font-light bg-gradient-to-r from-amber-200 via-slate-200 to-white bg-clip-text text-transparent dark:from-amber-200 dark:via-slate-200 dark:to-white">
                             Sabor inolvidable.
                         </span>
                     </h1>
 
-                    <p className="max-w-xl text-slate-400 text-base md:text-lg font-light leading-relaxed mb-10">
+                    <p className="max-w-xl text-muted-foreground dark:text-slate-400 text-base md:text-lg font-light leading-relaxed mb-10">
                         Empanadas artesanales hechas con ingredientes seleccionados, horneadas al momento. Directo a tu mesa.
                     </p>
 
@@ -394,17 +394,17 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                 </section>
             </div>
 
-                <section id="menu" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-[#3d2c21]">
-                    <h2 className="text-3xl font-serif text-[#f5f0eb] mb-10 text-center md:text-left">Nuestra Carta</h2>
+                <section id="menu" className="relative z-10 w-full bg-background dark:bg-[#14100c] py-20 border-t border-border"><div className="max-w-7xl mx-auto px-6">
+                    <h2 className="text-3xl font-serif text-foreground mb-10 text-center md:text-left">Nuestra Carta</h2>
 
                     {menu.length === 0 ? (
-                        <div className="text-center py-12 text-[#f5f0eb]/60 rounded-2xl bg-[#1c1611] border border-[#3d2c21]">
+                        <div className="text-center py-12 text-foreground/60 rounded-2xl bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21]">
                             <p>Aún no hay productos cargados en el menú.</p>
                         </div>
                     ) : (
                         menu.map((category) => (
                             <div key={category.id} className="mb-14">
-                                <h3 className="text-xl font-medium text-[#d4af37] mb-6 tracking-wide border-b border-[#d4af37]/10 pb-2">
+                                <h3 className="text-xl font-medium text-gold mb-6 tracking-wide border-b border-border/10 pb-2">
                                     {category.name}
                                 </h3>
 
@@ -412,9 +412,9 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                     {category.products?.map((product) => (
                                         <div
                                             key={product.id}
-                                            className="group relative bg-[#1c1611] border border-[#3d2c21] hover:border-[#d4af37]/40 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-md hover:shadow-[#d4af37]/10"
+                                            className="group relative bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21] hover:border-ember/50 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg hover:shadow-black/50 hover:scale-[1.02]"
                                         >
-                                            <div className="aspect-square w-full bg-[#1c1611]/80 overflow-hidden relative">
+                                            <div className="aspect-square w-full bg-card/80 dark:bg-[#1c1611]/80 overflow-hidden relative">
                                                 {product.image ? (
                                                     <img
                                                         src={product.image}
@@ -422,23 +422,23 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-[#f5f0eb]/40 text-xs">
+                                                    <div className="w-full h-full flex items-center justify-center text-foreground/40 text-xs">
                                                         Sin imagen
                                                     </div>
                                                 )}
-                                                <span className="absolute bottom-2 right-2 font-mono text-[#d4af37] font-bold bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-xs">
+                                                <span className="absolute bottom-2 right-2 font-mono text-gold font-bold bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-xs">
                                                     {formatMoney(Number(product.price))}
                                                 </span>
                                             </div>
 
                                             <div className="p-3 flex flex-col flex-1 justify-between gap-2">
-                                                <h4 className="font-semibold text-[#f5f0eb] text-sm leading-tight group-hover:text-[#d4af37] transition-colors line-clamp-2">
+                                                <h4 className="font-semibold text-foreground text-sm leading-tight group-hover:text-gold transition-colors line-clamp-2">
                                                     {product.name}
                                                 </h4>
 
                                                 <button
                                                     onClick={() => addToCart(product)}
-                                                    className="self-start p-2.5 rounded-full border border-[#d4af37]/40 bg-[#1c1611]/90 text-[#d4af37] hover:bg-[#d4af37] hover:text-black transition-all duration-300 shadow-lg shadow-black/20 hover:shadow-[#d4af37]/30"
+                                                    className="self-start p-2.5 rounded-full border border-gold/40 bg-card/90 dark:bg-[#1c1611]/90 text-gold hover:bg-gold hover:text-black transition-all duration-300 shadow-lg shadow-black/20 hover:shadow-ember/30 hover:scale-110 active:scale-95"
                                                 >
                                                     <Plus className="w-4 h-4" />
                                                 </button>
@@ -449,42 +449,46 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                             </div>
                         ))
                     )}
-                </section>
+                </div>
+            </section>
 
-                <section className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <section className="relative z-10 w-full bg-background dark:bg-[#14100c] py-20 border-t border-border dark:border-[#3d2c21]">
+                <div className="max-w-7xl mx-auto px-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[
                             { emoji: '🥟', label: 'Masa casera', desc: 'Amasada a mano cada día' },
                             { emoji: '🔥', label: 'Horno a leña', desc: 'Cocción tradicional' },
                             { emoji: '🥩', label: 'Cortes premium', desc: 'Carne seleccionada' },
                             { emoji: '🧀', label: 'Quesos artesanales', desc: 'Rellenos generosos' },
                         ].map((item) => (
-                            <div key={item.label} className="group bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-amber-500/30 transition-all duration-300 rounded-2xl p-6 text-center">
+                            <div key={item.label} className="group bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21] hover:border-ember/50 transition-all duration-300 rounded-2xl p-6 text-center shadow-sm hover:shadow-lg hover:shadow-black/50 hover:scale-[1.02]">
                                 <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{item.emoji}</div>
-                                <h3 className="font-semibold text-white text-sm mb-1">{item.label}</h3>
-                                <p className="text-xs text-slate-500">{item.desc}</p>
+                                <h3 className="font-semibold text-foreground text-sm mb-1">{item.label}</h3>
+                                <p className="text-xs text-muted-foreground">{item.desc}</p>
                             </div>
                         ))}
                     </div>
-                </section>
+                </div>
+            </section>
 
-                <section id="nosotros" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
+            <section id="nosotros" className="relative z-10 w-full bg-background dark:bg-[#14100c] py-20 border-t border-border dark:border-[#3d2c21]">
+                <div className="max-w-7xl mx-auto px-6">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div>
-                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-amber-400 tracking-wide mb-6 backdrop-blur-md">
-                                <ChefHat className="w-3.5 h-3.5" />
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21] text-xs font-medium text-gold tracking-wide mb-6">
+                                <ChefHat className="w-3.5 h-3.5 text-ember" />
                                 NUESTRA HISTORIA
                             </div>
-                            <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 leading-tight">
+                            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6 leading-tight">
                                 Pasión por la cocina, <br />
-                                <span className="text-amber-400">tradición en cada bocado.</span>
+                                <span className="text-ember">tradición en cada bocado.</span>
                             </h2>
-                            <p className="text-slate-400 font-light leading-relaxed mb-6">
+                            <p className="text-foreground/70 font-light leading-relaxed mb-6">
                                 En Empandas, cada empanada es el resultado de años de dedicación y amor por la cocina argentina.
                                 Seleccionamos los mejores ingredientes, amasamos la masa a mano y horneamos al momento para que
                                 llegue a tu mesa con el sabor de lo auténtico.
                             </p>
-                            <p className="text-slate-400 font-light leading-relaxed mb-8">
+                            <p className="text-foreground/70 font-light leading-relaxed mb-8">
                                 Desde nuestros inicios, nuestro objetivo fue simple: ofrecer empanadas artesanales de calidad
                                 superior, con recetas familiares que se transmiten de generación en generación.
                             </p>
@@ -495,9 +499,9 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                     { value: '15+', label: 'Variedades' },
                                     { value: '1000+', label: 'Clientes felices' },
                                 ].map((stat) => (
-                                    <div key={stat.label} className="bg-white/[0.03] border border-white/10 rounded-xl p-4 text-center">
-                                        <div className="text-2xl font-bold text-amber-400">{stat.value}</div>
-                                        <div className="text-xs text-slate-500 mt-1">{stat.label}</div>
+                                    <div key={stat.label} className="bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21] rounded-xl p-4 text-center shadow-sm hover:shadow-md hover:shadow-black/50 transition-all duration-300 hover:scale-[1.02]">
+                                        <div className="text-2xl font-bold text-gold">{stat.value}</div>
+                                        <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
                                     </div>
                                 ))}
                             </div>
@@ -508,8 +512,8 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                     { icon: Flame, label: 'Horneadas al momento' },
                                     { icon: Sparkles, label: 'Receta artesanal' },
                                 ].map(({ icon: Icon, label }) => (
-                                    <span key={label} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
-                                        <Icon className="w-3.5 h-3.5 text-amber-400" />
+                                    <span key={label} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21] text-xs text-foreground/80">
+                                        <Icon className="w-3.5 h-3.5 text-ember" />
                                         {label}
                                     </span>
                                 ))}
@@ -517,13 +521,13 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                         </div>
 
                         <div className="relative">
-                            <div className="absolute -inset-4 bg-gradient-to-br from-amber-500/20 to-transparent rounded-3xl blur-2xl pointer-events-none" />
-                            <div className="relative bg-white/[0.03] border border-white/10 rounded-3xl overflow-hidden">
-                                <div className="aspect-[4/3] bg-gradient-to-br from-amber-900/40 via-slate-900 to-slate-950 flex items-center justify-center">
+                            <div className="absolute -inset-4 bg-gradient-to-br from-ember/20 to-transparent rounded-3xl blur-2xl pointer-events-none dark:from-ember/20" />
+                            <div className="relative bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21] rounded-3xl overflow-hidden shadow-sm hover:shadow-lg hover:shadow-black/50 transition-all duration-300 hover:scale-[1.02]">
+                                <div className="aspect-[4/3] bg-gradient-to-br from-clay via-charcoal to-background dark:from-[#3d2c21] dark:via-[#1c1611] dark:to-[#14100c] flex items-center justify-center">
                                     <div className="text-center p-8">
                                         <div className="text-7xl mb-4">🥟</div>
-                                        <p className="text-slate-300 font-serif text-xl italic">"El sabor de lo hecho con amor"</p>
-                                        <div className="flex items-center justify-center gap-1 mt-4 text-amber-400">
+                                        <p className="text-foreground/80 font-serif text-xl italic">"El sabor de lo hecho con amor"</p>
+                                        <div className="flex items-center justify-center gap-1 mt-4 text-gold">
                                             {[...Array(5)].map((_, i) => (
                                                 <Star key={i} className="w-4 h-4 fill-current" />
                                             ))}
@@ -533,16 +537,18 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                             </div>
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                <section id="redes" className="relative z-10 max-w-6xl mx-auto px-6 py-20 border-t border-white/5">
+            <section id="redes" className="relative z-10 w-full bg-background dark:bg-[#14100c] py-20 border-t border-border dark:border-[#3d2c21]">
+                <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-amber-400 tracking-wide mb-6 backdrop-blur-md">
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21] text-xs font-medium text-gold tracking-wide mb-6">
                             <MessageCircle className="w-3.5 h-3.5" />
                             SEGUINOS
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-serif text-white mb-4">Conectate con nosotros</h2>
-                        <p className="text-slate-400 font-light max-w-xl mx-auto">
+                        <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4">Conectate con nosotros</h2>
+                        <p className="text-foreground/70 font-light max-w-xl mx-auto">
                             Seguí nuestras novedades, promociones y el detrás de escena de nuestras empanadas.
                         </p>
                     </div>
@@ -557,14 +563,14 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                             <a
                                 key={label}
                                 href="#"
-                                className={`group bg-white/[0.03] border border-white/10 rounded-2xl p-6 transition-all duration-300 ${color}`}
+                                className={`group bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21] rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-black/50 hover:scale-[1.02] ${color}`}
                             >
                                 <div className="flex items-center justify-between mb-4">
                                     <Icon className={`w-6 h-6 ${iconColor}`} />
-                                    <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
                                 </div>
-                                <h3 className="font-semibold text-white mb-1">{label}</h3>
-                                <p className="text-sm text-slate-500">{handle}</p>
+                                <h3 className="font-semibold text-foreground mb-1">{label}</h3>
+                                <p className="text-sm text-muted-foreground">{handle}</p>
                             </a>
                         ))}
                     </div>
@@ -575,29 +581,30 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                             { icon: Clock, title: 'Horarios', desc: 'Lun a Dom · 11:00 a 23:00 hs' },
                             { icon: Phone, title: 'Pedidos', desc: '+54 11 1234-5678' },
                         ].map(({ icon: Icon, title, desc }) => (
-                            <div key={title} className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 flex items-start gap-4">
-                                <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl shrink-0">
-                                    <Icon className="w-5 h-5 text-amber-400" />
+                            <div key={title} className="bg-card dark:bg-[#1c1611] border border-border dark:border-[#3d2c21] rounded-2xl p-5 flex items-start gap-4 shadow-sm hover:shadow-md hover:shadow-black/50 transition-all duration-300 hover:scale-[1.02]">
+                                <div className="p-2.5 bg-ember/10 border border-ember/20 rounded-xl shrink-0 dark:bg-ember/10 dark:border-ember/20">
+                                    <Icon className="w-5 h-5 text-ember" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-white text-sm mb-1">{title}</h4>
-                                    <p className="text-sm text-slate-500">{desc}</p>
+                                    <h4 className="font-semibold text-foreground text-sm mb-1">{title}</h4>
+                                    <p className="text-sm text-muted-foreground">{desc}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </section>
+                </div>
+            </section>
 
-                <footer className="relative z-10 border-t border-white/5 bg-black/40 py-8 text-center text-xs text-slate-600">
-                    <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                        <span className="text-sm font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            <footer className="relative z-10 w-full border-t border-border dark:border-[#3d2c21] bg-background dark:bg-[#14100c] py-8 text-center text-xs text-muted-foreground">
+                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <span className="text-sm font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent dark:from-white dark:via-slate-200 dark:to-slate-400">
                             Empandas
                         </span>
                         <p>© {new Date().getFullYear()} Empandas. Todos los derechos reservados.</p>
                         <div className="flex items-center gap-4">
-                            <a href="#nosotros" className="hover:text-white transition-colors">Nosotros</a>
-                            <a href="#redes" className="hover:text-white transition-colors">Redes</a>
-                            <a href="#menu" className="hover:text-white transition-colors">Carta</a>
+                            <a href="#nosotros" className="hover:text-foreground transition-colors">Nosotros</a>
+                            <a href="#redes" className="hover:text-foreground transition-colors">Redes</a>
+                            <a href="#menu" className="hover:text-foreground transition-colors">Carta</a>
                         </div>
                     </div>
                 </footer>
@@ -605,11 +612,11 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
 
             <button
                 onClick={() => setCartOpen(true)}
-                className="fixed bottom-6 right-6 z-50 bg-[#e63946] hover:bg-[#e63946]/90 text-white p-4 rounded-full shadow-lg shadow-[#e63946]/30 transition-all active:scale-95"
+                className="fixed bottom-6 right-6 z-50 bg-crimson hover:bg-crimson/90 text-white p-4 rounded-full shadow-lg shadow-crimson/30 transition-all duration-300 hover:scale-105 hover:shadow-xl"
             >
                 <ShoppingBag className="w-5 h-5" />
                 {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-[#d4af37] text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 bg-gold text-gold-foreground text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
                         {totalItems}
                     </span>
                 )}
@@ -617,14 +624,14 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
 
             {cartOpen && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
-                    <div className="w-full sm:w-96 h-full bg-[#0f0f11] border-l border-white/10 flex flex-col">
-                        <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0">
-                            <h2 className="text-lg font-bold text-white">Detalle del pedido</h2>
+                    <div className="w-full sm:w-96 h-full bg-card dark:bg-[#0f0f11] border-l border-border dark:border-white/10 flex flex-col">
+                        <div className="p-5 border-b border-border dark:border-white/10 flex items-center justify-between shrink-0">
+                            <h2 className="text-lg font-bold text-foreground">Detalle del pedido</h2>
                             <div className="flex items-center gap-2">
-                                <button onClick={clearCart} className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-white/5">
+                                <button onClick={clearCart} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg bg-secondary dark:bg-white/5">
                                     <Trash2 className="w-5 h-5" />
                                 </button>
-                                <button onClick={() => setCartOpen(false)} className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-white/5">
+                                <button onClick={() => setCartOpen(false)} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg bg-secondary dark:bg-white/5">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
@@ -639,26 +646,26 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
 
                             <div className="p-4 space-y-3">
                                 {data.items.length === 0 ? (
-                                    <p className="text-slate-500 text-sm text-center py-12">El carrito está vacío</p>
+                                    <p className="text-muted-foreground text-sm text-center py-12">El carrito está vacío</p>
                                 ) : (
                                     data.items.map((item) => (
-                                        <div key={item.product_id} className="bg-white/[0.03] border border-white/10 rounded-xl p-3 flex items-center justify-between gap-3">
+                                        <div key={item.product_id} className="bg-secondary/50 dark:bg-white/[0.03] border border-border dark:border-white/10 rounded-xl p-3 flex items-center justify-between gap-3">
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="text-sm font-medium text-white truncate">{item.name}</h4>
+                                                <h4 className="text-sm font-medium text-foreground truncate">{item.name}</h4>
                                                 <span className="text-xs text-amber-400 font-bold">{formatMoney(item.price)}</span>
                                             </div>
 
-                                            <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1 shrink-0">
-                                                <button onClick={() => updateQuantity(item.product_id, -1)} className="p-1 hover:bg-white/10 rounded text-slate-300">
+                                            <div className="flex items-center gap-2 bg-secondary dark:bg-white/5 rounded-lg p-1 shrink-0">
+                                                <button onClick={() => updateQuantity(item.product_id, -1)} className="p-1 hover:bg-secondary-foreground/10 dark:hover:bg-white/10 rounded text-muted-foreground">
                                                     <Minus className="w-3 h-3" />
                                                 </button>
-                                                <span className="text-xs font-bold w-5 text-center text-white">{item.quantity}</span>
-                                                <button onClick={() => updateQuantity(item.product_id, 1)} className="p-1 hover:bg-white/10 rounded text-slate-300">
+                                                <span className="text-xs font-bold w-5 text-center text-foreground">{item.quantity}</span>
+                                                <button onClick={() => updateQuantity(item.product_id, 1)} className="p-1 hover:bg-secondary-foreground/10 dark:hover:bg-white/10 rounded text-muted-foreground">
                                                     <Plus className="w-3 h-3" />
                                                 </button>
                                             </div>
 
-                                            <button onClick={() => removeFromCart(item.product_id)} className="text-slate-500 hover:text-red-400 p-1 shrink-0">
+                                            <button onClick={() => removeFromCart(item.product_id)} className="text-muted-foreground hover:text-crimson p-1 shrink-0">
                                                 <X className="w-4 h-4" />
                                             </button>
                                         </div>
@@ -667,24 +674,24 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                             </div>
 
                             {data.items.length > 0 && (
-                                <form onSubmit={handleCheckout} className="p-5 border-t border-white/10 space-y-3">
+                                <form onSubmit={handleCheckout} className="p-5 border-t border-border dark:border-white/10 space-y-3">
                                     <input
                                         type="text"
                                         placeholder="Nombre del cliente"
                                         value={data.guest_name}
                                         onChange={(e) => setData('guest_name', e.target.value)}
-                                        className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                                        className="w-full px-3 py-2.5 bg-secondary dark:bg-white/5 border border-border dark:border-white/10 rounded-xl text-sm text-foreground dark:text-white placeholder:text-muted-foreground focus:border-amber-500 focus:outline-none"
                                     />
-                                    {errors.guest_name && <p className="text-red-400 text-xs">{errors.guest_name}</p>}
+                                    {errors.guest_name && <p className="text-destructive text-xs">{errors.guest_name}</p>}
 
                                     <input
                                         type="text"
                                         placeholder="Teléfono"
                                         value={data.guest_phone}
                                         onChange={(e) => setData('guest_phone', e.target.value)}
-                                        className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                                        className="w-full px-3 py-2.5 bg-secondary dark:bg-white/5 border border-border dark:border-white/10 rounded-xl text-sm text-foreground dark:text-white placeholder:text-muted-foreground focus:border-amber-500 focus:outline-none"
                                     />
-                                    {errors.guest_phone && <p className="text-red-400 text-xs">{errors.guest_phone}</p>}
+                                    {errors.guest_phone && <p className="text-destructive text-xs">{errors.guest_phone}</p>}
 
                                     <div className="grid grid-cols-2 gap-2">
                                         {[
@@ -698,7 +705,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                                 className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
                                                     data.delivery_type === type.id
                                                         ? 'bg-amber-500 text-black'
-                                                        : 'bg-white/5 text-slate-300 border border-white/10'
+                                                        : 'bg-secondary dark:bg-white/5 text-foreground dark:text-slate-300 border border-border dark:border-white/10'
                                                 }`}
                                             >
                                                 {type.label}
@@ -713,9 +720,9 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                                 placeholder="Dirección de entrega"
                                                 value={data.delivery_address}
                                                 onChange={(e) => setData('delivery_address', e.target.value)}
-                                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                                                className="w-full px-3 py-2.5 bg-secondary dark:bg-white/5 border border-border dark:border-white/10 rounded-xl text-sm text-foreground dark:text-white placeholder:text-muted-foreground focus:border-amber-500 focus:outline-none"
                                             />
-                                            {errors.delivery_address && <p className="text-red-400 text-xs">{errors.delivery_address}</p>}
+                                            {errors.delivery_address && <p className="text-destructive text-xs">{errors.delivery_address}</p>}
                                         </>
                                     )}
 
@@ -731,7 +738,7 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                                 className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
                                                     data.payment_method === method.id
                                                         ? 'bg-amber-500 text-black'
-                                                        : 'bg-white/5 text-slate-300 border border-white/10'
+                                                        : 'bg-secondary dark:bg-white/5 text-foreground dark:text-slate-300 border border-border dark:border-white/10'
                                                 }`}
                                             >
                                                 {method.label}
@@ -744,8 +751,8 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                     )}
 
                                     <div className="flex items-center justify-between pt-2">
-                                        <span className="text-sm text-slate-400">Total</span>
-                                        <span className="text-xl font-black text-white">{formatMoney(data.total_price)}</span>
+                                        <span className="text-sm text-muted-foreground dark:text-slate-400">Total</span>
+                                        <span className="text-xl font-black text-foreground dark:text-white">{formatMoney(data.total_price)}</span>
                                     </div>
 
                                     {data.payment_method !== 'card' && (
