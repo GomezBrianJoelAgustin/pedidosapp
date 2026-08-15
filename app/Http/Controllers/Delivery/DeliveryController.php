@@ -15,8 +15,7 @@ class DeliveryController extends Controller
             ->where('delivery_type', 'delivery')
             ->whereIn('status', ['ready', 'out_for_delivery', 'at_location', 'delivered'])
             ->latest()
-            ->get()
-            ->makeHidden(['pin']);
+            ->paginate();
 
         return Inertia::render('Delivery/Index', [
             'orders' => $orders,

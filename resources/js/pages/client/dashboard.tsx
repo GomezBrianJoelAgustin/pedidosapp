@@ -1,6 +1,6 @@
 import FlashAlert from '@/components/flash-alert';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Search, X, Filter, Star } from 'lucide-react';
 import { usePolling } from '@/hooks/use-polling';
 
@@ -72,7 +72,7 @@ export default function ClientDashboard() {
         });
     }, [localOrders, searchTerm, statusFilter]);
 
-    const getStatusBadge = (status: string, deliveryType?: string) => {
+    const getStatusBadge = useCallback((status: string, deliveryType?: string) => {
         let label = status;
         let className = 'bg-white/5 text-muted-foreground border-border';
 
@@ -107,9 +107,9 @@ export default function ClientDashboard() {
                 {label}
             </span>
         );
-    };
+    }, []);
 
-    const getPaymentBadge = (paymentMethod: string, status: string) => {
+    const getPaymentBadge = useCallback((paymentMethod: string, status: string) => {
         const isPaid = status === 'paid';
         const isFailed = status === 'failed';
         const isPending = status === 'pending_payment' || status === 'pay_later' || status === 'pending';
@@ -157,9 +157,9 @@ export default function ClientDashboard() {
                 {status}
             </span>
         );
-    };
+    }, []);
 
-    const formatDate = (dateString: string) => {
+    const formatDate = useCallback((dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-AR', {
             day: '2-digit',
             month: '2-digit',
@@ -167,7 +167,7 @@ export default function ClientDashboard() {
             hour: '2-digit',
             minute: '2-digit',
         });
-    };
+    }, []);
 
     const handleReviewSubmitted = (orderId: number, review: { food_rating: number; delivery_rating?: number; comment?: string }) => {
         setLocalOrders((prev) =>

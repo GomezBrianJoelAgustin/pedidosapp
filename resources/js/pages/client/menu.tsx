@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { loadMercadoPagoSdk } from '@/lib/load-mercadopago';
 import { 
     ShoppingBag, 
@@ -58,26 +58,21 @@ export default function ClientMenu() {
     const [phone, setPhone] = useState(user.phone || '');
 
     // Aplanamos todos los productos de las categorías para la búsqueda y filtrado general
-    const allProducts = categories.flatMap(cat => cat.products);
+    const allProducts = useMemo(() => categories.flatMap(cat => cat.products), [categories]);
 
-    const filteredProducts = allProducts.filter((product) => {
-        const matchesCategory = selectedCategory === null || product.category_id === selectedCategory;
-        const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    const filteredProducts = useMemo(() => {
+        return allProducts.filter((product) => {
+            const matchesCategory = selectedCategory === null || product.category_id === selectedCategory;
+            const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+            return matchesCategory && matchesSearch;
+        });
+    }, [allProducts, selectedCategory, search]);
 
-    const form = useForm({
-        payment_method: 'effective',
-        delivery_type: 'takeaway',
-        delivery_address: user.address || '',
-        phone: user.phone || '',
-        items: [] as CartItem[],
-        total_price: 0,
-        payment_gateway_id: '',
-        payment_gateway_status: '',
-    });
+    const formatMoney = useCallback((amount: number) => {
+        return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
+    }, []);
 
-    const addToCart = (product: Product) => {
+    const addToCart = useCallback((product: Product) => {
         const existingIndex = form.data.items.findIndex(item => item.product_id === product.id);
         const updatedItems = [...form.data.items];
 
@@ -93,9 +88,9 @@ export default function ClientMenu() {
         }
 
         updateCart(updatedItems);
-    };
+    }, [form.data.items]);
 
-    const updateQuantity = (productId: number, delta: number) => {
+    const updateQuantity = useCallback((productId: number, delta: number) => {
         const updatedItems = form.data.items
             .map(item => {
                 if (item.product_id === productId) {
@@ -107,29 +102,21 @@ export default function ClientMenu() {
             .filter(Boolean) as CartItem[];
 
         updateCart(updatedItems);
-    };
+    }, [form.data.items]);
 
-    const removeFromCart = (productId: number) => {
+    const removeFromCart = useCallback((productId: number) => {
         const updatedItems = form.data.items.filter(item => item.product_id !== productId);
         updateCart(updatedItems);
-    };
+    }, [form.data.items]);
 
-    const clearCart = () => {
-        updateCart([]);
-    };
-
-    const updateCart = (newItems: CartItem[]) => {
+    const updateCart = useCallback((newItems: CartItem[]) => {
         const total = newItems.reduce((acc, item) => acc + Number(item.price) * item.quantity, 0);
         form.setData(prev => ({
             ...prev,
             items: newItems,
             total_price: total
         }));
-    };
-
-    const formatMoney = (amount: number) => {
-        return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
-    };
+    }, [form.setData]);
 
     const handleSubmitOrder = (
         e?: React.FormEvent,

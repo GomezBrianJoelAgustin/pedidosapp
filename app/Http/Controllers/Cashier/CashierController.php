@@ -15,8 +15,7 @@ class CashierController extends Controller
         $awaitingApproval = Order::with(['items.product', 'user', 'delivery'])
             ->where('status', 'awaiting_approval')
             ->latest()
-            ->get()
-            ->makeHidden(['pin']);
+            ->get();
 
         $pendingAssignment = Order::with(['items.product', 'user', 'delivery'])
             ->where('status', 'approved')
@@ -24,29 +23,25 @@ class CashierController extends Controller
             ->whereNull('delivery_id')
             ->whereNotIn('status', ['delivered'])
             ->latest()
-            ->get()
-            ->makeHidden(['pin']);
+            ->get();
 
         $pendingCashPayment = Order::with(['items.product', 'user', 'delivery'])
             ->where('payment_method', 'effective')
             ->whereIn('payment_status', ['pending', 'pending_payment', 'pay_later'])
             ->whereNotIn('status', ['delivered'])
             ->latest()
-            ->get()
-            ->makeHidden(['pin']);
+            ->get();
 
         $recentOrders = Order::with(['items.product', 'user', 'delivery'])
             ->whereIn('status', ['awaiting_approval', 'approved', 'preparing', 'ready', 'out_for_delivery', 'at_location', 'delivered', 'rejected'])
             ->latest()
             ->take(20)
-            ->get()
-            ->makeHidden(['pin']);
+            ->get();
 
         $rejectedOrders = Order::with(['items.product', 'user', 'delivery'])
             ->where('status', 'rejected')
             ->latest()
-            ->get()
-            ->makeHidden(['pin']);
+            ->get();
 
         $deliveryUsers = User::role('delivery')->get(['id', 'name', 'email']);
 
