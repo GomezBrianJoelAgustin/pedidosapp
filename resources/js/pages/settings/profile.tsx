@@ -128,12 +128,12 @@ export default function Profile({
                             {mustVerifyEmail &&
                                 auth.user.email_verified_at === null && (
                                     <div>
-                                        <p className="-mt-4 text-sm text-muted-foreground">
-                                            Your email address is unverified.{' '}
-                                            <Link
-                                                href={send()}
-                                                as="button"
-                                                className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                <p className="-mt-4 text-sm text-muted-foreground">
+                                    Your email address is unverified.{' '}
+                                    <Link
+                                        href={send()}
+                                        as="button"
+                                        className="text-foreground underline decoration-white/20 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-white/20"
                                             >
                                                 Click here to re-send the
                                                 verification email.

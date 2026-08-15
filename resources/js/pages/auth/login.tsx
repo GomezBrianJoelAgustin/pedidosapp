@@ -29,10 +29,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     };
 
     return (
-        <div className="relative min-h-screen w-full bg-[#09090b] text-[#f8fafc] font-sans overflow-hidden flex items-center justify-center px-6 selection:bg-amber-500 selection:text-white">
+        <div className="relative min-h-screen w-full bg-background text-foreground font-sans overflow-hidden flex items-center justify-center px-6 selection:bg-primary selection:text-white">
             <Head title="Iniciar sesión" />
 
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[500px] bg-gradient-to-b from-amber-950/25 via-slate-900/10 to-transparent rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[500px] bg-gradient-to-b from-primary/25 via-white/5 to-transparent rounded-full blur-[120px] pointer-events-none" />
 
             <div className="relative z-10 w-full max-w-md">
                 <div className="flex flex-col items-center mb-8">
@@ -47,12 +47,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     <h1 className="font-serif text-3xl font-normal text-white text-center">
                         Bienvenido de vuelta
                     </h1>
-                    <p className="text-slate-400 text-sm font-light mt-2 text-center">
+                    <p className="text-muted-foreground text-sm font-light mt-2 text-center">
                         Iniciá sesión para gestionar tus pedidos
                     </p>
                 </div>
 
-                <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-7 sm:p-8 backdrop-blur-md shadow-2xl shadow-black/40">
+                <div className="bg-card border border-border rounded-3xl p-7 sm:p-8 backdrop-blur-md shadow-2xl shadow-black/40">
                     {status && (
                         <div className="mb-5 flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-medium px-4 py-3 rounded-xl">
                             <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
@@ -62,11 +62,11 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
                     <form onSubmit={submit} className="space-y-5">
                         <div>
-                            <label htmlFor="email" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                            <label htmlFor="email" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                                 Email
                             </label>
                             <div className="relative">
-                                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <input
                                     id="email"
                                     type="email"
@@ -76,7 +76,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     autoComplete="username"
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setData('email', e.target.value)}
                                     placeholder="tu@email.com"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                                 />
                             </div>
                             {errors.email && (
@@ -85,11 +85,11 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                            <label htmlFor="password" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                                 Contraseña
                             </label>
                             <div className="relative">
-                                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <input
                                     id="password"
                                     type={showPassword ? 'text' : 'password'}
@@ -98,12 +98,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     autoComplete="current-password"
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setData('password', e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pl-10 pr-11 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                                    className="w-full pl-10 pr-11 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword((prev) => !prev)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors p-1"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors p-1"
                                     tabIndex={-1}
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -121,15 +121,15 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     name="remember"
                                     checked={data.remember}
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setData('remember', e.target.checked)}
-                                    className="w-4 h-4 rounded bg-white/5 border-white/20 text-amber-500 focus:ring-amber-500 focus:ring-offset-0"
+                                    className="w-4 h-4 rounded bg-background border-border text-primary focus:ring-primary focus:ring-offset-0"
                                 />
-                                <span className="text-sm text-slate-400">Recordarme</span>
+                                <span className="text-sm text-muted-foreground">Recordarme</span>
                             </label>
 
                             {canResetPassword && (
                                 <Link
                                     href={route('password.request')}
-                                    className="text-sm text-slate-400 hover:text-amber-400 transition-colors"
+                                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
                                 >
                                     ¿Olvidaste tu contraseña?
                                 </Link>
@@ -139,7 +139,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full mt-2 py-3.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                            className="w-full mt-2 py-3.5 bg-primary hover:bg-[#d46d2e] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                         >
                             {processing ? 'Ingresando...' : 'Iniciar sesión'}
                             {!processing && <ArrowRight className="w-4 h-4" />}
@@ -147,8 +147,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     </form>
                 </div>
 
-                <p className="text-center text-sm text-slate-500 mt-6">
-                    <Link href="/" className="hover:text-slate-300 transition-colors">
+                <p className="text-center text-sm text-muted-foreground mt-6">
+                    <Link href="/" className="hover:text-white transition-colors">
                         ← Volver al inicio
                     </Link>
                 </p>
