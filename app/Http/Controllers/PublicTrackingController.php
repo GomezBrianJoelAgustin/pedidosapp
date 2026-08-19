@@ -10,10 +10,11 @@ class PublicTrackingController extends Controller
     public function show(Request $request, $token)
     {
         $order = Order::where('tracking_token', $token)
-            ->with('items.product')
+            ->with('items.product', 'user', 'delivery')
             ->firstOrFail();
 
         $order->makeHidden('tracking_token');
+        $order->makeVisible(['pin']);
 
         return inertia('public/tracking', [
             'order' => $order,

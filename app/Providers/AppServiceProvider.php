@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Http\Responses\LoginResponse;
 use App\Http\Responses\RegisterResponse;
 use Carbon\CarbonImmutable;
+use App\Models\Order;
+use App\Observers\OrderObserver;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -32,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        Order::observe(OrderObserver::class);
 
         $this->configureDefaults();
     }

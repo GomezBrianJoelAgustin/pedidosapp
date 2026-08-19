@@ -84,10 +84,12 @@ export default function PublicTracking({ order, review, canReview }: PageProps) 
     };
 
     const getPaymentBadge = (paymentMethod: string, paymentStatus: string) => {
+        const isRejected = paymentStatus === 'failed' || paymentStatus === 'rejected';
+
         if (paymentMethod !== 'effective') {
             return (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-[#d4af37]/10 text-[#d4af37] border-[#d4af37]/20">
-                    {paymentStatus === 'paid' ? 'Pagado' : paymentStatus === 'failed' ? 'Rechazado' : 'Pendiente'}
+                    {paymentStatus === 'paid' ? 'Pagado' : isRejected ? 'Rechazado' : 'Pendiente'}
                 </span>
             );
         }
@@ -96,6 +98,14 @@ export default function PublicTracking({ order, review, canReview }: PageProps) 
             return (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                     Pago Completado
+                </span>
+            );
+        }
+
+        if (isRejected) {
+            return (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-[#e63946]/10 text-[#e63946] border-[#e63946]/20">
+                    Pago Rechazado
                 </span>
             );
         }
@@ -175,6 +185,24 @@ export default function PublicTracking({ order, review, canReview }: PageProps) 
                             <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 text-center">
                                 Dictá este código al cadete al momento de la entrega.
                             </p>
+                        </div>
+                    )}
+
+                    {(order.delivery_type || order.delivery_address) && (
+                        <div className="mb-4 p-3 bg-background border border-border rounded-xl space-y-1">
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                Datos de entrega
+                            </p>
+                            {order.delivery_type && (
+                                <p className="text-sm text-foreground capitalize">
+                                    <span className="text-muted-foreground">Tipo:</span> {order.delivery_type === 'takeaway' ? 'Retiro en local' : 'Envío a domicilio'}
+                                </p>
+                            )}
+                            {order.delivery_address && (
+                                <p className="text-sm text-foreground">
+                                    <span className="text-muted-foreground">Dirección:</span> {order.delivery_address}
+                                </p>
+                            )}
                         </div>
                     )}
 

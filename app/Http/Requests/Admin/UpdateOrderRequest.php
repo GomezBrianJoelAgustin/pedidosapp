@@ -24,7 +24,7 @@ class UpdateOrderRequest extends FormRequest
     {
         return [
             'status' => 'required|string|in:pending,awaiting_approval,approved,rejected,preparing,ready,out_for_delivery,at_location,delivered',
-            'payment_status' => 'required|string|in:pending,paid,failed,pending_payment,pay_later',
+            'payment_status' => 'required|string|in:pending,paid,failed,rejected,pending_payment,pay_later',
             'delivery_type' => 'nullable|string|in:takeaway,delivery',
             'delivery_address' => 'required_if:delivery_type,delivery|nullable|string',
         ];

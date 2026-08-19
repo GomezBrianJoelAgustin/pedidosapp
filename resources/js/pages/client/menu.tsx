@@ -57,6 +57,15 @@ export default function ClientMenu() {
     const [search, setSearch] = useState('');
     const [phone, setPhone] = useState(user.phone || '');
 
+    const form = useForm({
+        items: [] as CartItem[],
+        total_price: 0,
+        phone: phone || '',
+        payment_method: 'cash',
+        payment_gateway_id: '',
+        payment_gateway_status: '',
+    });
+
     // Aplanamos todos los productos de las categorías para la búsqueda y filtrado general
     const allProducts = useMemo(() => categories.flatMap(cat => cat.products), [categories]);
 

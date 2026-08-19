@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Cashier;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,36 +16,48 @@ class CashierController extends Controller
     {
         $awaitingApproval = Order::with(['items.product', 'user', 'delivery'])
             ->where('status', 'awaiting_approval')
+            ->distinct()
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->makeVisible(['pin']);
 
         $pendingAssignment = Order::with(['items.product', 'user', 'delivery'])
             ->where('status', 'approved')
             ->where('delivery_type', 'delivery')
             ->whereNull('delivery_id')
             ->whereNotIn('status', ['delivered'])
+            ->distinct()
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->makeVisible(['pin']);
 
         $pendingCashPayment = Order::with(['items.product', 'user', 'delivery'])
             ->where('payment_method', 'effective')
             ->whereIn('payment_status', ['pending', 'pending_payment', 'pay_later'])
             ->whereNotIn('status', ['delivered'])
+            ->distinct()
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->makeVisible(['pin']);
 
         $recentOrders = Order::with(['items.product', 'user', 'delivery'])
-            ->whereIn('status', ['awaiting_approval', 'approved', 'preparing', 'ready', 'out_for_delivery', 'at_location', 'delivered', 'rejected'])
+            ->whereIn('status', ['awaiting_approval', 'approved', 'preparing', 'ready', 'out_for_delivery', 'at_location', 'delivered'])
+            ->distinct()
             ->latest()
             ->take(20)
-            ->get();
+            ->get()
+            ->makeVisible(['pin']);
 
         $rejectedOrders = Order::with(['items.product', 'user', 'delivery'])
             ->where('status', 'rejected')
+            ->distinct()
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->makeVisible(['pin']);
 
         $deliveryUsers = User::role('delivery')->get(['id', 'name', 'email']);
+        $categories = Category::where('active', true)->get();
+        $products = Product::where('active', true)->get();
 
         return Inertia::render('Cashier/Index', [
             'awaitingApproval' => $awaitingApproval,
@@ -52,6 +66,8 @@ class CashierController extends Controller
             'recentOrders' => $recentOrders,
             'rejectedOrders' => $rejectedOrders,
             'deliveryUsers' => $deliveryUsers,
+            'categories' => $categories,
+            'products' => $products,
         ]);
     }
 
@@ -87,7 +103,6 @@ class CashierController extends Controller
             'status' => 'rejected',
             'approved_by' => $user->id,
             'rejection_reason' => $request->input('rejection_reason'),
-            'payment_status' => 'failed',
         ]);
 
         return back()->with('success', 'Pedido rechazado correctamente.');

@@ -13,8 +13,9 @@ class DashboardController extends Controller
     {
         $orders = Order::where('user_id', auth()->id())
             ->with('items.product', 'review')
+            ->distinct()
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return Inertia::render('client/dashboard', [
             'orders' => $orders,
