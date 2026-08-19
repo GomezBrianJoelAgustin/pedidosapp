@@ -43,7 +43,7 @@ interface Order {
 }
 
 interface PageProps {
-    orders: { data: Order[] } | Order[];
+    orders: { data: Order[]; current_page: number; last_page: number; per_page: number; total: number; from: number | null; to: number | null; path: string } | Order[];
 }
 
 export default function KitchenIndex({ orders }: PageProps) {
@@ -357,6 +357,28 @@ export default function KitchenIndex({ orders }: PageProps) {
                     </div>
                 )}
             </div>
+
+            {Array.isArray(orders) === false && orders.last_page > 1 && (
+                <div className="flex items-center justify-between pt-2">
+                    <button
+                        disabled={orders.current_page === 1}
+                        onClick={() => window.location.href = `${orders.path}?page=${orders.current_page - 1}`}
+                        className="px-4 py-2 text-sm font-medium rounded-xl border border-border bg-card hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Anterior
+                    </button>
+                    <span className="text-xs text-muted-foreground">
+                        Página {orders.current_page} de {orders.last_page}
+                    </span>
+                    <button
+                        disabled={orders.current_page === orders.last_page}
+                        onClick={() => window.location.href = `${orders.path}?page=${orders.current_page + 1}`}
+                        className="px-4 py-2 text-sm font-medium rounded-xl border border-border bg-card hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Siguiente
+                    </button>
+                </div>
+            )}
 
             {modalDetail && selectedOrder && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">

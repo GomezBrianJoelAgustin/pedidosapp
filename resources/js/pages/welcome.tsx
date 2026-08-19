@@ -1,6 +1,6 @@
 ﻿import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { ShoppingBag, Plus, Minus, X, Trash2, CheckCircle, Instagram, Facebook, MessageCircle, Music2, MapPin, Clock, Phone, Sparkles, ChefHat, Leaf, Flame, Star, ArrowRight, Sun, Moon } from 'lucide-react';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import FlashAlert from '@/components/flash-alert';
 import { loadMercadoPagoSdk } from '@/lib/load-mercadopago';
 import { useAppearance } from '@/hooks/use-appearance';
@@ -51,40 +51,16 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         total_price: 0,
     });
 
-    const updateCart = (newItems: CartItem[]) => {
+    const updateCart = useCallback((newItems: CartItem[]) => {
         const total = newItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
         setData(prev => ({ ...prev, items: newItems, total_price: total }));
-    };
+    }, [setData]);
 
-    const formatMoney = (amount: number) =>
-        new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount);
+    const formatMoney = useCallback((amount: number) =>
+        new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(amount),
+    []);
 
-    useEffect(() => {
-        const savedCart = localStorage.getItem('guest_cart');
-        if (savedCart) {
-            try {
-                const parsed = JSON.parse(savedCart);
-                if (parsed?.items?.length) {
-                    updateCart(parsed.items);
-                }
-            } catch {
-            }
-        }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem('guest_cart', JSON.stringify({ items: data.items, total_price: data.total_price }));
-    }, [data.items, data.total_price]);
-
-    useEffect(() => {
-        const path = window.location.pathname;
-        if (path === '/' || path === '/home') {
-            localStorage.removeItem('guest_cart');
-            reset();
-        }
-    }, []);
-
-    const addToCart = (product: Product) => {
+    const addToCart = useCallback((product: Product) => {
         const existingIndex = data.items.findIndex(item => item.product_id === product.id);
         const updated = [...data.items];
 
@@ -100,33 +76,31 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         }
 
         updateCart(updated);
-    };
+    }, [data.items, updateCart]);
 
-    const updateQuantity = (productId: number, delta: number) => {
+    const updateQuantity = useCallback((productId: number, delta: number) => {
         const updated = data.items
             .map(item => {
                 if (item.product_id === productId) {
                     const newQty = item.quantity + delta;
-
                     return newQty > 0 ? { ...item, quantity: newQty } : null;
                 }
-
                 return item;
             })
             .filter(Boolean) as CartItem[];
         updateCart(updated);
-    };
+    }, [data.items, updateCart]);
 
-    const removeFromCart = (productId: number) => {
+    const removeFromCart = useCallback((productId: number) => {
         updateCart(data.items.filter(item => item.product_id !== productId));
-    };
+    }, [data.items, updateCart]);
 
-    const clearCart = () => {
+    const clearCart = useCallback(() => {
         updateCart([]);
         localStorage.removeItem('guest_cart');
-    };
+    }, [updateCart]);
 
-    const totalItems = data.items.reduce((acc, item) => acc + item.quantity, 0);
+    const totalItems = useMemo(() => data.items.reduce((acc, item) => acc + item.quantity, 0), [data.items]);
 
     const handleCheckout = (e: React.FormEvent) => {
         e.preventDefault();

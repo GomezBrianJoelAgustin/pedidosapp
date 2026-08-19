@@ -1,6 +1,6 @@
 import FlashAlert from '@/components/flash-alert';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Search, X, Filter, Star } from 'lucide-react';
 import { usePolling } from '@/hooks/use-polling';
 
@@ -48,17 +48,18 @@ interface PageProps {
     auth: {
         user: User;
     };
-    orders: Order[];
+    orders: { data: Order[]; current_page: number; last_page: number; per_page: number; total: number; from: number | null; to: number | null; path: string } | Order[];
 }
 
 export default function ClientDashboard() {
-    const { auth, orders } = usePage<PageProps>().props;
-    const [localOrders, setLocalOrders] = useState<Order[]>(orders);
+    const { auth } = usePage<PageProps>().props;
+    const orders = usePage<PageProps>().props.orders;
+    const [localOrders, setLocalOrders] = useState<Order[]>(Array.isArray(orders) ? orders : orders.data);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'awaiting_approval' | 'approved' | 'preparing' | 'ready' | 'out_for_delivery' | 'at_location' | 'delivered' | 'rejected'>('all');
 
     useEffect(() => {
-        setLocalOrders(orders);
+        setLocalOrders(Array.isArray(orders) ? orders : orders.data);
     }, [orders]);
 
     usePolling({ interval: 5000, enabled: true });
@@ -72,7 +73,7 @@ export default function ClientDashboard() {
         });
     }, [localOrders, searchTerm, statusFilter]);
 
-    const getStatusBadge = (status: string, deliveryType?: string) => {
+    const getStatusBadge = useCallback((status: string, deliveryType?: string) => {
         let label = status;
         let className = 'bg-white/5 text-muted-foreground border-border';
 
@@ -107,9 +108,9 @@ export default function ClientDashboard() {
                 {label}
             </span>
         );
-    };
+    }, []);
 
-    const getPaymentBadge = (paymentMethod: string, status: string) => {
+    const getPaymentBadge = useCallback((paymentMethod: string, status: string) => {
         const isPaid = status === 'paid';
         const isFailed = status === 'failed';
         const isPending = status === 'pending_payment' || status === 'pay_later' || status === 'pending';
@@ -157,9 +158,9 @@ export default function ClientDashboard() {
                 {status}
             </span>
         );
-    };
+    }, []);
 
-    const formatDate = (dateString: string) => {
+    const formatDate = useCallback((dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-AR', {
             day: '2-digit',
             month: '2-digit',
@@ -167,7 +168,7 @@ export default function ClientDashboard() {
             hour: '2-digit',
             minute: '2-digit',
         });
-    };
+    }, []);
 
     const handleReviewSubmitted = (orderId: number, review: { food_rating: number; delivery_rating?: number; comment?: string }) => {
         setLocalOrders((prev) =>
@@ -336,10 +337,32 @@ export default function ClientDashboard() {
                                     </span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                )}
-            </main>
+                            ))}
+                        </div>
+                    )}
+
+                    {Array.isArray(orders) === false && orders.last_page > 1 && (
+                        <div className="flex items-center justify-between pt-4">
+                            <button
+                                disabled={orders.current_page === 1}
+                                onClick={() => window.location.href = `${orders.path}?page=${orders.current_page - 1}`}
+                                className="px-4 py-2 text-sm font-medium rounded-xl border border-border bg-card hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Anterior
+                            </button>
+                            <span className="text-xs text-muted-foreground">
+                                Página {orders.current_page} de {orders.last_page}
+                            </span>
+                            <button
+                                disabled={orders.current_page === orders.last_page}
+                                onClick={() => window.location.href = `${orders.path}?page=${orders.current_page + 1}`}
+                                className="px-4 py-2 text-sm font-medium rounded-xl border border-border bg-card hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    )}
+                </main>
         </div>
     );
 }

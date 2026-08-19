@@ -13,9 +13,9 @@ class KitchenController extends Controller
     {
         $orders = Order::with(['items.product', 'user', 'delivery'])
             ->whereIn('status', ['approved', 'preparing', 'ready'])
+            ->distinct()
             ->latest()
-            ->get()
-            ->makeHidden(['pin']);
+            ->paginate(10);
 
         return Inertia::render('Kitchen/Index', [
             'orders' => $orders,

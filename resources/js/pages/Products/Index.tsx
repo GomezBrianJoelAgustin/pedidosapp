@@ -21,7 +21,7 @@ interface Product {
 }
 
 interface Props {
-    products: Product[];
+    products: { data: Product[]; current_page: number; last_page: number; per_page: number; total: number; from: number | null; to: number | null; path: string };
     categories: Category[];
 }
 
@@ -102,7 +102,7 @@ return;
         });
     };
 
-    const filteredProducts = products.filter((prod) => {
+    const filteredProducts = products.data.filter((prod) => {
         const matchesSearch = prod.name.toLowerCase().includes(search.toLowerCase()) ||
             (prod.description && prod.description.toLowerCase().includes(search.toLowerCase()));
 
@@ -261,6 +261,28 @@ return;
                             <p className="text-xs text-muted-foreground mt-1">
                                 Probá cambiando el filtro de búsqueda o crea un nuevo producto.
                             </p>
+                        </div>
+                    )}
+
+                    {products.last_page > 1 && (
+                        <div className="flex items-center justify-between pt-2">
+                            <button
+                                disabled={products.current_page === 1}
+                                onClick={() => window.location.href = `${products.path}?page=${products.current_page - 1}`}
+                                className="px-4 py-2 text-sm font-medium rounded-xl border border-border bg-card hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Anterior
+                            </button>
+                            <span className="text-xs text-muted-foreground">
+                                Página {products.current_page} de {products.last_page}
+                            </span>
+                            <button
+                                disabled={products.current_page === products.last_page}
+                                onClick={() => window.location.href = `${products.path}?page=${products.current_page + 1}`}
+                                className="px-4 py-2 text-sm font-medium rounded-xl border border-border bg-card hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Siguiente
+                            </button>
                         </div>
                     )}
                 </div>

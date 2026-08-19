@@ -22,11 +22,11 @@ interface Product {
 }
 
 interface Props {
-    categories: Category[];
+    categories: { data: Category[]; current_page: number; last_page: number; per_page: number; total: number; from: number | null; to: number | null; path: string };
     products: Product[];
 }
 
-export default function Index({ categories = [], products = [] }: Props) {
+export default function Index({ categories, products = [] }: Props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [search, setSearch] = useState('');
@@ -101,7 +101,7 @@ return;
         });
     };
 
-    const filteredCategories = categories.filter((cat) =>
+    const filteredCategories = categories.data.filter((cat) =>
         cat.name.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -212,6 +212,28 @@ return;
                             <p className="text-xs text-muted-foreground mt-1">
                                 Intenta cambiar el término de búsqueda o crea una nueva categoría.
                             </p>
+                        </div>
+                    )}
+
+                    {categories.last_page > 1 && (
+                        <div className="flex items-center justify-between pt-2">
+                            <button
+                                disabled={categories.current_page === 1}
+                                onClick={() => setSearch('')}
+                                className="px-4 py-2 text-sm font-medium rounded-xl border border-border bg-card hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Anterior
+                            </button>
+                            <span className="text-xs text-muted-foreground">
+                                Página {categories.current_page} de {categories.last_page}
+                            </span>
+                            <button
+                                disabled={categories.current_page === categories.last_page}
+                                onClick={() => setSearch('')}
+                                className="px-4 py-2 text-sm font-medium rounded-xl border border-border bg-card hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Siguiente
+                            </button>
                         </div>
                     )}
                 </div>

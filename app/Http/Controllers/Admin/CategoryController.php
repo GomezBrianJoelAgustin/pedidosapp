@@ -24,7 +24,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories = Category::with('products')->latest()->get();
+        $categories = Category::with('products')->latest()->paginate(10);
         
         return Inertia::render('Categories/Index', [
             'categories' => $categories
