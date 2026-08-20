@@ -1,16 +1,17 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { loadMercadoPagoSdk } from '@/lib/load-mercadopago';
-import { 
-    ShoppingBag, 
-    Trash2, 
-    Plus, 
-    Minus, 
-    X, 
-    Banknote, 
-    CreditCard, 
-    QrCode, 
-    ArrowRight 
+import {
+    ShoppingBag,
+    Trash2,
+    Plus,
+    Minus,
+    X,
+    Banknote,
+    CreditCard,
+    QrCode,
+    ArrowRight,
+    Search
 } from 'lucide-react';
 
 interface Product {
@@ -124,6 +125,14 @@ export default function ClientMenu() {
             ...prev,
             items: newItems,
             total_price: total
+        }));
+    }, [form.setData]);
+
+    const clearCart = useCallback(() => {
+        form.setData(prev => ({
+            ...prev,
+            items: [],
+            total_price: 0,
         }));
     }, [form.setData]);
 
@@ -279,84 +288,103 @@ export default function ClientMenu() {
                     </div>
                 </div>
 
-                <div className="relative w-full">
-                    <input
-                        type="text"
-                        placeholder="Buscar producto por nombre..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary shadow-sm transition-all"
-                    />
-                </div>
+                <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-2 pb-4 bg-background/90 dark:bg-background/80 backdrop-blur-xl space-y-3">
+                    <div className="relative w-full">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        <input
+                            type="text"
+                            placeholder="Buscar producto por nombre..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary shadow-sm transition-all"
+                        />
+                    </div>
 
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                    <button
-                        onClick={() => setSelectedCategory(null)}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all shrink-0 cursor-pointer ${
-                            selectedCategory === null
-                                ? 'bg-primary text-white dark:text-black shadow-md shadow-primary/20'
-                                : 'bg-card text-foreground border border-border hover:bg-white/5'
-                        }`}
-                    >
-                        Todos
-                    </button>
-                    {categories.map((category) => (
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                         <button
-                            key={category.id}
-                            onClick={() => setSelectedCategory(category.id)}
-                            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all shrink-0 cursor-pointer ${
-                                selectedCategory === category.id
+                            onClick={() => setSelectedCategory(null)}
+                            className={`px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+                                selectedCategory === null
                                     ? 'bg-primary text-white dark:text-black shadow-md shadow-primary/20'
                                     : 'bg-card text-foreground border border-border hover:bg-white/5'
                             }`}
                         >
-                            {category.name}
+                            Todos
                         </button>
-                    ))}
+                        {categories.map((category) => (
+                            <button
+                                key={category.id}
+                                onClick={() => setSelectedCategory(category.id)}
+                                className={`px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+                                    selectedCategory === category.id
+                                        ? 'bg-primary text-white dark:text-black shadow-md shadow-primary/20'
+                                        : 'bg-card text-foreground border border-border hover:bg-white/5'
+                                }`}
+                            >
+                                {category.name}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                    {filteredProducts.map((product) => (
-                        <div
-                            key={product.id}
-                            onClick={() => addToCart(product)}
-                            className="group bg-card rounded-2xl border border-border p-3 flex flex-col justify-between hover:shadow-lg dark:hover:shadow-none hover:border-primary/40 transition-all cursor-pointer relative overflow-hidden active:scale-95"
-                        >
-                            <div className="w-full h-28 sm:h-36 bg-background border border-border rounded-xl overflow-hidden mb-3 relative">
-                                {product.image ? (
-                                    <img
-                                        src={product.image}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs text-center px-2">
-                                        Sin imagen
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                    {filteredProducts.map((product) => {
+                        const inCart = form.data.items.find(item => item.product_id === product.id);
+
+                        return (
+                            <div
+                                key={product.id}
+                                onClick={() => addToCart(product)}
+                                className="group bg-card rounded-2xl border border-border p-3 flex flex-col justify-between hover:shadow-xl dark:hover:shadow-none hover:border-primary/40 transition-all cursor-pointer relative overflow-hidden active:scale-[0.98]"
+                            >
+                                <div className="w-full h-28 sm:h-36 bg-background border border-border rounded-xl overflow-hidden mb-3 relative">
+                                    {product.image ? (
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs text-center px-2">
+                                            Sin imagen
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h3 className="font-semibold text-foreground text-sm line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-primary transition-colors">
+                                            {product.name}
+                                        </h3>
+                                        <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
+                                            {product.description}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                                        <span className="font-bold text-foreground text-sm sm:text-base">
+                                            {formatMoney(product.price)}
+                                        </span>
+                                        <div
+                                            className={`p-1.5 rounded-lg border transition-all ${
+                                                inCart
+                                                    ? 'bg-emerald-500 border-emerald-500 text-white'
+                                                    : 'bg-background border-border text-foreground group-hover:bg-primary group-hover:text-white dark:group-hover:text-black'
+                                            }`}
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {inCart && (
+                                    <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
+                                        {inCart.quantity}
                                     </div>
                                 )}
                             </div>
-
-                            <div className="flex-1 flex flex-col justify-between">
-                                <div>
-                                    <h3 className="font-semibold text-foreground text-sm line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-primary transition-colors">
-                                        {product.name}
-                                    </h3>
-                                    <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
-                                        {product.description}
-                                    </p>
-                                </div>
-                                
-                                <div className="flex items-center justify-between pt-2 border-t border-border">
-                                    <span className="font-bold text-foreground text-sm sm:text-base">
-                                        {formatMoney(product.price)}
-                                    </span>
-                                    <div className="p-1.5 bg-background border border-border text-foreground rounded-lg group-hover:bg-primary group-hover:text-white dark:group-hover:text-black transition-colors">
-                                        <Plus className="w-4 h-4" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 

@@ -84,6 +84,7 @@ Route::middleware(['auth', 'role:cashier'])->prefix('caja')->name('cashier.')->g
 
 Route::post('/pedido', [PublicOrderController::class, 'store'])->name('public.orders.store');
 Route::get('/order/track/{token}', [\App\Http\Controllers\PublicTrackingController::class, 'show'])->name('public.order.track');
+Route::get('/products/{product}/reviews', [\App\Http\Controllers\PublicTrackingController::class, 'reviews'])->name('public.products.reviews');
 Route::post('/order/track/{order}/review', [\App\Http\Controllers\PublicReviewController::class, 'store'])->name('public.orders.review');
 Route::post('/pagos/mercadopago', [MercadoPagoController::class, 'processPayment'])->name('mercadopago.process');
 

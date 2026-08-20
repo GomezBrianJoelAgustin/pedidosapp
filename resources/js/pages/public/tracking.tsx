@@ -38,16 +38,31 @@ interface Review {
     comment?: string;
 }
 
+interface ProductReview {
+    product_id: number;
+    product_name: string;
+    reviews: Array<{
+        comment: string;
+        food_rating: number;
+        delivery_rating?: number;
+        user_name: string;
+        created_at: string;
+    }>;
+    average: number | null;
+    count: number;
+}
+
 interface PageProps {
     order: Order;
     review: Review | null;
     canReview: boolean;
+    productReviews: Record<number, ProductReview>;
 }
 
-export default function PublicTracking({ order, review, canReview }: PageProps) {
-    const [foodRating, setFoodRating] = useState(0);
-    const [deliveryRating, setDeliveryRating] = useState(0);
-    const [comment, setComment] = useState('');
+export default function PublicTracking({ order, review, canReview, productReviews }: PageProps) {
+    const [foodRatings, setFoodRatings] = useState<Record<number, number>>({});
+    const [deliveryRatings, setDeliveryRatings] = useState<Record<number, number>>({});
+    const [comments, setComments] = useState<Record<number, string>>({});
     const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
@@ -117,20 +132,50 @@ export default function PublicTracking({ order, review, canReview }: PageProps) 
         );
     };
 
-    const handleReviewSubmit = (e: React.FormEvent) => {
+    const handleReviewSubmit = (e: React.FormEvent, productId: number) => {
         e.preventDefault();
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+        const foodRating = foodRatings[productId] || 0;
+        const deliveryRating = deliveryRatings[productId] || 0;
+        const comment = comments[productId] || '';
+
         if (!foodRating) return;
 
         router.post(
             route('public.orders.review', order.id),
-            { food_rating: foodRating, delivery_rating: deliveryRating || undefined, comment: comment || undefined },
+            { product_id: productId, food_rating: foodRating, delivery_rating: deliveryRating || undefined, comment: comment || undefined },
             {
                 preserveScroll: true,
                 preserveState: true,
-                onSuccess: () => setSubmitted(true),
+                onSuccess: () => {
+                    form.reset();
+                    setFoodRatings(prev => ({ ...prev, [productId]: 0 }));
+                    setDeliveryRatings(prev => ({ ...prev, [productId]: 0 }));
+                    setComments(prev => ({ ...prev, [productId]: '' }));
+                    window.location.reload();
+                },
             }
         );
     };
+
+    const StarRating = ({ rating, setRating, name }: { rating: number; setRating: (r: number) => void; name: string }) => (
+        <div className="flex items-center gap-1">
+            <span className="text-xs font-semibold text-muted-foreground mr-1">{name}:</span>
+            {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className="p-1"
+                >
+                    <Star
+                        className={`w-5 h-5 ${star <= rating ? 'text-primary fill-primary' : 'text-muted-foreground'}`}
+                    />
+                </button>
+            ))}
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 font-sans">
@@ -206,54 +251,47 @@ export default function PublicTracking({ order, review, canReview }: PageProps) 
                         </div>
                     )}
 
-                    {order.status === 'delivered' && !review && canReview && !submitted && (
-                        <form onSubmit={handleReviewSubmit} className="mb-4 p-4 bg-background border border-border rounded-2xl space-y-3">
+                    {order.status === 'delivered' && !submitted && (
+                        <div className="mb-4 p-4 bg-background border border-border rounded-2xl space-y-4">
                             <p className="text-xs font-bold text-muted-foreground uppercase">Calificá tu pedido</p>
-                            <div className="flex items-center gap-1">
-                                <span className="text-xs font-semibold text-muted-foreground mr-1">Comida:</span>
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <button
-                                        key={star}
-                                        type="button"
-                                        onClick={() => setFoodRating(star)}
-                                        className="p-1"
+                            {order.items.map((item) => {
+                                const productKey = item.product_id || item.product?.id;
+                                const existingReviews = productKey ? (productReviews[productKey]?.reviews || []) : [];
+                                const hasUserReviewed = existingReviews.length > 0;
+
+                                return (
+                                    <form
+                                        key={item.id}
+                                        onSubmit={(e) => productKey && handleReviewSubmit(e, productKey)}
+                                        className="space-y-2"
                                     >
-                                        <Star
-                                            className={`w-5 h-5 ${star <= foodRating ? 'text-primary fill-primary' : 'text-muted-foreground'}`}
+                                        <p className="text-sm font-semibold text-foreground">
+                                            {item.product?.name || 'Producto'}
+                                        </p>
+                                        {hasUserReviewed && (
+                                            <p className="text-[10px] text-emerald-500 font-semibold">Ya calificaste este producto</p>
+                                        )}
+                                        <StarRating name="Comida" rating={foodRatings[productKey] || 0} setRating={(r) => setFoodRatings(prev => ({ ...prev, [productKey]: r }))} />
+                                        <StarRating name="Cadete" rating={deliveryRatings[productKey] || 0} setRating={(r) => setDeliveryRatings(prev => ({ ...prev, [productKey]: r }))} />
+                                        <textarea
+                                            name="comment"
+                                            placeholder="Dejanos un comentario..."
+                                            rows={2}
+                                            value={comments[productKey] || ''}
+                                            onChange={(e) => setComments(prev => ({ ...prev, [productKey]: e.target.value }))}
+                                            className="w-full rounded-xl bg-background border border-border text-sm p-2"
                                         />
-                                    </button>
-                                ))}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <span className="text-xs font-semibold text-muted-foreground mr-1">Cadete:</span>
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <button
-                                        key={star}
-                                        type="button"
-                                        onClick={() => setDeliveryRating(star)}
-                                        className="p-1"
-                                    >
-                                        <Star
-                                            className={`w-5 h-5 ${star <= deliveryRating ? 'text-primary fill-primary' : 'text-muted-foreground'}`}
-                                        />
-                                    </button>
-                                ))}
-                            </div>
-                            <textarea
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                                placeholder="Dejanos un comentario..."
-                                rows={2}
-                                className="w-full rounded-xl bg-background border border-border text-sm p-2"
-                            />
-                            <button
-                                type="submit"
-                                disabled={!foodRating}
-                                className="px-4 py-2 text-sm font-bold bg-primary hover:bg-[#d46d2e] text-white rounded-xl disabled:opacity-50"
-                            >
-                                Enviar Reseña
-                            </button>
-                        </form>
+                                        <button
+                                            type="submit"
+                                            disabled={hasUserReviewed || !(foodRatings[productKey] || 0)}
+                                            className="px-4 py-2 text-sm font-bold bg-primary hover:bg-[#d46d2e] text-white rounded-xl disabled:opacity-50"
+                                        >
+                                            Enviar Reseña
+                                        </button>
+                                    </form>
+                                );
+                            })}
+                        </div>
                     )}
 
                     {order.status === 'delivered' && review && (
