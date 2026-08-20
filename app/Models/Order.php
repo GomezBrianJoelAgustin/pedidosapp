@@ -36,4 +36,8 @@ class Order extends Model
     public function reviews(){
         return $this->hasMany(Review::class);
     }
+
+    public function review(){
+        return $this->hasOne(Review::class);
+    }
 }
