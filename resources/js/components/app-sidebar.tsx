@@ -60,6 +60,16 @@ const cashierNavItems: NavItem[] = [
         href: '/caja',
         icon: Wallet,
     },
+    {
+        title: 'Categories',
+        href: '/admin/categories',
+        icon: ChartColumnStacked,
+    },
+    {
+        title: 'Products',
+        href: '/admin/products',
+        icon: Barcode,
+    },
 ];
 
 const clientNavItems: NavItem[] = [
