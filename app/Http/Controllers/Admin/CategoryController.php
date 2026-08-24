@@ -51,4 +51,17 @@ class CategoryController extends Controller
 
         return redirect()->route('admin.categories')->with('success', 'Categoría eliminada correctamente.');
     }
+
+    public function toggleActive(Request $request, Category $category)
+    {
+        $category->update([
+            'active' => ! $category->active,
+        ]);
+
+        $categories = Category::with('products')->latest()->paginate(10);
+
+        return Inertia::render('Categories/Index', [
+            'categories' => $categories,
+        ]);
+    }
 }

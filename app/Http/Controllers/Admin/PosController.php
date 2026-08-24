@@ -25,6 +25,17 @@ class PosController extends Controller
     {
         $validated = $request->validated();
 
+        $productIds = collect($validated['items'])->pluck('product_id')->unique();
+        $inactiveProducts = Product::whereIn('id', $productIds)
+            ->where('active', false)
+            ->pluck('name');
+
+        if ($inactiveProducts->isNotEmpty()) {
+            return back()->withErrors([
+                'items' => 'Los siguientes productos ya no están disponibles: ' . $inactiveProducts->implode(', '),
+            ]);
+        }
+
         DB::transaction(function () use ($validated) {
             $userId = auth()->id();
 

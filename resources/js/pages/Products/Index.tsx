@@ -1,5 +1,5 @@
-import { Head, useForm } from '@inertiajs/react';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Package, Image as ImageIcon, Eye, ShieldAlert } from 'lucide-react';
+import { Head, useForm, router } from '@inertiajs/react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Package, Image as ImageIcon, Eye, ShieldAlert, Power } from 'lucide-react';
 import React, { useState } from 'react';
 import FlashAlert from '@/components/flash-alert';
 
@@ -39,7 +39,6 @@ export default function Index({ products = [], categories = [] }: Props) {
         price: '',
         category_id: '',
         image: '',
-        active: true,
     });
 
     const openCreateModal = () => {
@@ -62,7 +61,6 @@ export default function Index({ products = [], categories = [] }: Props) {
             price: String(product.price),
             category_id: String(product.category_id),
             image: product.image || '',
-            active: product.active,
         });
         clearErrors();
         setIsModalOpen(true);
@@ -94,11 +92,20 @@ export default function Index({ products = [], categories = [] }: Props) {
 
     const handleDelete = () => {
         if (!deletingProduct) {
-return;
-}
+ return;
+ }
 
         destroy(route('admin.products.destroy', deletingProduct.id), {
             onSuccess: () => setDeletingProduct(null),
+        });
+    };
+
+    const [togglingId, setTogglingId] = useState<number | null>(null);
+
+    const handleToggleActive = (product: Product) => {
+        setTogglingId(product.id);
+        router.patch(route('admin.products.toggle', product.id), {}, {
+            onFinish: () => setTogglingId(null),
         });
     };
 
@@ -228,6 +235,18 @@ return;
                                     </div>
 
                                     <div className="p-4 px-5 border-t border-border flex items-center justify-end gap-1 bg-background/50 dark:bg-white/[0.02]">
+                                        <button
+                                            onClick={() => handleToggleActive(product)}
+                                            disabled={togglingId === product.id}
+                                            className={`p-2 rounded-lg transition-colors ${
+                                                product.active
+                                                    ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10'
+                                                    : 'text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10'
+                                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                            title={product.active ? 'Desactivar producto' : 'Activar producto'}
+                                        >
+                                            <Power className="w-4 h-4" />
+                                        </button>
                                         <button
                                             onClick={() => openEditModal(product)}
                                             className="p-2 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-white/5 rounded-lg transition-colors"
@@ -372,19 +391,6 @@ return;
                                     placeholder="Detalles del producto..."
                                 />
                                 {errors.description && <p className="text-xs text-rose-500 dark:text-rose-400 mt-1">{errors.description}</p>}
-                            </div>
-
-                            <div className="flex items-center gap-3 pt-1">
-                                <input
-                                    type="checkbox"
-                                    id="product_active"
-                                    checked={data.active}
-                                    onChange={(e) => setData('active', e.target.checked)}
-                                    className="w-4 h-4 rounded border-border bg-background text-primary focus:ring-primary focus:ring-offset-0"
-                                />
-                                <label htmlFor="product_active" className="text-sm text-foreground font-medium cursor-pointer select-none">
-                                    Producto disponible para venta
-                                </label>
                             </div>
 
                                 <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-5 border-t border-border">

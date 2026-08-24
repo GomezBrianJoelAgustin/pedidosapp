@@ -42,15 +42,18 @@ Route::middleware(['auth', 'role:client'])->prefix('mi-cuenta')->name('client.')
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [OrderController::class, 'index'])->name('dashboard');
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
-    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-    Route::get('/products', [ProductController::class, 'index'])->name('products');
-    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/categories', [CategoryController::class, 'index'])->middleware('role_or_permission:admin|cashier|view categories')->name('categories');
+    Route::post('/categories', [CategoryController::class, 'store'])->middleware('role_or_permission:admin|cashier|create categories')->name('categories.store');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->middleware('role_or_permission:admin|cashier|edit categories')->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->middleware('role_or_permission:admin|cashier|delete categories')->name('categories.destroy');
+    Route::patch('/categories/{category}/toggle', [CategoryController::class, 'toggleActive'])->middleware('role_or_permission:admin|cashier|edit categories')->name('categories.toggle');
+
+    Route::get('/products', [ProductController::class, 'index'])->middleware('role_or_permission:admin|cashier|view products')->name('products');
+    Route::post('/products', [ProductController::class, 'store'])->middleware('role_or_permission:admin|cashier|create products')->name('products.store');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->middleware('role_or_permission:admin|cashier|edit products')->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('role_or_permission:admin|cashier|delete products')->name('products.destroy');
+    Route::patch('/products/{product}/toggle', [ProductController::class, 'toggleActive'])->middleware('role_or_permission:admin|cashier|edit products')->name('products.toggle');
 
     Route::get('/pos', [PosController::class, 'index'])->name('pos');
     Route::post('/pos', [PosController::class, 'store'])->name('pos.store');

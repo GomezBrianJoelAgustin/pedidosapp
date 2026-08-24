@@ -34,7 +34,7 @@ interface Order {
     items: OrderItem[];
     delivery_type?: string;
     delivery_address?: string | null;
-    review?: Review | null;
+    reviews?: Review[] | null;
 }
 
 interface User {
@@ -173,7 +173,7 @@ export default function ClientDashboard() {
     const handleReviewSubmitted = (orderId: number, review: { food_rating: number; delivery_rating?: number; comment?: string }) => {
         setLocalOrders((prev) =>
             prev.map((order) =>
-                order.id === orderId ? { ...order, review: { ...review, id: Date.now() } as Review } : order,
+                order.id === orderId ? { ...order, reviews: [{ ...review, id: Date.now() } as Review] } : order,
             ),
         );
     };
@@ -306,26 +306,33 @@ export default function ClientDashboard() {
                                         </div>
                                     )}
 
-                                    {order.status === 'delivered' && !order.review ? (
+                                    {order.status === 'delivered' && !order.reviews?.length ? (
                                         <ReviewForm orderId={order.id} onReviewSubmitted={(review) => handleReviewSubmitted(order.id, review)} />
-                                    ) : order.review ? (
+                                    ) : order.reviews?.length ? (
                                         <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl">
                                             <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">
                                                 Tu reseña
                                             </p>
-                                            <div className="flex items-center gap-1 mb-1">
-                                                <span className="text-xs text-muted-foreground">Comida:</span>
-                                                <span className="text-amber-500 font-bold">{'★'.repeat(order.review.food_rating)}{'☆'.repeat(5 - order.review.food_rating)}</span>
-                                            </div>
-                                            {order.review.delivery_rating && (
-                                                <div className="flex items-center gap-1 mb-1">
-                                                    <span className="text-xs text-muted-foreground">Cadete:</span>
-                                                    <span className="text-amber-500 font-bold">{'★'.repeat(order.review.delivery_rating)}{'☆'.repeat(5 - order.review.delivery_rating)}</span>
-                                                </div>
-                                            )}
-                                            {order.review.comment && (
-                                                <p className="text-xs text-muted-foreground italic">"{order.review.comment}"</p>
-                                            )}
+                                            {(() => {
+                                                const existing = order.reviews[0];
+                                                return (
+                                                    <>
+                                                        <div className="flex items-center gap-1 mb-1">
+                                                            <span className="text-xs text-muted-foreground">Comida:</span>
+                                                            <span className="text-amber-500 font-bold">{'★'.repeat(existing.food_rating)}{'☆'.repeat(5 - existing.food_rating)}</span>
+                                                        </div>
+                                                        {existing.delivery_rating && (
+                                                            <div className="flex items-center gap-1 mb-1">
+                                                                <span className="text-xs text-muted-foreground">Cadete:</span>
+                                                                <span className="text-amber-500 font-bold">{'★'.repeat(existing.delivery_rating)}{'☆'.repeat(5 - existing.delivery_rating)}</span>
+                                                            </div>
+                                                        )}
+                                                        {existing.comment && (
+                                                            <p className="text-xs text-muted-foreground italic">"{existing.comment}"</p>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     ) : null}
                                 </div>

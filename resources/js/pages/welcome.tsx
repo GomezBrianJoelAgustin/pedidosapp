@@ -66,6 +66,24 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
         total_price: 0,
     });
 
+    const guestNameRef = useRef(data.guest_name);
+    const guestPhoneRef = useRef(data.guest_phone);
+    const deliveryTypeRef = useRef(data.delivery_type);
+    const deliveryAddressRef = useRef(data.delivery_address);
+    const itemsRef = useRef(data.items);
+    const totalPriceRef = useRef(data.total_price);
+    const paymentMethodRef = useRef(data.payment_method);
+
+    useEffect(() => {
+        guestNameRef.current = data.guest_name;
+        guestPhoneRef.current = data.guest_phone;
+        deliveryTypeRef.current = data.delivery_type;
+        deliveryAddressRef.current = data.delivery_address;
+        itemsRef.current = data.items;
+        totalPriceRef.current = data.total_price;
+        paymentMethodRef.current = data.payment_method;
+    }, [data]);
+
     const updateCart = useCallback((newItems: CartItem[]) => {
         const total = newItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
         setData(prev => ({ ...prev, items: newItems, total_price: total }));
@@ -160,25 +178,17 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
             return;
         }
 
+        if (!data.guest_name.trim() || !data.guest_phone.trim()) {
+            setPaymentError('Ingresá tu nombre y teléfono para continuar.');
+            return;
+        }
+
         post(route('public.orders.store'), data, {
-            onSuccess: (page) => {
-                console.log('[checkout] onSuccess page.props:', page.props);
+            onSuccess: () => {
                 reset();
                 setCartOpen(false);
                 setPaymentError(null);
                 localStorage.removeItem('guest_cart');
-
-                const token = page.props?.order?.tracking_token;
-                console.log('[checkout] tracking_token from response:', token);
-                if (token) {
-                    localStorage.setItem('active_guest_order', token);
-                    console.log('[checkout] navigating to tracking:', route('public.order.track', token));
-                    router.visit(route('public.order.track', token));
-                    return;
-                }
-
-                console.log('[checkout] no token found, navigating home');
-                router.visit(route('home'));
             },
             onError: (errors) => {
                 console.error('[checkout] onError:', errors);
@@ -290,31 +300,28 @@ export default function Welcome({ auth, menu = [], mercadopagoPublicKey }: Props
                                     return;
                                 }
 
+                                if (!guestNameRef.current.trim() || !guestPhoneRef.current.trim()) {
+                                    setPaymentError('Ingresá tu nombre y teléfono antes de pagar.');
+                                    setPaymentProcessing(false);
+                                    return;
+                                }
+
                                 router.post(route('public.orders.store'), {
-                                    guest_name: data.guest_name,
-                                    guest_phone: data.guest_phone,
-                                    payment_method: data.payment_method,
-                                    delivery_type: data.delivery_type,
-                                    delivery_address: data.delivery_address,
-                                    items: data.items,
-                                    total_price: data.total_price,
+                                    guest_name: guestNameRef.current,
+                                    guest_phone: guestPhoneRef.current,
+                                    payment_method: paymentMethodRef.current,
+                                    delivery_type: deliveryTypeRef.current,
+                                    delivery_address: deliveryAddressRef.current,
+                                    items: itemsRef.current,
+                                    total_price: totalPriceRef.current,
                                     payment_gateway_id: String(result.id),
                                     payment_gateway_status: result.status,
                                 }, {
-                                    onSuccess: (page) => {
+                                    onSuccess: () => {
                                         reset();
                                         setCartOpen(false);
                                         setPaymentError(null);
                                         localStorage.removeItem('guest_cart');
-
-                                        const token = page.props?.order?.tracking_token;
-                                        if (token) {
-                                            localStorage.setItem('active_guest_order', token);
-                                            router.visit(route('public.order.track', token));
-                                            return;
-                                        }
-
-                                        router.visit(route('home'));
                                     },
                                     onError: (errors) => {
                                         console.error('Error al crear la orden:', errors);

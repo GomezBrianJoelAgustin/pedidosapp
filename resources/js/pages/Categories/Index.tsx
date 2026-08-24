@@ -1,5 +1,5 @@
-import { Head, useForm } from '@inertiajs/react';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Layers, Tag, Eye, PackageX, ImageIcon, Package, ShieldAlert } from 'lucide-react';import React, { useState } from 'react';
+import { Head, useForm, router } from '@inertiajs/react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Layers, Tag, Eye, PackageX, ImageIcon, Package, ShieldAlert, Power } from 'lucide-react';import React, { useState } from 'react';
 import FlashAlert from '@/components/flash-alert';
 
 interface Category {
@@ -32,11 +32,11 @@ export default function Index({ categories, products = [] }: Props) {
     const [search, setSearch] = useState('');
     const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
     const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+    const [togglingId, setTogglingId] = useState<number | null>(null);
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         name: '',
         description: '',
-        active: true,
     });
 
     const openCreateModal = () => {
@@ -51,7 +51,6 @@ export default function Index({ categories, products = [] }: Props) {
         setData({
             name: category.name,
             description: category.description || '',
-            active: category.active,
         });
         clearErrors();
         setIsModalOpen(true);
@@ -93,11 +92,18 @@ export default function Index({ categories, products = [] }: Props) {
 
     const handleDelete = () => {
         if (!deletingCategory) {
-return;
-}
+ return;
+ }
 
         destroy(route('admin.categories.destroy', deletingCategory.id), {
             onSuccess: () => setDeletingCategory(null),
+        });
+    };
+
+    const handleToggleActive = (category: Category) => {
+        setTogglingId(category.id);
+        router.patch(route('admin.categories.toggle', category.id), {}, {
+            onFinish: () => setTogglingId(null),
         });
     };
 
@@ -180,6 +186,18 @@ return;
                                     </div>
 
                                     <div className="mt-5 pt-4 border-t border-border flex items-center justify-end gap-1">
+                                        <button
+                                            onClick={() => handleToggleActive(cat)}
+                                            disabled={togglingId === cat.id}
+                                            className={`p-2 rounded-lg transition-colors ${
+                                                cat.active
+                                                    ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10'
+                                                    : 'text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10'
+                                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                            title={cat.active ? 'Desactivar categoría' : 'Activar categoría'}
+                                        >
+                                            <Power className="w-4 h-4" />
+                                        </button>
                                         <button
                                             onClick={() => openEditModal(cat)}
                                             className="p-2 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-white/5 rounded-lg transition-colors"
@@ -277,19 +295,6 @@ return;
                                 {errors.description && (
                                     <p className="text-xs text-rose-500 dark:text-rose-400 mt-1">{errors.description}</p>
                                 )}
-                            </div>
-
-                            <div className="flex items-center gap-3 pt-1">
-                                <input
-                                    type="checkbox"
-                                    id="active"
-                                    checked={data.active}
-                                    onChange={(e) => setData('active', e.target.checked)}
-                                    className="w-4 h-4 rounded border-border bg-background text-primary focus:ring-primary focus:ring-offset-0"
-                                />
-                                <label htmlFor="active" className="text-sm text-foreground font-medium cursor-pointer select-none">
-                                    Categoría activa
-                                </label>
                             </div>
 
                                 <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-5 border-t border-border">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePublicOrderRequest;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Mail\OrderConfirmationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -20,6 +21,17 @@ class PublicOrderController extends Controller
             }
 
             $validated = $request->validated();
+
+            $productIds = collect($validated['items'])->pluck('product_id')->unique();
+            $inactiveProducts = Product::whereIn('id', $productIds)
+                ->where('active', false)
+                ->pluck('name');
+
+            if ($inactiveProducts->isNotEmpty()) {
+                return back()->withErrors([
+                    'items' => 'Los siguientes productos ya no están disponibles: ' . $inactiveProducts->implode(', '),
+                ]);
+            }
 
             $paymentStatus = 'pending';
 

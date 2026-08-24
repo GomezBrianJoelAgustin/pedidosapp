@@ -15,6 +15,7 @@ class RoleAndPermissionSeeder extends Seeder
 
         $permissions = [
             'view products', 'create products', 'edit products', 'delete products',
+            'view categories', 'create categories', 'edit categories', 'delete categories',
             'view orders', 'create orders', 'edit orders', 'delete orders',
             'update order status', 'cancel order', 'view my orders',
             'view users', 'create users', 'edit users', 'delete users',
@@ -38,10 +39,13 @@ class RoleAndPermissionSeeder extends Seeder
             'view products', 'create products', 'edit products', 'delete products',
             'view orders', 'create orders', 'edit orders', 'delete orders',
             'update order status', 'view users', 'create users', 'edit users', 'delete users',
+            'view categories', 'create categories', 'edit categories', 'delete categories',
         ]);
 
         $cashierRole->syncPermissions([
+            'view products', 'create products', 'edit products', 'delete products',
             'create orders', 'edit orders', 'delete orders', 'update order status',
+            'view categories', 'create categories', 'edit categories', 'delete categories',
         ]);
 
         $chefRole->syncPermissions([
